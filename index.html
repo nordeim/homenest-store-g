@@ -28,6 +28,11 @@
       type="image/png"
       href="https://media.base44.com/images/public/69d42a22d48136041e198f55/2d5ea29ee_logo.png/v1/fit/w_180,h_180/2d5ea29ee_logo.png"
     />
+    <!-- PWA manifest (R18-01, superset — the reference ships no manifest):
+         minimal installability surface; icons reuse the FAVICON-1 CDN logo
+         at the two install-required sizes. Root-relative start_url/scope
+         keep it deploy-origin agnostic. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
     <!-- OpenGraph (reference head shape) -->
     <meta property="og:title" content="HomeNest Kitchen" />
     <meta

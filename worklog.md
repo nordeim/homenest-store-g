@@ -379,3 +379,28 @@ Stage Summary:
 - Tooling quality floor: static analysis now part of the standard gate; PAD §10 "No ESLint config" gap closed
 - Parity posture: fifth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, and R14-01 live region all hold
 - Next-session candidates: server-backed auth (unchanged), optional PWA manifest
+
+---
+Task ID: 16
+Agent: main (Super Z)
+Task: Session 18 — sixth no-drift sweep, R18-01 PWA manifest superset (TDD), docs, push
+
+Work Log:
+- git pull fast-forwarded 0c929b9..40f2710 (remote added only docs/session_17.md, the raw session-16 transcript); working tree clean, no fileMode artifacts
+- Environment intact: .env pinned contract, node_modules, paramiko 5.0.0 importable, no stale keys
+- Review targets validated against the codebase: session_16.md claims (eslint.config.js shape, package.json scripts, doc edits, session16 captures) all confirmed; session_17.md = transcript
+- Skills consulted: tdd-workflow, webapp-testing, agent-browser (DNS quirk persists — sweeps via Playwright + host-resolver-rules), code-review-and-audit, tailwindcss-v4 (menu trap watch)
+- Baseline gate pre-change: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.59 KB ✓ 188/188 E2E ✓ (SEO determinism held)
+- Reference posture re-measured: no manifest link in head; /manifest.webmanifest + /site.webmanifest answered by SPA catch-all (text/html) — superset opportunity confirmed
+- R18-01 TDD: RED first (tests/e2e/pwa-manifest.spec.ts, 6/6 failing) → GREEN (public/manifest.webmanifest + index.html link). Deep-route trap found: viteSingleFile base './' relativizes the href → 404 on /products/<slug>; fixed via absoluteManifestLink transformIndexHtml post-hook in vite.config.ts; spec pins PDP + home routes
+- Post-change gate: typecheck ✓ lint ✓ 95/95 ✓ build 506.92 KB (+0.33 KB) ✓ 194/194 E2E ✓ (97 specs × 2 projects)
+- Reference re-sweep (Playwright @390×844): NO drift — sixth consecutive (bare 36×36 trigger; NAV.bg-card/80 white/80 shadowless 1px border; active 14px/500 white on rgb(217,110,38) 12px; inactive muted rgb(126,111,103); no dialog semantics; robots allows all; sitemap 22 statics, 0 product URLs)
+- Clone sweep: dialog contract live-verified (portal, initial focus search pill, 7×Tab trap + wrap, Escape restore); row pins exact + superset Sign in (6 rows); R14-01 live region live ("bowl" → "3 products match your search.", no-results + empty branches correct; "kettle" probe correctly empty — no such product in catalog); served PDP head (title=h1, canonical, Product JSON-LD USD $54.99); robots 5 disallows; sitemap 36 URLs
+- R18-02: 4 captures visually verified post-capture (session18-home-desktop, session18-pdp-desktop, session18-mobile-home, session18-mobile-menu-open; byte-sizes identical to session-14/16 sets) → docs/screenshots/
+- Doc-drift fix: PAD §10 combobox row still said "Open — cosmetic" though R14-01 closed it in session 14 — struck and marked closed; PAD superset item 14 extended with manifest posture
+- Docs updated: public/manifest.webmanifest, index.html, vite.config.ts, pwa-manifest.spec.ts, DEPLOYMENT.md §7 (194 + manifest curl), PAD, remediation plan §17, docs/session_18.md, README rows, worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — all observed post-change
+- Parity posture: sixth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset (+ manifest now), and R14-01 live region all hold
+- Standing candidate list shrunk to ONE: server-backed auth (ADR-001 decision). PWA manifest CLOSED (R18-01)

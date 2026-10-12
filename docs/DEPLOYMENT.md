@@ -106,9 +106,10 @@ localStorage data. No action is needed on the deploy side.
 ## 7. Verification checklist
 
 ```bash
-npm run verify && npm run e2e    # typecheck + lint + unit + build + 188 E2E runs
+npm run verify && npm run e2e    # typecheck + lint + unit + build + 194 E2E runs
 curl -s https://your-host/robots.txt        # private surfaces disallowed + sitemap pointer
 curl -s https://your-host/sitemap.xml       # 36 URLs (12 statics + 24 products) at your origin
+curl -s https://your-host/manifest.webmanifest # valid PWA manifest (R18-01) with the manifest+json MIME type
 curl -s -o /dev/null -w "%{http_code}" https://your-host/products/nonexistent-slug   # 200 — SPA fallback serves index.html
 ```
 

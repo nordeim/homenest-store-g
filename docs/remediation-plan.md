@@ -967,3 +967,102 @@ gate's file set.
 
 Remaining from the §15.6 list: server-backed auth workstream, optional
 PWA manifest. (Closed this session: ESLint flat config.)
+
+## 17. Session-18 Addendum (2026-10-13) — Sixth No-Drift Sweep, R18-01 PWA Manifest Superset (TDD)
+
+Session 18 ran on the persisted checkout: `git pull` fast-forwarded
+`0c929b9..40f2710` — the remote had advanced by exactly one commit
+adding `docs/session_17.md`, the raw session-16 transcript (the
+established pattern). With no defects found and the candidate list down
+to two, the session closed the next-smallest standing item: the optional
+PWA manifest — a pure superset extension with zero visual footprint.
+
+### 17.1 Validation (baseline ledger reproduced, then re-run post-change)
+
+- Baseline gate before any change: typecheck ✓ · lint ✓ · **95/95 unit**
+  ✓ · build 506.59 KB ✓ · **188/188 E2E** ✓ — session-16 ledger
+  reproduced; SEO determinism held (prebuild regeneration byte-identical,
+  sitemap 36 URLs, 5 private surfaces disallowed).
+- Post-change gate: typecheck ✓ · lint ✓ · 95/95 ✓ · build **506.92 KB**
+  (+0.33 KB — the static head comment + link tag; the manifest itself is
+  a public asset, not inlined) · **194/194 E2E** (97 specs × 2 projects —
+  188 prior + 6 new manifest specs).
+
+### 17.2 R18-01 — PWA manifest superset (closes the last non-auth candidate)
+
+- Reference posture (re-measured live 2026-10-13): no `<link
+  rel="manifest">` in the head; `/manifest.webmanifest` and
+  `/site.webmanifest` are answered by the SPA catch-all with `text/html`
+  — no valid manifest shipped. (The §15-era "manifest 302s" note
+  reflected an earlier measurement; the superset conclusion is
+  unchanged.)
+- **TDD (RED → GREEN):** `tests/e2e/pwa-manifest.spec.ts` written first —
+  6/6 failing (3 specs × 2 projects): served manifest MIME type
+  (`application/manifest+json`), install-required members (name
+  "HomeNest Kitchen", short_name "HomeNest", root-relative
+  `start_url`/`scope`, `standalone`, theme/background `#fbfaf9`,
+  192×192 + 512×512 absolute-CDN `image/png` icons per the FAVICON-1
+  precedent — no shipped binary), and the static head link.
+- **Implementation:** `public/manifest.webmanifest` + `<link
+  rel="manifest">` in the `index.html` static head set (HeadManager is
+  additive-only, so the static link survives route-head surgery).
+- **Deep-route trap found and pinned:** `viteSingleFile`'s recommended
+  config hard-sets `base: "./"`, which rewrites the root-absolute href
+  to `./manifest.webmanifest` — a 404 on 2-segment routes
+  (`/products/<slug>` resolves it under `/products/`). Fixed with a
+  10-line `transformIndexHtml` post-hook in `vite.config.ts`
+  (`absoluteManifestLink`) restoring `href="/manifest.webmanifest"`;
+  the single-file build carries no other asset URLs, so this is the
+  only affected link. The head-link spec pins BOTH a real PDP route and
+  the home route.
+- Served MIME verified (`application/manifest+json` — vite preview's
+  mrmime table knows `.webmanifest`); robots/sitemap untouched.
+
+### 17.3 Live sweeps (both sides, no drift — sixth consecutive)
+
+- Reference (@390×844, Playwright + host-resolver-rules — the
+  agent-browser DNS quirk persists): bare 36×36 trigger
+  (`rgba(0,0,0,0)`, 0px border, no shadow); `NAV.bg-card/80
+  backdrop-blur-xl border-b` panel = `rgba(255,255,255,0.8)`,
+  shadowless, `1px solid rgba(229,224,220,0.5)`; rows 14px/500 — active
+  white on `rgb(217,110,38)` at 12px radius, inactive muted
+  `rgb(126,111,103)`; no dialog semantics, focus stays on BODY; robots
+  allows everything; sitemap 22 statics (8 admin + 4 private listed),
+  0 product URLs.
+- Clone (production preview :4177): dialog contract live-verified
+  (`role="dialog"` + `aria-modal="true"` + `aria-label="Site menu"`,
+  portaled to body, initial focus at the search pill, 7×Tab trap with
+  wrap, Escape restores the "Open menu" trigger); row pins exact +
+  superset `Sign in` row (6 rows); R14-01 live region announcing live
+  ("bowl" → "3 products match your search.", "zzqqxx" → "No products
+  match that search.", cleared → "", aria-live polite — a "kettle"
+  probe correctly returns no-results: no kettle product exists in the
+  25-item catalog); served PDP head (title = h1, canonical, Product
+  JSON-LD USD $54.99); robots 5 disallows; sitemap 36 URLs.
+- **Conclusion: no functional or visual gaps on either side.**
+
+### 17.4 Follow-ups executed
+
+- ✅ **R18-01** — PWA manifest superset (§17.2).
+- ✅ **R18-02 — session captures** (4, visually verified post-capture;
+  byte-sizes identical to the session-14/16 sets — pixel-parity
+  evidence): `session18-home-desktop`, `session18-pdp-desktop`,
+  `session18-mobile-home`, `session18-mobile-menu-open` →
+  `docs/screenshots/`; README Documentation rows extended.
+- ✅ **Doc-drift fix** — PAD §10 row "Desktop search combobox options
+  are not announced with result counts" still read "Open — cosmetic"
+  although R14-01 closed it in session 14; struck and marked closed
+  with the pinning spec reference. PAD superset item 14 extended with
+  the session-18 manifest posture.
+
+### 17.5 Verification gate (post session-18)
+
+typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
+— all observed this session after the R18-01 change.
+
+### 17.6 Residual risks & follow-up candidates (shrunk by one)
+
+Remaining from the §16.6 list: server-backed auth workstream only.
+(Closed this session: the optional PWA manifest.) The standing candidate
+list is now a single item — the largest one, requiring an architectural
+decision (client-only SPA vs. server-backed auth per ADR-001).
