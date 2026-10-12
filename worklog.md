@@ -404,3 +404,25 @@ Stage Summary:
 - Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — all observed post-change
 - Parity posture: sixth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset (+ manifest now), and R14-01 live region all hold
 - Standing candidate list shrunk to ONE: server-backed auth (ADR-001 decision). PWA manifest CLOSED (R18-01)
+
+---
+Task ID: 17
+Agent: main (Super Z)
+Task: Session 20 — seventh no-drift sweep, full re-validation, candidate-list retirement, docs, push
+
+Work Log:
+- git pull fast-forwarded 168d2ec..6e17492 (remote added only docs/session_19.md, the raw session-18 transcript); git diff 168d2ec..HEAD --stat proves the rest byte-identical — root-doc review carries over
+- Uploaded coding_agent_prompt.md reviewed — same operating standard (modes A–D, evidence-backed, TDD); consistent with session doctrine
+- Environment intact: .env pinned contract, node_modules, paramiko 5.0.0, 9 persisted sweep/capture scripts, no stale keys
+- Skills consulted (catalog byte-identical to session 18): tdd-workflow, webapp-testing, agent-browser (DNS quirk persists — Playwright + host-resolver-rules), code-review-and-audit, tailwindcss-v4
+- Baseline gate on 6e17492: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — session-18 ledger reproduced exactly; no skipped tests outside the intentional desktop-only viewport gate
+- Reference re-sweep (Playwright @390×844): NO drift — seventh consecutive (bare 36×36 trigger; NAV.bg-card/80 white/80 shadowless 1px border; active 14px/500 white on rgb(217,110,38) 12px; inactive muted rgb(126,111,103); no dialog semantics; robots allows all; sitemap 22 statics, 0 product URLs)
+- Clone sweep (sweep20-clone.js — session-18 script + manifest pins): dialog contract live-verified (portal, initial focus search pill, 7×Tab trap + wrap, Escape restore); row pins exact + superset Sign in (6 rows); R14-01 live region announcing (polite; no-results + empty branches); served PDP head (title=h1, canonical, Product JSON-LD USD $54.99); robots 5 disallows; sitemap 36 URLs; R18-01 manifest green (200 application/manifest+json, members correct, icons 192+512, root-absolute link on deep route)
+- Candidate-list retirement: server-backed auth reclassified from "session candidate" to registered owner decision (ADR-001) — zero-server static deployment is the documented contract; reference delegates auth while clone already exceeds it (hashed passwords, 128-bit guest tokens, role-gated admin); real accounts need backend + DB + sessions + rate limiting (multi-session architecture workstream). No agent-actionable remediation items remain
+- R20-02: 4 captures visually verified post-capture (session20-home-desktop, session20-pdp-desktop, session20-mobile-home, session20-mobile-menu-open; byte-sizes identical to session-14/16/18 sets) → docs/screenshots/
+- Docs updated: remediation plan §18 (incl. §18.4 retirement), docs/session_20.md, README rows, worklog (this entry); DEPLOYMENT/AGENTS/CLAUDE/PAD §10 required no edits (no code change)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — observed on 6e17492 pre-change; docs-only remainder outside every gate's file set
+- Parity posture: seventh consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, manifest superset, and R14-01 live region all hold
+- Candidate list formally retired: validation track is the default until the owner green-lights ADR-001 (server-backed auth) or the reference drifts

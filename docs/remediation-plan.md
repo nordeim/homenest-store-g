@@ -1066,3 +1066,85 @@ Remaining from the §16.6 list: server-backed auth workstream only.
 (Closed this session: the optional PWA manifest.) The standing candidate
 list is now a single item — the largest one, requiring an architectural
 decision (client-only SPA vs. server-backed auth per ADR-001).
+
+## 18. Session-20 Addendum (2026-10-13) — Seventh No-Drift Sweep, Full Re-Validation, Candidate List Retired
+
+Session 20 ran on the persisted checkout: `git pull` fast-forwarded
+`168d2ec..6e17492` — the remote had advanced by exactly one commit
+adding `docs/session_19.md`, the raw session-18 transcript. The uploaded
+operating standard (`coding_agent_prompt.md`) matches the standing
+doctrine (modes A–D, evidence-backed work, TDD, no unverified claims).
+No code change was indicated this session: with the candidate list down
+to a single architectural item (server-backed auth, ADR-001), the
+session ran the full validation track — the session-12 pure-validation
+precedent.
+
+### 18.1 Validation (ledger reproduced, no code change)
+
+- typecheck ✓ · lint ✓ · **95/95 unit** ✓ · build **506.92 KB** ✓ ·
+  **194/194 E2E** (97 specs × 2 projects, 3.7 min) — the session-18
+  ledger reproduced exactly; SEO determinism held (prebuild
+  regeneration byte-identical, sitemap 36 URLs, robots 5 disallows).
+- No skipped or pending tests outside the intentional desktop-only
+  viewport gate (`search-keyboard.spec.ts`).
+
+### 18.2 Live sweeps (both sides, no drift — seventh consecutive)
+
+- Reference (@390×844, Playwright + host-resolver-rules — the
+  agent-browser DNS quirk persists): bare 36×36 trigger
+  (`rgba(0,0,0,0)`, 0px border, no shadow); `NAV.bg-card/80` panel =
+  `rgba(255,255,255,0.8)`, shadowless, `1px solid
+  rgba(229,224,220,0.5)`; rows 14px/500 — active white on
+  `rgb(217,110,38)` at 12px radius, inactive muted `rgb(126,111,103)`;
+  no dialog semantics, focus stays on BODY; robots allows everything;
+  sitemap 22 statics (8 admin + 4 private listed), 0 product URLs.
+- Clone (production preview :4177, `sweep20-clone.js` — the session-18
+  script extended with manifest pins): dialog contract live-verified
+  (`role="dialog"` + `aria-modal="true"` + `aria-label="Site menu"`,
+  portal-to-body, initial focus at the search pill, 7×Tab trap with
+  wrap, Escape restores the trigger); row pins exact + superset
+  `Sign in` row (6 rows); R14-01 live region announcing (polite;
+  no-results and empty branches correct); served PDP head (title = h1,
+  canonical, Product JSON-LD USD $54.99); robots 5 disallows; sitemap
+  36 URLs; **R18-01 manifest contract green** (`/manifest.webmanifest`
+  → 200 `application/manifest+json`, name/short_name/start_url/
+  standalone/theme `#fbfaf9`, icons 192×192 + 512×512, head link
+  root-absolute on a deep route).
+- **Conclusion: no functional or visual gaps on either side.**
+
+### 18.3 Follow-ups executed
+
+- ✅ **R20-02 — session captures** (4, visually verified post-capture;
+  byte-sizes identical to the session-14/16/18 sets — pixel-parity
+  evidence): `session20-home-desktop`, `session20-pdp-desktop`,
+  `session20-mobile-home`, `session20-mobile-menu-open` →
+  `docs/screenshots/`; README Documentation rows extended.
+
+### 18.4 Candidate-list retirement (owner decision registered)
+
+The single remaining item — **server-backed auth** — is reclassified
+from "session candidate" to a **registered owner decision (ADR-001)**:
+
+- The zero-server singlefile SPA is the documented architecture
+  (PAD §2, DEPLOYMENT.md, README); static hosting with no external
+  services is part of the production contract.
+- The reference delegates auth entirely to its platform screen; the
+  clone already exceeds it (working demo auth: salted-hash passwords
+  R5-01, 128-bit guest tokens R3-02, role-gated admin surfaces).
+- Serving real accounts means a backend runtime, a real database,
+  sessions, rate limiting and revocation — a multi-session architecture
+  workstream with a security surface that cannot be responsibly bolted
+  onto a parity-maintenance session, and which would invalidate the
+  static-hosting deployment story.
+
+**No agent-actionable remediation items remain.** All other PAD §10 rows
+are accepted or registered (contrast pairs, WebKit sandbox, npm build
+advisories, carousel kicker, static-origin fallbacks). Future sessions
+default to the validation track unless the owner green-lights ADR-001 or
+the reference site drifts.
+
+### 18.5 Verification gate (post session-20)
+
+typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
+— all observed this session on the `6e17492` tree before any change;
+the docs-only remainder sits outside every gate's file set.
