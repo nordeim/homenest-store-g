@@ -46,6 +46,10 @@ export function Header() {
   const { cartCount, setCartOpen, user, setSearchOpen, searchOpen, visibleProducts } = useStore();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  // The menu's search control matches the reference's compact muted pill at
+  // rest; tapping it expands the working input (functional superset — the
+  // reference's pill is inert).
+  const [menuSearchOpen, setMenuSearchOpen] = useState(false);
   const searchId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -68,13 +72,26 @@ export function Header() {
   }, [path, setSearchOpen]);
 
   useEffect(() => {
+    if (menuOpen) return;
+    setMenuSearchOpen(false);
+  }, [menuOpen]);
+
+  // Expanding the pill hands focus straight to the revealed input.
+  useEffect(() => {
+    if (menuSearchOpen) document.getElementById("mobile-search")?.focus();
+  }, [menuSearchOpen]);
+
+  useEffect(() => {
     if (!menuOpen) return;
     const previous = document.body.style.overflow;
     const previouslyFocused = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
-    // Move focus into the modal panel (first focusable = search input).
+    // Move focus into the modal panel (first focusable: the search pill, or
+    // the search input once expanded).
     document
-      .querySelector<HTMLElement>("#mobile-nav-holder input, #mobile-nav-holder a[href]")
+      .querySelector<HTMLElement>(
+        '#mobile-nav-holder input, #mobile-nav-holder button:not([tabindex="-1"]), #mobile-nav-holder a[href]',
+      )
       ?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -87,7 +104,9 @@ export function Header() {
       const holder = document.getElementById("mobile-nav-holder");
       if (!holder) return;
       const focusables = Array.from(
-        holder.querySelectorAll<HTMLElement>('a[href], input:not([disabled]), button:not([tabindex="-1"])'),
+        holder.querySelectorAll<HTMLElement>(
+          'a[href], input:not([disabled]), button:not([tabindex="-1"])',
+        ),
       );
       if (focusables.length === 0) return;
       const first = focusables[0];
@@ -288,24 +307,38 @@ export function Header() {
               />
               <nav
                 id="mobile-nav"
-                className="border-b border-border bg-card px-4 pb-6 pt-3 shadow-pop"
+                className="border-b border-border bg-panel px-4 pb-5 pt-4"
                 aria-label="Mobile"
               >
-                <form onSubmit={submitSearch} role="search" className="mb-2">
-                  <label htmlFor="mobile-search" className="sr-only">
-                    Search products
-                  </label>
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      id="mobile-search"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Search products..."
-                      className="h-11 w-full rounded-full border border-border bg-muted pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
-                    />
+                {menuSearchOpen ? (
+                  <form onSubmit={submitSearch} role="search" className="mb-2">
+                    <label htmlFor="mobile-search" className="sr-only">
+                      Search products
+                    </label>
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        id="mobile-search"
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Search products..."
+                        className="h-11 w-full rounded-full border border-border bg-muted pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
+                      />
+                    </div>
+                  </form>
+                ) : (
+                  <div className="mb-2">
+                    <button
+                      type="button"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-[9999px] bg-muted text-muted-foreground transition-colors hover:text-foreground"
+                      aria-label="Search products"
+                      aria-expanded={menuSearchOpen}
+                      onClick={() => setMenuSearchOpen(true)}
+                    >
+                      <Search className="h-4 w-4" />
+                    </button>
                   </div>
-                </form>
+                )}
                 <ul className="flex flex-col gap-1">
                   {NAV_LINKS.map((item) => {
                     const active = path === item.href;
@@ -314,10 +347,10 @@ export function Header() {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex min-h-11 items-center rounded-full px-4 text-base font-medium",
+                            "flex min-h-11 items-center rounded-md px-4 text-sm font-medium",
                             active
                               ? "bg-primary text-primary-foreground"
-                              : "text-foreground hover:bg-muted",
+                              : "text-muted-foreground hover:bg-muted",
                           )}
                           aria-current={active ? "page" : undefined}
                           onClick={() => setMenuOpen(false)}
@@ -330,7 +363,7 @@ export function Header() {
                   <li>
                     <Link
                       href="/account"
-                      className="flex min-h-11 items-center rounded-full px-4 text-base font-medium text-foreground hover:bg-muted"
+                      className="flex min-h-11 items-center rounded-md px-4 text-sm font-medium text-muted-foreground hover:bg-muted"
                       onClick={() => setMenuOpen(false)}
                     >
                       {user ? "Account" : "Sign in"}
@@ -349,18 +382,52 @@ export function Header() {
 export function CartDrawer() {
   const { cartOpen, setCartOpen, cart, products, setLineQty, removeLine, totals, cartCount } = useStore();
   const { navigate } = useRouter();
+  const drawerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!cartOpen) return;
     const previous = document.body.style.overflow;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
+    // Move focus into the modal dialog (first focusable = the close button).
+    const drawer = drawerRef.current;
+    drawer
+      ?.querySelector<HTMLElement>('a[href], button:not([disabled]):not([tabindex="-1"])')
+      ?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setCartOpen(false);
+      if (event.key === "Escape") {
+        setCartOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      // Focus trap: cycle Tab/Shift+Tab within the dialog so keyboard users
+      // cannot reach the dimmed background page (aria-modal contract).
+      const panel = drawerRef.current;
+      if (!panel) return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]):not([tabindex="-1"])',
+        ),
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      const inside = active instanceof HTMLElement && panel.contains(active);
+      if (event.shiftKey && (active === first || !inside)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !inside)) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKey);
+      // Restore focus to the trigger so keyboard users keep their place.
+      previouslyFocused?.focus?.();
     };
   }, [cartOpen, setCartOpen]);
 
@@ -370,11 +437,18 @@ export function CartDrawer() {
     <div className="fixed inset-0 z-[500]">
       <button
         type="button"
+        tabIndex={-1}
         className="absolute inset-0 bg-foreground/40"
         aria-label="Close cart"
         onClick={() => setCartOpen(false)}
       />
-      <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-card shadow-drawer" role="dialog" aria-label="Cart">
+      <aside
+        ref={drawerRef}
+        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-card shadow-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Cart"
+      >
         <div className="flex h-16 items-center justify-between border-b border-border px-5">
           <h2 className="font-display text-xl font-bold text-foreground">Cart ({cartCount})</h2>
           <button

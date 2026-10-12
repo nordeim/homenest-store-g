@@ -40,9 +40,15 @@ test("hamburger trails the cart icon in the mobile header", async ({ page }) => 
 test("mobile header has no dedicated search button", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Search products" })).toHaveCount(0);
-  // Search remains reachable inside the dropdown menu.
+  // Search remains reachable inside the dropdown menu — behind the compact
+  // pill (session-4 re-measurement: the reference's resting menu shows a
+  // muted icon pill, not an expanded input; tapping it reveals the input).
   await page.getByRole("button", { name: "Open menu" }).click();
-  await expect(page.getByRole("dialog", { name: "Site menu" }).getByPlaceholder("Search products...")).toBeVisible();
+  const menu = page.getByRole("dialog", { name: "Site menu" });
+  const pill = menu.getByRole("button", { name: "Search products" });
+  await expect(pill).toBeVisible();
+  await pill.click();
+  await expect(menu.getByPlaceholder("Search products...")).toBeVisible();
 });
 
 test("feature bar is a 2x2 grid on phones", async ({ page }) => {

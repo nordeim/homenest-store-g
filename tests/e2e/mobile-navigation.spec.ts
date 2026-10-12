@@ -11,6 +11,19 @@ import { expect, test } from "@playwright/test";
  * closes the menu, and the page below stays UNDIMMED (matching the current
  * reference; session-3 measurement).
  *
+ * Session-4 re-measurement (same reference, same day): the panel is a
+ * translucent white/80 surface with NO drop shadow; menu rows render at
+ * 14px/500 with muted-foreground inactive text and a 12px radius on the
+ * active row (NOT a full pill); and the menu's search control is a compact
+ * muted icon pill at rest — not an expanded input. The reference's search
+ * pill is functionally inert (and even unclickable: its own toast viewport
+ * covers it); the clone expands it into a working search input on tap, a
+ * registered functional superset (PAD §5.6).
+ *
+ * Touch-target note: the reference pill measures 40x28; the clone ships a
+ * 40x40 disc to honor the repo's documented large-touch-target posture
+ * (README a11y features) — width parity kept, height deliberately larger.
+ *
  * Implementation note: the menu is portaled to <body>. Tailwind v4's
  * backdrop-filter on the sticky header creates a containing block for fixed
  * descendants, so the drawer must NOT live inside the header DOM.
@@ -18,7 +31,7 @@ import { expect, test } from "@playwright/test";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
-test("hamburger opens the dropdown panel with search and links", async ({ page }) => {
+test("hamburger opens the dropdown panel with search pill and links", async ({ page }) => {
   await page.goto("/");
   const open = page.getByRole("button", { name: "Open menu" });
   await expect(open).toBeVisible();
@@ -26,11 +39,65 @@ test("hamburger opens the dropdown panel with search and links", async ({ page }
 
   const nav = page.getByRole("navigation", { name: "Mobile" });
   await expect(nav).toBeVisible();
-  await expect(nav.getByPlaceholder("Search products...")).toBeVisible();
+  // Resting state: the compact muted search pill — the expanded input only
+  // appears after tapping the pill (reference resting visual).
+  await expect(nav.getByRole("button", { name: "Search products" })).toBeVisible();
+  await expect(nav.getByPlaceholder("Search products...")).toHaveCount(0);
   for (const label of ["Home", "Products", "Track Order", "About", "Contact"]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
   }
   await expect(nav.getByRole("link", { name: "Sign in" })).toBeVisible();
+});
+
+test("menu resting visuals match the session-4 reference measurement", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const nav = page.getByRole("navigation", { name: "Mobile" });
+
+  // Panel: translucent white, NO drop shadow, 1px bottom border.
+  await expect(nav).toHaveCSS("background-color", "rgba(255, 255, 255, 0.8)");
+  await expect(nav).toHaveCSS("box-shadow", "none");
+  await expect(nav).toHaveCSS("border-bottom-width", "1px");
+
+  // Search pill: muted disc, fully rounded, 40px wide.
+  const pill = nav.getByRole("button", { name: "Search products" });
+  await expect(pill).toHaveCSS("background-color", "rgb(242, 240, 237)");
+  await expect(pill).toHaveCSS("border-radius", "9999px");
+  const box = await pill.boundingBox();
+  expect(Math.round(box?.width ?? 0)).toBe(40);
+
+  // Rows: 14px/500, muted inactive text, 12px active-row radius.
+  const active = nav.getByRole("link", { name: "Home", exact: true });
+  await expect(active).toHaveCSS("background-color", "rgb(217, 110, 38)");
+  await expect(active).toHaveCSS("border-radius", "12px");
+  await expect(active).toHaveCSS("font-size", "14px");
+  const inactive = nav.getByRole("link", { name: "About", exact: true });
+  await expect(inactive).toHaveCSS("color", "rgb(126, 111, 103)");
+  await expect(inactive).toHaveCSS("font-size", "14px");
+});
+
+test("tapping the search pill expands the input and focuses it", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const nav = page.getByRole("navigation", { name: "Mobile" });
+  await nav.getByRole("button", { name: "Search products" }).click();
+  const input = nav.getByPlaceholder("Search products...");
+  await expect(input).toBeVisible();
+  await expect(input).toBeFocused();
+  await expect(nav.getByRole("button", { name: "Search products" })).toHaveCount(0);
+});
+
+test("expanded search collapses after the menu closes", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const nav = page.getByRole("navigation", { name: "Mobile" });
+  await nav.getByRole("button", { name: "Search products" }).click();
+  await expect(nav.getByPlaceholder("Search products...")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("navigation", { name: "Mobile" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("navigation", { name: "Mobile" }).getByRole("button", { name: "Search products" })).toBeVisible();
 });
 
 test("active route renders as the orange pill row", async ({ page }) => {
@@ -94,8 +161,10 @@ test("menu search submits to the products page", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Open menu" }).click();
   const nav = page.getByRole("navigation", { name: "Mobile" });
-  await nav.getByPlaceholder("Search products...").fill("knife");
-  await nav.getByPlaceholder("Search products...").press("Enter");
+  await nav.getByRole("button", { name: "Search products" }).click();
+  const input = nav.getByPlaceholder("Search products...");
+  await input.fill("knife");
+  await input.press("Enter");
   await expect(page).toHaveURL(/\/products\?search=knife/);
   await expect(page.getByRole("heading", { name: "All Products" })).toBeVisible();
 });
@@ -115,16 +184,16 @@ test("focus moves into the menu on open and Tab cycles within it", async ({ page
   await page.goto("/");
   await page.getByRole("button", { name: "Open menu" }).click();
 
-  // Initial focus lands on the first focusable (the search input).
-  const search = page.getByRole("dialog", { name: "Site menu" }).getByPlaceholder("Search products...");
-  await expect(search).toBeFocused();
-
-  // Tab past every focusable in the panel (input + 6 links = 7 focusables):
-  // the full cycle wraps back onto the input — focus must never reach the
-  // background page.
+  // Initial focus lands on the first focusable (the collapsed search pill).
   const panel = page.locator("#mobile-nav-holder");
+  const pill = panel.getByRole("button", { name: "Search products" });
+  await expect(pill).toBeFocused();
+
+  // Tab past every focusable in the panel (pill + 6 links = 7 focusables):
+  // the full cycle wraps back onto the pill — focus must never reach the
+  // background page.
   for (let i = 0; i < 7; i += 1) await page.keyboard.press("Tab");
-  await expect(search).toBeFocused();
+  await expect(pill).toBeFocused();
   expect(panel.locator("a[href]")).not.toHaveCount(0);
 
   // Shift+Tab from the first focusable wraps to the last link.

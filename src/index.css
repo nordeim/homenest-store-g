@@ -35,6 +35,11 @@
   --color-border: hsl(30 15% 88%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(20 15% 10%);
+  /* Translucent menu panel (reference measures rgba(255,255,255,0.8)). The
+     alpha is baked into the token on purpose: Tailwind v4's /NN opacity
+     modifiers color-mix in oklab and would compute to oklab(...) instead of
+     the reference's sRGB value (same class of trap as the gradient T-3). */
+  --color-panel: hsl(0 0% 100% / 0.8);
   --color-ring: hsl(24 70% 50%);
   --color-badge: hsl(38 92% 50%);
   --color-footer: hsl(24 14% 11%);
