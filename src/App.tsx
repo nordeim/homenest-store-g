@@ -1,4 +1,5 @@
 import { PageShell } from "@/components/chrome";
+import { HeadManager } from "@/components/head-manager";
 import { matchPath, RouterProvider, useRouter } from "@/lib/router";
 import { StoreProvider } from "@/lib/store";
 import { HomePage } from "@/pages/home";
@@ -96,6 +97,9 @@ function Routes() {
 export default function App() {
   return (
     <RouterProvider>
+      {/* Head ownership sits inside the RouterProvider so every route
+          change (push/replace/popstate) re-runs the head contract. */}
+      <HeadManager />
       <StoreProvider>
         <PageShell>
           <Routes />
