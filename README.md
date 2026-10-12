@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-22%20unit%20%2B%2082%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-25%20unit%20%2B%20104%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -26,8 +26,8 @@ Everything ships as one self-contained `dist/index.html` (~500 KB): no server, n
 | ✅ Order success & tracking | Token-gated confirmation view, COD amount notice, delivery window estimate, 5-step order-progress tracker by order number |
 | 👤 Accounts | Email/password auth with redirect validation (open-redirect hardened), profile, password change, address book, wishlist |
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
-| ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support |
-| 🧪 Tested | 22 Vitest unit tests on pure seams + 82 Playwright E2E tests including a computed-style visual-parity gate |
+| ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu with focus trap, axe structural-a11y gate |
+| 🧪 Tested | 25 Vitest unit tests on pure seams + 52 Playwright E2E specs (104 runs) including computed-style visual-parity, mobile header parity, and a11y smoke gates |
 
 ## Architecture
 
@@ -71,13 +71,16 @@ Full details — ADRs, data model, security posture, testing strategy — live i
 │   ├── 📄 types.ts                # Domain types
 │   ├── 📂 components              # chrome.tsx (header/footer/drawer), product.tsx (cards)
 │   ├── 📂 data                    # catalog.ts (seed catalog + demo users)
-│   ├── 📂 lib                     # store.tsx, router.tsx, commerce.ts, db-path.ts
+│   ├── 📂 lib                     # store.tsx, router.tsx, commerce.ts, db-path.ts, storage-key.ts
 │   ├── 📂 pages                   # home, shop, checkout-flow, account, content, admin
 │   └── 📄 index.css               # @theme design tokens + base styles
 ├── 📂 tests
 │   ├── 📄 db-path.test.ts         # DB URL contract tests
-│   └── 📂 e2e                     # smoke, mobile-navigation, catalog, cart-checkout,
-│                                  # auth-admin, visual-parity specs
+│   ├── 📄 catalog-hash.test.ts    # catalog ↔ STORAGE_KEY registry contract
+│   ├── 📄 catalog-registry.json   # catalog revision → storage key pin
+│   └── 📂 e2e                     # smoke, mobile-navigation, mobile-header-parity,
+│                                  # catalog, cart-checkout, auth-admin, a11y-smoke,
+│                                  # visual-parity specs
 ├── 📂 db                          # catalog.json brand config (custom.db is git-ignored)
 ├── 📂 docs/screenshots            # Dev-server screen captures
 └── 📂 public/images               # Product/hero imagery
@@ -115,9 +118,9 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 
 ```bash
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
-npm run test            # Vitest unit tests (22)
+npm run test            # Vitest unit tests (25)
 npm run build           # production single-file build
-npm run e2e             # Playwright E2E (82) — requires npm run build first
+npm run e2e             # Playwright E2E (52 specs / 104 runs) — requires npm run build first
 npm run verify          # typecheck + unit + build in one command
 ```
 
@@ -147,7 +150,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 | `npm audit` flags braces/micromatch via vite-plugin-singlefile | Build-time-only dependency of the bundler's glob handling; inputs are trusted repo files. Accepted risk — do not downgrade the plugin for this. |
 | E2E fails to bind port 4173 | Stop the stale preview: `pkill -f "vite preview"`, or set `E2E_PORT`. |
 | Admin/account pages bounce to login after a hard refresh | Fixed by gating on the store's `ready` flag; if you see it again, you reintroduced the hydration race. |
-| Old cart/products appear after a catalog change | `STORAGE_KEY` in `src/lib/store.tsx` is versioned — bump it when the persisted shape or seed catalog changes. |
+| Old cart/products appear after a catalog change | Edit the seed → bump `STORAGE_KEY` in `src/lib/storage-key.ts` and add the new hash row to `tests/catalog-registry.json` (the `catalog-hash` test enforces this with repair instructions). |
 | WebKit/`--project=mobile` complains about missing host libs | The mobile project pins `browserName: "chromium"` on the iPhone 14 profile; install WebKit libs only if you specifically need Safari coverage. |
 
 ## Documentation
@@ -156,7 +159,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`CLAUDE.md`](CLAUDE.md) — six-phase workflow and per-tech standards
 - [`Project_Architecture_Document.md`](Project_Architecture_Document.md) — ADRs, layer model, data & security architecture, testing strategy
 - [`homenest-store-g_SKILL.md`](homenest-store-g_SKILL.md) — distilled engineering skill: 20-section reference (stack, design system, trap log, patterns, debugging) for any agent working on this repo
-- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24), residual risks
+- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24, R3-01…R3-06), residual risks, session-3 addendum
 - [`docs/session_1.md`](docs/session_1.md) — Session 1 execution transcript (audit → parity → tests → docs → push)
+- [`docs/session_2.md`](docs/session_2.md) — Session 2 execution transcript (validation → remediation plan → SKILL distillation → push)
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)

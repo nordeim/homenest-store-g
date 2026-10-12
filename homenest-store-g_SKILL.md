@@ -18,7 +18,7 @@ tags:
   - visual-parity
   - testing
   - skill
-project_state: "typecheck clean · 22/22 unit · build green · 82/82 E2E (chromium + mobile)"
+project_state: "typecheck clean · 25/25 unit · build green · 104/104 E2E (chromium + mobile)"
 ---
 
 # HomeNest Store G — Project Skill
@@ -295,9 +295,10 @@ Signature: `function useStore(): StoreValue`. Returns the whole store value
 (state + actions) from `React.createContext`. Consumers destructure only what
 they need. The provider:
 
-- Hydrates once on mount from `localStorage["homenest.v2"]` (key **versioned**;
-  bump `v2` → `v3` whenever any persisted shape changes — trap T-7), merging
-  with seed data and setting `ready: true` **synchronously after rehydration**
+- Hydrates once on mount from `localStorage[STORAGE_KEY]` (currently
+  `homenest.v3`, owned by `src/lib/storage-key.ts`; the catalog↔key pairing is
+  **contract-enforced** by `tests/catalog-hash.test.ts` — see trap T-7),
+  merging with seed data and setting `ready: true` **synchronously after rehydration**
   so route guards can wait on it.
 - Persists cart/users/orders/UI prefs back on every state change.
 - Action surface (verified from source): `setCartOpen`, `setSearchOpen`,
@@ -352,10 +353,11 @@ reprice or rename them without re-measuring the reference (Appendix C).
    must be unique; `slug` unique; image path under `public/images/`.
 2. If it should appear in the reference-parity grid, set `featured: true`
    (max: keep the Featured grid at the reference's visual weight).
-3. Run `npm run test` — catalog-count E2E pins (`tests/e2e/catalog.spec.ts`)
-   assert "N products found"; update the expected count **only if** the change
-   is intentional, and bump the storage key `homenest.v2` → `v3` if any
-   persisted shape changed (§6).
+3. Run `npm run test` — the `catalog-hash` contract test fails if the seed
+   hash has no registry row: bump `STORAGE_KEY` (`src/lib/storage-key.ts`),
+   add the new hash → new key row to `tests/catalog-registry.json`. Catalog-
+   count E2E pins (`tests/e2e/catalog.spec.ts`) assert "N products found";
+   update the expected count **only if** the change is intentional.
 
 **How to add a category:** add to the `CategoryId` union in `src/types.ts`
 **first** (the compiler then forces every switch/map), then `CATEGORIES`.
@@ -452,12 +454,12 @@ nav bug)
 the header JSX, so `fixed` resolved against the header box, not the viewport.
 This is a spec-compliant browser behavior, not a Tailwind regression — but it
 bites hard in Tailwind v4 UIs that lean on blurred sticky headers.
-**Fix:** the mobile menu panel + dim overlay render through
-`createPortal(..., document.body)` from inside `Header` (`chrome.tsx:243`),
+**Fix:** the mobile menu dialog renders through
+`createPortal(..., document.body)` from inside `Header` (`chrome.tsx`),
 positioned `fixed inset-x-0 top-16 z-[350]`. The header keeps its blur.
 **Lesson:** any `position: fixed` element must not be a DOM descendant of an
 element with `backdrop-filter`/`filter`/`transform`/`contain`. Portal it.
-Pinned by 8 specs in `tests/e2e/mobile-navigation.spec.ts`.
+Pinned by 11 specs in `tests/e2e/mobile-navigation.spec.ts`.
 
 ### T-5: ESM `__dirname` crash (MEDIUM)
 **Symptom:** `vitest.config.ts`/`vite.config.ts` throw `__dirname is not
@@ -482,10 +484,13 @@ testing, and compilation. If a new vendored folder appears, extend the pin.
 **Symptom:** after catalog changes, the UI shows old products/counts.
 **Root cause:** persisted `products` under a version-less storage key
 override the re-seeded catalog.
-**Fix:** storage key `homenest.v2`; schema changes bump the version so stale
-payloads are discarded.
+**Fix:** `STORAGE_KEY` lives in `src/lib/storage-key.ts` (currently
+`homenest.v3`) and is **contract-pinned**: `tests/catalog-hash.test.ts`
+sha-256-hashes `src/data/catalog.ts` and requires a matching hash → key row
+in `tests/catalog-registry.json`. A seed edit without the bump fails the
+gate with repair instructions (this caught the session-3 carousel reorder).
 **Lesson:** every persisted shape change ships with a key version bump in the
-same commit.
+same commit — and now the gate proves it instead of trusting the checklist.
 
 ### T-8: Hydration race on guarded routes (HIGH)
 **Symptom:** hard refresh of `/admin` (logged in) bounces to `/login`.
@@ -578,17 +583,19 @@ every push):
 
 ```bash
 npm run typecheck   # tsc --noEmit — zero errors
-npm run test        # vitest — 22/22 (2 files)
+npm run test        # vitest — 25/25 (3 files)
 npm run build       # vite build — single-file dist/index.html
-npm run e2e         # playwright — 82/82 (41 specs × chromium+mobile)
+npm run e2e         # playwright — 104/104 (52 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
 - [ ] No `.env` staged (git-ignored); `.env.example` still matches the
       `DATABASE_URL` contract.
 - [ ] `db/*.db` binaries not staged.
-- [ ] If persisted shapes changed: storage key version bumped (T-7) **and**
-      catalog-count pins updated in the same commit.
+- [ ] If persisted shapes or the seed catalog changed: `STORAGE_KEY` bumped
+      **and** the new hash → key row added to `tests/catalog-registry.json`
+      (T-7 — the `catalog-hash` test enforces both), plus catalog-count pins
+      updated in the same commit.
 - [ ] If `skills/` tree changed: `optimizeDeps.entries` still excludes it.
 - [ ] Mobile nav still portal-rendered (T-4): `rg -n "createPortal" src/components/chrome.tsx`
       → exactly one, targeting `document.body`.
@@ -716,10 +723,17 @@ and navigates, checkout places an order, track-order finds it.
 {typeof document !== "undefined" &&
   createPortal(
     menuOpen ? (
-      <div className="fixed inset-x-0 top-16 z-[350] md:hidden" id="mobile-nav-holder">
+      <div
+        className="fixed inset-x-0 top-16 z-[350] md:hidden"
+        id="mobile-nav-holder"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+      >
         <button
           type="button"
-          className="fixed inset-0 top-16 -z-10 h-[calc(100vh-4rem)] cursor-default bg-white/70"
+          tabIndex={-1}
+          className="fixed inset-0 top-16 -z-10 h-[calc(100vh-4rem)] cursor-default bg-transparent"
           aria-label="Close menu overlay"
           onClick={() => setMenuOpen(false)}
         />
@@ -731,6 +745,11 @@ and navigates, checkout places an order, track-order finds it.
     document.body,
   )}
 ```
+
+The `Header` pairs this with a focus-trap effect: on open, focus moves to the
+panel's first focusable (the search input); the window keydown handler cycles
+Tab/Shift+Tab within `#mobile-nav-holder` and closes on Escape; the cleanup
+restores focus to the trigger.
 
 **Pattern: store action with `string | null` error contract** (`store.tsx`)
 
@@ -851,7 +870,7 @@ Verified usage (arbitrary-value classes; `@theme` exposes the same numbers):
 | z | Element | File | Purpose |
 |---|---|---|---|
 | `z-[300]` | Sticky header | `chrome.tsx:94` | App chrome sits above page content |
-| `z-[350]` | Mobile nav portal (`#mobile-nav-holder`) + desktop search overlay | `chrome.tsx:245` | Below cart drawer, above header/page; dim overlay is `-z-10` inside the portal |
+| `z-[350]` | Mobile nav portal (`#mobile-nav-holder`) + desktop search overlay | `chrome.tsx` | Below cart drawer, above header/page; transparent click-catcher is `-z-10` inside the portal |
 | `z-[420]` | Chat FAB | `chrome.tsx:458` | Floats above content, below modal surfaces |
 | `z-[500]` | Cart drawer (`fixed inset-0` root) | `chrome.tsx:333` | Top modal surface |
 | `z-[800]` | Toaster stack | `chrome.tsx:440` | Always visible |
@@ -988,11 +1007,11 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
 ## Appendix B: Verification & Test Ledger
 
 - Unit (vitest, node env): `src/lib/commerce.test.ts` + `tests/db-path.test.ts`
-  = **22 tests, 2 files, all green**.
-- E2E (playwright, production build via preview server): **41 specs** —
-  smoke 5, mobile-navigation 8, catalog 6, cart-checkout 9, auth-admin 7,
-  visual-parity 6 — × 2 projects (chromium, mobile) = **82 executions,
-  all green**.
+  + `tests/catalog-hash.test.ts` = **25 tests, 3 files, all green**.
+- E2E (playwright, production build via preview server): **52 specs** —
+  smoke 5, mobile-navigation 11, mobile-header-parity 4, catalog 6,
+  cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 4 — × 2 projects
+  (chromium, mobile) = **104 executions, all green**.
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site
@@ -1003,8 +1022,10 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 1. Primary orange computed `rgb(217, 110, 38)` on CTA/active-nav surfaces.
 2. Active nav is a filled pill (radius ≥ half height), white text.
 3. Mobile menu: inline dropdown panel below the header (not a side drawer);
-   hamburger toggles to a green circular close button; page below dims;
-   closes on navigation and Escape.
+   hamburger is the TRAILING header icon (right of the cart) and toggles to a
+   green circular close button; no page dim (session-3 re-measurement);
+   closes on navigation and Escape; modal focus trap keeps Tab inside the
+   panel.
 4. Cart summary shows Subtotal / Shipping (Free ≥ $50) / Total — **no tax
    line**.
 5. Checkout defaults to Cash on Delivery; card is the registered superset.
@@ -1020,6 +1041,7 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 | Session | Date | Scope | Outcome |
 |---|---|---|---|
 | 1 | 2026-10-12 | Full Mode C audit → parity redesign → test infra → docs | 17 findings (F-01…F-17) remediated (R-01…R-24); gate 22/22 unit + 82/82 E2E; see `docs/remediation-plan.md` + `docs/session_1.md` |
+| 3 | 2026-10-12 | Ledger validation → follow-ups (TDD) → live parity re-measurement | R-05 over-claim corrected; `isExpiryValid` rolling window, 128-bit crypto guest tokens, mobile-menu modal dialog + focus trap, axe structural gate, catalog↔key registry contract; 5 mobile parity gaps fixed (hamburger trailing, no header search button, 2×2 feature bar, carousel order, no page dim); STORAGE_KEY → homenest.v3; gate 25/25 unit + 104/104 E2E |
 
 *End of skill. Maintain per the meta-skill: bump minor version on sprints,
 major on stack upgrades; re-verify §2 versions, §11 counts, and §19 hexes

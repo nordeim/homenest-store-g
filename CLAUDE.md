@@ -39,8 +39,8 @@ Non-negotiables:
 
 ### Data contracts
 - Money = integer cents; format only at render (`formatMoney`).
-- Validate inputs at the boundary with the helpers in `lib/commerce.ts` (`isEmail`, `isZip`, `isCardNumberValid`, `validateRedirectPath`). Same-origin redirects only.
-- Order success views are token-gated: `?order=<number>&token=<guestToken>`; owners see their orders via `userId`.
+- Validate inputs at the boundary with the helpers in `lib/commerce.ts` (`isEmail`, `isZip`, `isCardNumberValid`, `isExpiryValid` — rolling window with injectable clock, `validateRedirectPath`). Same-origin redirects only.
+- Guest order views are capability-gated: `?order=<number>&token=<guestToken>`; tokens are 128-bit `crypto.getRandomValues` hex (`generateGuestToken`); owners see their orders via `userId`.
 
 ## 4. Development Workflow
 
@@ -71,8 +71,8 @@ Demo passwords are stored in plain text inside localStorage by design (client-on
 
 ## 5. Testing Strategy
 
-- **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, validation. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 22 tests.
-- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation, catalog, cart/checkout, auth/admin, visual parity. 82 tests across chromium + mobile (iPhone 14 profile on chromium engine) projects, `workers: 1`.
+- **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 25 tests.
+- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, catalog, cart/checkout, auth/admin, a11y smoke (axe structural gate), visual parity. 52 specs = 104 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
 - **Visual parity gate**: `tests/e2e/visual-parity.spec.ts` asserts computed colors/fonts from the reference measurement. Treat it as a build-breaker.
 - Bugs get a failing regression test at the same seam before the fix.
 

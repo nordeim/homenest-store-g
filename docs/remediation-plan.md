@@ -1,10 +1,10 @@
 # HomeNest Store G — Codebase Audit & Remediation Plan
 
-> **Status:** EXECUTED & VALIDATED (100% of remediation items complete)
-> **Session:** 1 (see `docs/session_1.md` for the full execution transcript)
+> **Status:** EXECUTED & VALIDATED (100% of remediation items complete; session-3 addendum in §9)
+> **Session:** 1 (see `docs/session_1.md`), 2 (see `docs/session_2.md`), 3 (§9 below)
 > **Reference site:** https://nest-culinary-hub.base44.app/ (visual + functional parity target)
 > **Tech-stack pattern source:** https://github.com/nordeim/ecommerce-store.git (AGENTS.md / CLAUDE.md / PAD / SKILL.md)
-> **Verification gate at time of writing:** typecheck ✓ · 22/22 unit ✓ · build ✓ · 82/82 E2E ✓
+> **Verification gate at time of writing:** typecheck ✓ · 25/25 unit ✓ · build ✓ · 104/104 E2E ✓
 
 ---
 
@@ -108,8 +108,13 @@ TDD hook that pins the fix so regressions cannot silently return.
   *TDD:* `tests/db-path.test.ts` (8 contract tests, including normalization
   pins the tests initially got wrong and were corrected to pin the *real*
   contract).
-- ✅ **R-05 (fixes F-12) — Card-expiry validation year floor** no longer
-  hardcodes a single year (rolling window).
+- ✅ **R-05 (fixes F-12) — Card-expiry validation year floor.**
+  ⚠️ **Session-3 correction:** session 1 recorded this item as done, but a
+  session-3 code audit found `isExpiryValid` still contained the hardcoded
+  `year >= 26` floor — the fix had never actually landed (the PAD's known-
+  issues table was right, the ledger was wrong). Actually executed in
+  session 3 as **R3-01** below. Lesson recorded: an executed item needs a
+  test pin, not just a checkbox.
 
 ### 4.2 Environment, DB & tooling
 
@@ -235,3 +240,112 @@ TDD hook that pins the fix so regressions cannot silently return.
    the storage-key version.
 5. Add axe-core smoke checks to the Playwright suite for the a11y targets in
    the SKILL/README.
+
+---
+
+## 9. Session-3 Addendum (2026-10-12) — Follow-ups Executed + Live Parity Re-Measurement
+
+Session 3 validated the session-1/2 ledgers against the code, executed the §8
+follow-up recommendations (TDD), and re-measured the reference site live —
+which surfaced five mobile parity gaps the earlier sweep had missed.
+
+### 9.1 Ledger corrections
+
+| Item | Correction |
+|---|---|
+| R-05 / F-12 | Was marked ✅ but the code still had the `year >= 26` floor. Actually fixed this session (R3-01). The checkbox outran the code; the test pin now outranks the checkbox. |
+
+### 9.2 Follow-ups executed (TDD: red → green)
+
+- ✅ **R3-01 (§8.3 + F-12) — `isExpiryValid` rolling window.** Two-digit year
+  expands to `2000 + YY`; the card is valid through the last day of its expiry
+  month; the clock is injectable (`isExpiryValid(value, now?)`) so the pin is
+  deterministic. The old code accepted `01/26` in October 2026.
+  *TDD:* `src/lib/commerce.test.ts` — 8 injected-clock pins including the
+  distinguishing case `01/26 @ 2026-10-12 → false` (old code: true).
+- ✅ **R3-02 (§8.3 / F-11) — crypto guest tokens.** New
+  `generateGuestToken()` in `lib/commerce.ts`: 16 bytes from
+  `crypto.getRandomValues`, hex-encoded (128-bit, URL-safe). `placeOrder`
+  uses it; `Math.random` no longer touches any security-adjacent value.
+  *TDD:* format/length/uniqueness pins in `commerce.test.ts`.
+- ✅ **R3-03 (§8.1 / F-13) — Mobile menu is a real modal.** The portaled
+  panel is wrapped in `role="dialog" aria-modal="true" aria-label="Site
+  menu"`; focus moves into the panel on open (search input first), Tab /
+  Shift+Tab cycle within it, Escape restores focus to the trigger. The inner
+  `<nav aria-label="Mobile">` keeps its landmark role — all pre-existing E2E
+  accessible-name contracts still pass. The overlay click-catcher is
+  `tabIndex={-1}` (out of the tab order).
+  *TDD:* 3 new specs in `tests/e2e/mobile-navigation.spec.ts` (11 total × 2
+  projects).
+- ✅ **R3-04 (§8.5) — axe-core smoke gate.** `tests/e2e/a11y-smoke.spec.ts`
+  (4 specs × 2 projects) asserts **no critical/serious structural
+  violations** on home / products / PDP / cart with `color-contrast`
+  disabled, and logs the contrast findings so the count stays visible.
+  *Exclusion rationale:* every failing contrast pair is a parity-pinned
+  reference token (white on primary orange ≈3.2:1, white on badge amber
+  ≈2.2:1, primary orange on white ≈3.2:1, muted grays ≈4.4:1) measured live
+  from the reference — the reference itself fails the same checks. Visual
+  parity is the higher-priority contract; registered in PAD §5.6.
+- ✅ **R3-05 (§8.4, scoped to the real seed) — Catalog ↔ storage-key
+  registry.** `src/lib/storage-key.ts` now owns `STORAGE_KEY` (dependency-free
+  module); `tests/catalog-hash.test.ts` sha-256-hashes `src/data/catalog.ts`
+  (LF-normalized) and requires `tests/catalog-registry.json` to map the
+  current hash → the shipped `STORAGE_KEY`. Editing the seed without bumping
+  the key fails the gate with repair instructions. Scope note: the original
+  recommendation named `db/catalog.json`, but that file is brand/tooling
+  config; the *client seed* is `src/data/catalog.ts`, so that is what is
+  pinned. The contract proved itself immediately: the session-3 carousel
+  reorder tripped it, forcing the deliberate `homenest.v2 → homenest.v3`
+  bump (which also re-seeds stale clients).
+- ✅ **R3-06 (§8.2) — WebKit attempt.** Browser binary downloads, but the
+  sandbox cannot provide WebKit's host libraries (no root). The mobile
+  project keeps the chromium engine + iPhone 14 profile; standing accepted
+  risk unchanged.
+
+### 9.3 Live parity re-measurement — five mobile gaps found and fixed
+
+agent-browser sweep at 390×844 against the live reference (2026-10-12)
+surfaced divergences the session-1/2 sweeps normalized away. All fixed and
+pinned by the new `tests/e2e/mobile-header-parity.spec.ts` (4 specs × 2
+projects):
+
+| Gap | Reference (measured) | Clone before | Fix |
+|---|---|---|---|
+| Hamburger position | Trailing edge: logo → user → cart → **hamburger** | Hamburger left of the logo | Moved to the right group after the cart button |
+| Mobile search button | None in the header (search lives in the menu) | Search icon shown below `lg` | `hidden md:inline-flex lg:hidden` |
+| Feature bar on phones | 2×2 grid at 390px | 1-col stack | `grid-cols-2` base (was `sm:grid-cols-2`) |
+| Carousel order | Slide 1 "Elevate Your Kitchen" (Shop Now) | Slide 1 "New Arrivals" | Reordered CAROUSEL; `STORAGE_KEY` → `homenest.v3` |
+| Page dim under menu | None | `bg-white/70` + blur wash | Overlay click-catcher made transparent; scroll-lock/focus-trap kept |
+
+"Sign in" remains in the mobile menu as registered divergence (demo-auth
+entry point; the reference delegates auth to its platform screen).
+
+### 9.4 Verification gate (post session-3)
+
+| Gate | Command | Result |
+|---|---|---|
+| Types | `npm run typecheck` | ✅ clean |
+| Unit | `npm run test` (vitest) | ✅ 25/25 |
+| Build | `npm run build` | ✅ single-file bundle |
+| E2E | `npm run e2e` (chromium + mobile) | ✅ 104/104 (52 specs × 2 projects) |
+| a11y | axe structural gate on 4 surfaces | ✅ 0 critical/serious (contrast documented) |
+| Mobile nav | 11 specs @ iPhone 14 profile | ✅ incl. modal dialog + focus trap |
+| Mobile header parity | 4 bounding-box/layout pins | ✅ |
+
+### 9.5 Residual risks (updated)
+
+1. npm advisories (`braces`/`micromatch`) — unchanged, build-time only.
+2. WebKit host libs unavailable in this sandbox — chromium-engine pin stays.
+3. Client-only demo auth — plaintext passwords still in localStorage (server
+   workstream required; unchanged). Guest tokens are now crypto-grade.
+4. Color-contrast pairs on parity surfaces — documented exclusion (§9.2
+   R3-04); changing them is a parity-breaking decision, not a lint fix.
+
+### 9.6 Follow-up recommendations (next candidates)
+
+1. Server-backed auth workstream (removes F-10 entirely).
+2. Re-check the reference site's menu behavior on future sweeps — the page
+   dim flipped between session-1 and session-3 measurements; the clone
+   follows the latest measurement.
+3. Add axe checks for authenticated surfaces (account, admin) once the demo
+   auth flow is exercised in the a11y spec.

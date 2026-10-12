@@ -178,3 +178,30 @@ Work Log:
 Stage Summary:
 - Remote state: github.com:nordeim/homenest-store-g main @ 394c6cb (5 new commits total across sessions: d914875→2109282 parity/test/docs batch, 54306d0 session_1.md, da57ecf + 394c6cb session-2 artifacts)
 - No branches created; all commits on main; key material never persisted in-repo
+
+---
+Task ID: 8
+Agent: main (Super Z)
+Task: Session 3 — ledger validation, TDD follow-ups, live parity re-measurement, docs, push
+
+Work Log:
+- git pull: fast-forwarded 394c6cb..7c73267 (docs/session_2.md + prompt-to-validate-2.md)
+- Reviewed AGENTS/CLAUDE/README/PAD/SKILL + docs/remediation-plan.md, worklog, session_2.md; validated claims against code
+- AUDIT CATCH: remediation plan marked R-05 (isExpiryValid year floor) as executed, but src/lib/commerce.ts still had `year >= 26` — doc/code misalignment; PAD's known-issues table had been right
+- Baseline gate green before changes: typecheck ✓ 22/22 unit ✓ build ✓ 82/82 E2E ✓
+- R3-01 (TDD, red→green): isExpiryValid rolling window (2000+YY, valid through expiry month, injectable clock); 8 deterministic pins incl. the distinguishing case 01/26 @ 2026-10-12 → false (old code accepted)
+- R3-02 (TDD, red→green): generateGuestToken() = 16 bytes crypto.getRandomValues hex (128-bit, URL-safe); store.placeOrder uses it; Math.random no longer security-adjacent
+- R3-03 (TDD, red→green): mobile menu is a real modal — role="dialog" + aria-modal="true" + aria-label="Site menu" wrapper (inner nav landmark kept), focus enters at search input on open, Tab/Shift+Tab cycle the 7 panel focusables, Escape restores focus to trigger, overlay click-catcher tabIndex=-1; 3 new specs (11 × 2 projects pass); fixed spec off-by-one (7 focusables, not 8)
+- R3-04: @axe-core/playwright added (devDep); tests/e2e/a11y-smoke.spec.ts gates 4 surfaces on zero critical/serious STRUCTURAL violations with color-contrast excluded-and-logged — every failing contrast pair is a parity-pinned reference token (white/orange ≈3.2:1, white/amber ≈2.2:1, orange/white ≈3.2:1, muted grays); exclusion documented in spec header + PAD §5.6 + remediation plan §9.2
+- R3-05 (TDD, red→green): STORAGE_KEY extracted to src/lib/storage-key.ts; tests/catalog-hash.test.ts sha-256-pins src/data/catalog.ts to a key via tests/catalog-registry.json; registry caught the session-3 carousel edit immediately → forced deliberate homenest.v2→v3 bump (re-seeds stale clients)
+- R3-06: WebKit install attempted — binary downloads but host libs need root; chromium-engine pin stays (accepted risk, PAD updated)
+- agent-browser live sweep @390×844 vs reference found FIVE mobile parity gaps the earlier sweeps missed, all fixed + pinned by tests/e2e/mobile-header-parity.spec.ts (4 specs): (1) hamburger trailing edge after cart (was left of logo); (2) no header search button below md (search lives in menu); (3) feature bar 2×2 at phones (was 1-col); (4) carousel slide 1 = "Elevate Your Kitchen" (was "New Arrivals"); (5) menu overlay no longer dims the page (reference has no dim at current measurement; scroll-lock + focus trap kept)
+- Full gate after remediation: typecheck ✓ · 25/25 unit ✓ · build ✓ (495 KB) · 104/104 E2E ✓ (52 specs × chromium+mobile)
+- Session-fresh screenshots: session3-home-desktop, session3-products-desktop, session3-pdp-desktop, session3-mobile-home (re-captured post-fix), session3-mobile-menu-open (re-captured post-fix) → docs/screenshots/
+- Docs aligned in same change: remediation plan §9 addendum (incl. R-05 correction), PAD (threat model, §5.6 divergences 10–12, §7.1 test table, §7.4 checklist, known-issues), AGENTS.md (registry-enforced storage key convention, modal-menu testing quirk), CLAUDE.md (contracts + counts), README (badges/counts/hierarchy/links), SKILL.md (frontmatter state, T-7, portal pattern, parity contract, ledger, audit history row)
+- worklog.md updated (this entry) for git inclusion
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 25/25 unit ✓ build ✓ 104/104 E2E ✓ — all observed this session
+- Ledger integrity restored: R-05 over-claim corrected with the fix actually landed and unit-pinned
+- Follow-ups from remediation plan §8: 4 of 5 executed (WebKit blocked by sandbox root), plus 5 new parity pins

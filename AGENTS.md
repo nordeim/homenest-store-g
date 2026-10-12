@@ -57,6 +57,7 @@ Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from
 - **E2E runs against the production build.** `npm run build` before `npm run e2e`; the config boots `vite preview` on :4173 (`--strictPort`) and reuses an already-running server locally.
 - **Each test gets a fresh browser context**, i.e. fresh localStorage — tests never share cart/session state. Login through the real UI per test (no rate limiter exists, so per-test logins are fine here).
 - **`getByRole` name matching is substring by default.** "Close menu" also matches "Close menu overlay" — use `{ exact: true }` (this bit the mobile-nav spec once).
+- **The mobile menu is a modal dialog** (`role="dialog" aria-modal="true" aria-label="Site menu"`) with a focus trap: focus enters at the search input, Tab cycles among the panel's 7 focusables (input + 6 links), Escape restores focus to the trigger. The inner `<nav aria-label="Mobile">` keeps its landmark role — specs may keep using it. The panel does NOT dim the page (matches the live reference; re-measure before "fixing").
 - **Never click a disabled control** (quantity minus at qty=1) — assert `toBeDisabled()` instead; Playwright waits for enabled state and times out otherwise.
 - **Strict-mode text collisions**: "Total" matches "Subtotal"; "Confirmed" matches "Your order has been confirmed". Use `{ exact: true }` or role-scoped locators.
 - **Computed styles are the parity gate, not screenshots.** Colors above are asserted with `toHaveCSS`. When you change a token, re-measure and update the spec in the same commit.
@@ -67,7 +68,7 @@ Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from
 - TypeScript strict; no `any` (`unknown` at boundaries); no `ts-ignore`. Unused locals/params are compile errors — prune imports.
 - Components: named-function exports, one domain per file (`chrome.tsx` = shared chrome, `product.tsx` = card primitives). Pages are kebab-cased files with PascalCase exports.
 - Assets live in `public/images/` and are referenced by absolute path (`/images/...`). Product images are PNG; the catalog in `src/data/catalog.ts` is the seed (reference-parity products keep exact names/prices/ratings).
-- **Versioned storage key**: bump `STORAGE_KEY` (`homenest.v2`) whenever `PersistedState` shape or the seed catalog changes — stale client data otherwise shadows the new catalog (this bit the redesign).
+- **Versioned storage key**: bump `STORAGE_KEY` (`src/lib/storage-key.ts`) whenever `PersistedState` shape or the seed catalog changes — stale client data otherwise shadows the new catalog (this bit the redesign). The bump is *enforced*: `tests/catalog-hash.test.ts` sha-256-pins `src/data/catalog.ts` to a key via `tests/catalog-registry.json`; a seed edit without the bump (and a registry row for the new hash) fails the gate with repair instructions.
 - Conventional Commits; docs (`AGENTS.md`, `CLAUDE.md`, `README.md`, `Project_Architecture_Document.md`) are updated in the same commit as the change they describe.
 - Never commit: `.env`, `db/*.db`, `node_modules/`, `dist/`, `test-results/`, `playwright-report/`, `tests/e2e/.auth/`.
 - The trap log above grows (documented) instead of being worked around.

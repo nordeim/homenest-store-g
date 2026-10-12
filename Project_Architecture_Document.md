@@ -399,6 +399,9 @@ These supersets are intentional; they must not change the **resting visuals** of
 7. Chat FAB bottom-right navigates to `/contact` (the reference's FAB opens a platform widget).
 8. Demo login/register pages with email+password (the reference delegates to the Base44 platform auth screen).
 9. Order numbers are `ORD-YYYY-NNN` sequential (the reference generates `ORD-XXXXXXXX` random) — sequential numbers are friendlier for support flows.
+10. "Sign in" row in the mobile menu (the reference's menu lists the five nav links only) — the demo auth entry point; the reference delegates auth to its platform screen.
+11. The mobile menu panel does NOT dim the page beneath it (session-3 re-measurement of the live reference; the session-1 measurement read a dim that is no longer present). Scroll-lock and the focus trap remain.
+12. Color-contrast pairs on parity surfaces (white-on-orange CTAs, white-on-amber "Featured" pills, orange category labels, muted grays) match the reference tokens and fail WCAG AA contrast — documented exclusion from the axe gate (remediation plan §9.2 R3-04).
 
 ---
 
@@ -425,7 +428,7 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Vector | Mitigation | Residual risk |
 |---|---|---|
 | Credential theft | Nothing leaves the browser | **Accepted:** passwords stored plaintext in localStorage — a deliberate demo simplification; a server-backed deployment must replace `login`/`register`/`changePassword` with hashed, salted, rate-limited server auth |
-| Guest token forgery | 59-bit random token | **Accepted:** `Math.random()` token is demo-grade; production should use `crypto.getRandomValues` (192-bit) |
+| Guest token forgery | 128-bit CSPRNG token (`crypto.getRandomValues`, hex) | Low: session 3 replaced the former ~59-bit `Math.random` token (R3-02); forgeability now requires brute-forcing 2¹²⁸ |
 | XSS | React escaping only | Low: no HTML injection surfaces exist |
 | Payment fraud | No real payments | None: card fields never leave the page; COD is simulated |
 | Supply chain | `npm audit fix` applied | **Accepted:** 3 high advisories remain in `braces`/`micromatch` via `vite-plugin-singlefile`'s build-time globbing — no runtime exposure, inputs are trusted repo files; downgrading the plugin would be a breaking change |
@@ -438,15 +441,18 @@ Email + password against the seeded/registered user list; session = `sessionUser
 
 | Category | Files | Tests | Location | Framework |
 |---|---|---|---|---|
-| Commerce seam units | 1 | 14 | `src/lib/commerce.test.ts` | Vitest (node) |
+| Commerce seam units | 1 | 15 | `src/lib/commerce.test.ts` | Vitest (node) |
 | DB URL contract | 1 | 8 | `tests/db-path.test.ts` | Vitest (node) |
+| Catalog ↔ storage-key registry | 1 (+ registry JSON) | 2 | `tests/catalog-hash.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
-| Mobile navigation | 1 | 8 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| Mobile navigation | 1 | 11 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| Mobile header parity | 1 | 4 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
 | Catalog | 1 | 6 | `tests/e2e/catalog.spec.ts` | Playwright |
 | Cart & checkout | 1 | 9 | `tests/e2e/cart-checkout.spec.ts` | Playwright |
 | Auth & admin | 1 | 7 | `tests/e2e/auth-admin.spec.ts` | Playwright |
 | Visual parity | 1 | 6 | `tests/e2e/visual-parity.spec.ts` | Playwright |
-| **Total** | **9** | **104** (22 unit + 82 E2E runs) | | |
+| A11y smoke (axe) | 1 | 4 | `tests/e2e/a11y-smoke.spec.ts` | Playwright |
+| **Total** | **12** | **77 specs → 129 runs** (25 unit × 1 + 52 E2E × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -463,11 +469,12 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 ### 7.4 Pre-Push Checklist
 
 1. `npm run typecheck` — exit 0
-2. `npm run test` — 22/22
-3. `npm run build` — succeeds (~502 KB single file)
-4. `npm run e2e` — 82/82 across chromium + mobile
+2. `npm run test` — 25/25
+3. `npm run build` — succeeds (~495 KB single file)
+4. `npm run e2e` — 104/104 across chromium + mobile
 5. Docs updated in the same commit when contracts/visuals changed
 6. `AGENTS.md` trap log grown (not worked around) if a new trap was discovered
+7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same commit
 
 ---
 
@@ -537,11 +544,12 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | Priority | Issue | Impact | Status |
 |---|---|---|---|
 | HIGH (accepted) | Demo passwords stored plaintext in localStorage | Unacceptable for any real deployment | Open — requires the server workstream (ADR-001) |
-| HIGH (accepted) | Guest tokens use `Math.random()` (~59 bits) | Forgery risk in adversarial settings | Open — swap to `crypto.getRandomValues` |
+| ~~HIGH (accepted)~~ | ~~Guest tokens use `Math.random()` (~59 bits)~~ | — | **Fixed (session 3, R3-02):** `generateGuestToken()` = 128-bit `crypto.getRandomValues`, hex-encoded |
 | MEDIUM (accepted) | 3 high npm advisories in braces/micromatch via vite-plugin-singlefile | Build-time only; no runtime exposure | Accepted, documented in README troubleshooting |
 | MEDIUM | No ESLint/Prettier config | Style consistency relies on tsc + review | Open — add flat-config ESLint wired into `npm run verify` if the team wants it |
-| LOW | `isExpiryValid` hardcodes `year >= 26` | Card expiry validation degrades in the 2030s | Open |
-| LOW | WebKit not installed in this sandbox | Mobile project pins chromium engine; no Safari coverage locally | Accepted — install WebKit libs where available |
+| ~~LOW~~ | ~~`isExpiryValid` hardcodes `year >= 26`~~ | — | **Fixed (session 3, R3-01):** rolling window with injectable clock; unit-pinned |
+| LOW | WebKit not installed in this sandbox | Mobile project pins chromium engine; no Safari coverage locally | Accepted — host libs need root; browser binary cached, launch blocked (re-attempted session 3) |
+| LOW | Color-contrast pairs on parity surfaces (orange/amber/gray tokens) fail WCAG AA | axe `color-contrast` findings on parity-pinned tokens | Accepted — the reference itself fails these pairs; visual parity wins (remediation plan §9.2 R3-04); structural a11y is gated clean |
 | LOW | Carousel kicker field is stored but not rendered | Reference hero shows no kicker; kept for admin-editing future | Registered divergence |
 
 ---
