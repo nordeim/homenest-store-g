@@ -175,6 +175,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_10.md`](docs/session_10.md) — Session 10 execution record (DEPLOYMENT.md alignment → full re-validation → no-drift re-sweep → push)
 - [`docs/session_12.md`](docs/session_12.md) — Session 12 execution record (fresh-clone rebuild → full re-validation → third no-drift sweep → push)
 - [`docs/session_14.md`](docs/session_14.md) — Session 14 execution record (fourth no-drift sweep → R14-01 combobox live-region announcements via TDD → push)
-- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) — raw session transcripts for the session-5, session-8, session-10, and session-12 records
+- [`docs/session_16.md`](docs/session_16.md) — Session 16 execution record (fifth no-drift sweep → R16-01 ESLint flat config wired into `verify` → push)
+- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) — raw session transcripts for the session-5, session-8, session-10, session-12, and session-14 records
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)

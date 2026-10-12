@@ -14,7 +14,7 @@ The SEO layer (session 8) is a generated + seam-driven superset: `src/lib/seo.ts
 2. **PLAN** — Break work into vertical slices: one seam, one test, one implementation. State assumptions explicitly.
 3. **VALIDATE** — Confirm the slice is testable: which spec pins it? If none exists, write it first (red → green).
 4. **IMPLEMENT** — Smallest change that satisfies the slice without weakening guards.
-5. **VERIFY** — Run the full gate: `npm run verify && npm run e2e`. All four stages (typecheck, unit, build, E2E) must exit 0.
+5. **VERIFY** — Run the full gate: `npm run verify && npm run e2e`. All five stages (typecheck, lint, unit, build, E2E) must exit 0.
 6. **DELIVER** — Conventional Commit; update `AGENTS.md`/`README.md`/`Project_Architecture_Document.md` in the same commit when behavior, contracts, or visuals changed.
 
 Non-negotiables:
@@ -60,6 +60,7 @@ npm run dev            # http://localhost:5173
 | Build (single file) | `npm run build` |
 | Typecheck | `npm run typecheck` |
 | Unit tests | `npm run test` / `npm run test:watch` |
+| Lint (flat config, R16-01) | `npm run lint` |
 | E2E (needs build) | `npm run build && npm run e2e` |
 | Everything (pre-push) | `npm run verify && npm run e2e` |
 

@@ -893,3 +893,77 @@ every gate's file set.
 Remaining from the §13.4/§14.5 list: server-backed auth workstream,
 ESLint flat config into `npm run verify`, optional PWA manifest.
 (Closed this session: aria-live combobox announcements.)
+
+## 16. Session-16 Addendum (2026-10-13) — Fifth No-Drift Sweep, R16-01 ESLint Flat Config Wired into `verify`
+
+Session 16 ran on the persisted checkout: `git pull` fast-forwarded
+`02db6a5..506b77e` — the remote had advanced by exactly one commit
+adding `docs/session_15.md`, the raw session-14 transcript. With no
+defects found and the candidate list down to three, the session closed
+the next-smallest standing item: the PAD §10 "No ESLint/Prettier config"
+gap — executed as pure tooling (devDeps + config + gate wiring), zero
+runtime surface.
+
+### 16.1 Validation (baseline ledger reproduced, then re-run post-change)
+
+- Baseline gate before any change: typecheck ✓ · **95/95 unit** ✓ ·
+  build 506.59 KB ✓ · **188/188 E2E** ✓ — session-14 ledger reproduced;
+  SEO determinism held (prebuild regeneration byte-identical, sitemap
+  36 URLs, 5 private surfaces disallowed).
+- Post-change gate: typecheck ✓ · **lint ✓ (new stage)** · 95/95 ✓ ·
+  build 506.59 KB ✓ (size-identical bundle — nothing shipped changed) ·
+  **188/188 E2E** re-observed on the post-tooling build.
+
+### 16.2 R16-01 — ESLint 9 flat config (closes a PAD §10 MEDIUM row)
+
+- Toolchain (devDeps only): eslint 9.39.5, typescript-eslint 8.71.2,
+  eslint-plugin-react-hooks 5.2.0, eslint-plugin-react-refresh 0.4.26,
+  globals 16.5.0 (Node v24.21.0).
+- `eslint.config.js`: global ignores (incl. **`skills/`** per the
+  standing mandate, plus dist/docs/public/db/Playwright artifacts);
+  browser block (js + tseslint recommended, react-hooks
+  recommended-latest, react-refresh vite preset); node block for build
+  tooling and `scripts/*.mjs`; deliberately **non-type-aware** (tsc
+  stays the type floor; gate stays fast/deterministic).
+- First run: **5 findings, all `react-refresh/only-export-components`**
+  on the established provider+hook co-location modules (`store.tsx`,
+  `router.tsx`, `chrome.tsx`). Resolved by a scoped, documented rule-off
+  for exactly those three files — the rule protects dev-HMR fast
+  refresh, irrelevant in a singlefile build — keeping it ON for all
+  future files. Zero findings from every other rule.
+- Wiring: `"lint": "eslint ."`; `verify` = `typecheck && lint && test &&
+  build`. First full verify with the stage exits 0.
+
+### 16.3 Live sweeps (both sides, no drift — fifth consecutive)
+
+- Reference (@390×844, Playwright + host-resolver-rules — the
+  agent-browser DNS quirk persists): bare 36×36 trigger;
+  `NAV.bg-card/80` panel white/80, shadowless, 1px
+  `rgba(229,224,220,0.5)` bottom border; rows 14px/500 — active white
+  on `rgb(217,110,38)`, inactive muted `rgb(126,111,103)`, 12px radius;
+  no dialog semantics; robots allows everything; sitemap 22 statics,
+  0 product URLs.
+- Clone: dialog contract live-verified (role/aria-modal/label,
+  portal-to-body, initial focus search pill, 7×Tab trap + wrap, Escape
+  restores trigger); row pins exact + superset Sign in row; served PDP
+  head (title = h1, canonical, Product JSON-LD USD); robots 5
+  disallows; sitemap 36 URLs; R14-01 live region announcing.
+- **Conclusion: no functional or visual gaps on either side.**
+
+### 16.4 Follow-ups executed
+
+- ✅ **R16-01** — ESLint flat config into `verify` (§16.2).
+- ✅ **R16-02** — 4 session captures, visually verified post-capture,
+  byte-sizes identical to the session-14 set (pixel-parity evidence) →
+  `docs/screenshots/`; README Documentation rows extended.
+
+### 16.5 Verification gate (post session-16)
+
+typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.59 KB ✓ · 188/188 E2E ✓
+— observed after the R16-01 change; docs-only remainder outside every
+gate's file set.
+
+### 16.6 Residual risks & follow-up candidates (shrunk by one)
+
+Remaining from the §15.6 list: server-backed auth workstream, optional
+PWA manifest. (Closed this session: ESLint flat config.)

@@ -19,7 +19,7 @@ Production e-commerce storefront + admin console: Vite 7 · React 19 · TypeScri
 | Regenerate SEO artifacts | `npm run seo:generate` (also runs via the `prebuild` hook) |
 | Full pre-push gate | `npm run verify && npm run e2e` |
 
-There is no ESLint config — `tsc --noEmit` with `noUnusedLocals`/`noUnusedParameters` is the lint gate. Do not add ESLint casually; if you do, wire it into `npm run verify`.
+ESLint flat config (`eslint.config.js`, R16-01) runs as the `lint` stage inside `npm run verify` — eslint 9 + typescript-eslint recommended + react-hooks + react-refresh, non-type-aware (tsc covers types). Provider+hook co-location is carved out only for `store.tsx`/`router.tsx`/`chrome.tsx`; keep the rule on for new files. `skills/` is never linted.
 
 ## Environment & database contract
 

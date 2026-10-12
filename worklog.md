@@ -356,3 +356,26 @@ Stage Summary:
 - Verification ledger: typecheck ✓ 95/95 unit ✓ build 506.59 KB ✓ 188/188 E2E ✓ — observed post-change
 - Parity posture: fourth consecutive no-drift sweep on both sides; menu pins, dialog superset, and SEO superset all hold
 - Standing candidate list shrunk: aria-live combobox announcements CLOSED (R14-01); remaining — server-backed auth, ESLint flat config, optional PWA manifest
+
+---
+Task ID: 15
+Agent: main (Super Z)
+Task: Session 16 — fifth no-drift sweep, R16-01 ESLint flat config into verify, docs, push
+
+Work Log:
+- git pull fast-forwarded 02db6a5..506b77e (remote added only docs/session_15.md, the raw session-14 transcript); git diff 02db6a5..HEAD --stat proves the rest of the suite byte-identical — root-doc review carries over
+- Environment fully intact: .env pinned contract, node_modules, paramiko shim, paramiko 5.0.0 importable, no stale keys
+- Skills consulted: tdd-workflow, webapp-testing, agent-browser (DNS quirk persists — sweeps via Playwright + host-resolver-rules), code-review-and-audit
+- Baseline gate pre-change: typecheck ✓ 95/95 unit ✓ build 506.59 KB ✓ 188/188 E2E ✓ (SEO determinism held)
+- R16-01: installed eslint 9.39.5 + typescript-eslint 8.71.2 + react-hooks 5.2.0 + react-refresh 0.4.26 + globals 16.5.0 (devDeps only); wrote eslint.config.js (flat config; skills/ excluded per mandate; browser + node blocks; non-type-aware by design); first run = 5 findings, all react-refresh/only-export-components on the established provider+hook modules → scoped documented rule-off for store/router/chrome, rule stays on for new files; zero findings from every other rule
+- Wired "lint": "eslint ." into package.json; verify = typecheck && lint && test && build; first full verify with the stage exits 0; bundle size-identical (506.59 KB — nothing shipped changed); E2E re-observed 188/188 on the post-tooling build
+- Reference re-sweep (Playwright @390×844): NO drift — fifth consecutive (bare 36×36 trigger; NAV.bg-card/80 white/80 shadowless 1px border; active 14px/500 white on rgb(217,110,38) 12px; inactive muted rgb(126,111,103); no dialog semantics; robots allows all; sitemap 22 statics, 0 product URLs)
+- Clone sweep: dialog contract live-verified (portal, initial focus search pill, 7×Tab trap + wrap, Escape restore); row pins exact + superset Sign in (6 rows); served PDP head (title=h1, canonical, Product JSON-LD USD $54.99); robots 5 disallows; sitemap 36 URLs; R14-01 live region announcing ("3 products match your search.")
+- R16-02: 4 captures visually verified post-capture (session16-home-desktop, session16-pdp-desktop, session16-mobile-home, session16-mobile-menu-open; byte-sizes identical to session-14 set — pixel-parity evidence) → docs/screenshots/
+- Docs updated: eslint.config.js (self-documenting), package.json (+lint), AGENTS.md ESLint row, CLAUDE.md five-stage verify + lint row, PAD §10 ESLint row → closed, DEPLOYMENT.md §7 comment (lint + 188), remediation plan §16, docs/session_16.md, README rows, worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.59 KB ✓ 188/188 E2E ✓ — all observed post-change
+- Tooling quality floor: static analysis now part of the standard gate; PAD §10 "No ESLint config" gap closed
+- Parity posture: fifth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, and R14-01 live region all hold
+- Next-session candidates: server-backed auth (unchanged), optional PWA manifest
