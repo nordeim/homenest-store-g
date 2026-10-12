@@ -1,10 +1,10 @@
 # HomeNest Store G — Codebase Audit & Remediation Plan
 
-> **Status:** EXECUTED & VALIDATED (100% of remediation items complete; session-3 addendum in §9)
-> **Session:** 1 (see `docs/session_1.md`), 2 (see `docs/session_2.md`), 3 (§9 below)
+> **Status:** EXECUTED & VALIDATED (100% of remediation items complete; session-4 addendum in §10)
+> **Session:** 1 (see `docs/session_1.md`), 2 (see `docs/session_2.md`), 3 (§9 below), 4 (§10 below)
 > **Reference site:** https://nest-culinary-hub.base44.app/ (visual + functional parity target)
 > **Tech-stack pattern source:** https://github.com/nordeim/ecommerce-store.git (AGENTS.md / CLAUDE.md / PAD / SKILL.md)
-> **Verification gate at time of writing:** typecheck ✓ · 25/25 unit ✓ · build ✓ · 104/104 E2E ✓
+> **Verification gate at time of writing:** typecheck ✓ · 25/25 unit ✓ · build ✓ · 120/120 E2E ✓
 
 ---
 
@@ -349,3 +349,102 @@ entry point; the reference delegates auth to its platform screen).
    follows the latest measurement.
 3. Add axe checks for authenticated surfaces (account, admin) once the demo
    auth flow is exercised in the a11y spec.
+
+---
+
+## 10. Session-4 Addendum (2026-10-12) — Doc-Drift Audit, Cart-Drawer Modal, Authenticated axe Gate, Menu Parity Re-Sweep
+
+Session 4 validated the session-3 ledger and transcript against the code,
+audited the codebase with the repo skills, and re-swept the live reference
+(§9.6.2). The sweep surfaced five more menu-level parity gaps; the audit
+found one real a11y gap (cart drawer) and six stale SKILL claims.
+
+### 10.1 Ledger corrections (doc drift found by the audit)
+
+| Location | Stale claim | Correction |
+|---|---|---|
+| SKILL §7 | `nextOrderNumber()` generates `ORD-XXXXXXX` (random) | Code generates sequential `ORD-YYYY-NNN` (per-year max + 1, injectable clock) — §7 now matches the code |
+| SKILL §8 | Mobile menu "no focus trap / aria-modal yet — registered gap" | Session 3 (R3-03) shipped both; §8 updated |
+| SKILL §13 | "Don't fix guest tokens ad hoc — registered follow-up" | Fixed in session 3 (R3-02); §13 now warns against regressing |
+| SKILL §15 | URL-driven pattern reads the `q` param | The real contract is `search` |
+| SKILL §19 | "white at 70% + blur for the mobile-menu dim" | The dim was removed in session 3; §19 documents `--color-panel` instead |
+| SKILL App. D | Session-2 row missing | Added, plus the session-4 row |
+
+### 10.2 Follow-ups executed (TDD: red → green)
+
+- ✅ **R4-01 — Cart drawer is a real modal.** The drawer (the app's top
+  modal surface, z-500) carried `role="dialog"` but no `aria-modal`, no
+  focus trap, no focus management — keyboard users could Tab into the dimmed
+  page behind it. Now: `aria-modal="true"`, focus moves into the drawer on
+  open (close button first), Tab/Shift+Tab cycle within it, the backdrop
+  click-catcher is `tabIndex={-1}`, Escape closes, and focus restores to the
+  cart trigger on close — the same contract the mobile menu has had since
+  R3-03.
+  *TDD:* new `tests/e2e/cart-drawer.spec.ts` (3 specs × 2 projects): modal
+  semantics + initial focus, full Tab cycle + Shift+Tab wrap, focus restore
+  via Escape and via the X button.
+- ✅ **R4-02 (§9.6.3) — axe gate extended to authenticated surfaces.**
+  `tests/e2e/a11y-smoke.spec.ts` grew two tests: `/account` (demo customer)
+  and `/admin` (demo admin) both log in through the real UI and must show
+  zero critical/serious structural violations. Result: both surfaces are
+  structurally clean; their color-contrast findings (3/1 and 2/1 nodes) are
+  the same parity-pinned reference tokens, logged not gated.
+- ✅ **R4-03 — SKILL doc-drift corrections.** All six stale claims in
+  §10.1 fixed in the same change; SKILL bumped to v1.1.0.
+- ✅ **R4-04 (§9.6.2) — Menu parity re-measurement: five gaps fixed.** The
+  live sweep at 390×844 (same reference, re-measured 2026-10-12) found the
+  menu panel had drifted further from the reference than session 3 knew:
+
+  | Gap | Reference (measured) | Clone before | Fix |
+  |---|---|---|---|
+  | Panel surface | `rgba(255,255,255,0.8)` translucent, NO drop shadow, 1px bottom border | Solid white + `shadow-pop` | New `--color-panel` token (alpha baked in — see T-13); shadow removed |
+  | Menu search control | Compact muted icon pill (`rgb(242,240,237)`, radius 9999px, 40px wide) — functionally inert | Full-width always-expanded input | Pill at rest (parity); tapping expands the working input and focuses it (superset — registered divergence #13) |
+  | Row type scale | 14px / weight 500 | 16px | `text-sm` |
+  | Inactive row color | `rgb(126,111,103)` (muted-foreground) | `rgb(29,24,22)` (foreground) | `text-muted-foreground` |
+  | Active-row radius | 12px | full pill (`calc(infinity*1px)`) | `rounded-md` (12px token) |
+
+  *TDD:* 4 new/updated pins in `tests/e2e/mobile-navigation.spec.ts`
+  (resting-visuals pin, pill-expand behavior, collapse-on-close behavior,
+  focus-entry updated to the pill; 14 specs × 2 projects).
+- ✅ **New trap T-13** (both AGENTS.md and SKILL §9): Tailwind v4 serializes
+  `/NN` opacity modifiers as oklab `color-mix` and `rounded-full` as
+  `calc(infinity * 1px)` — both visually identical to the reference's
+  v3-era `rgba(...)`/`9999px` but different as computed strings. Fix: bake
+  alpha into the token (`--color-panel`), use `rounded-[9999px]` where an
+  exact radius string is pinned.
+
+### 10.3 Verification gate (post session-4)
+
+| Gate | Command | Result |
+|---|---|---|
+| Types | `npm run typecheck` | ✅ clean |
+| Unit | `npm run test` (vitest) | ✅ 25/25 |
+| Build | `npm run build` | ✅ single-file bundle (497 KB) |
+| E2E | `npm run e2e` (chromium + mobile) | ✅ 120/120 (60 specs × 2 projects) |
+| a11y | axe structural gate on 6 surfaces (home, products, PDP, cart, account, admin) | ✅ 0 critical/serious (contrast documented) |
+| Mobile nav | 14 specs @ iPhone 14 profile | ✅ incl. session-4 resting-visual pins |
+| Cart drawer | 3 modal-semantics specs | ✅ |
+
+### 10.4 Residual risks (updated)
+
+1. npm advisories (`braces`/`micromatch`) — unchanged, build-time only.
+2. WebKit host libs unavailable in this sandbox — chromium-engine pin stays.
+3. Client-only demo auth — plaintext passwords still in localStorage (server
+   workstream required; unchanged).
+4. Color-contrast pairs on parity surfaces — documented exclusion (§9.2
+   R3-04); now measured and logged on authenticated surfaces too.
+5. Reference-side quirk, not actionable: the reference's own toast viewport
+   (`fixed top-0 z-[100] w-full`) covers its menu search pill, so the pill
+   cannot actually be clicked on the reference; the clone's expanded search
+   is fully interactive.
+
+### 10.5 Follow-up recommendations (next candidates)
+
+1. Server-backed auth workstream (removes F-10 entirely) — unchanged from
+   §9.6; remains the largest open item.
+2. Re-check the reference menu on future sweeps — its resting visuals have
+   now changed twice across three sweeps (dim flip in session 3, panel
+   translucency + search pill in session 4); the clone follows the latest
+   measurement each time.
+3. Desktop search overlay: consider ArrowDown/ArrowUp navigation for the
+   combobox listbox (nice-to-have; axe-clean today).

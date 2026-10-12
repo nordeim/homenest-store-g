@@ -8,7 +8,7 @@ description: >
   containing block, hsl() literals, oklab gradients), the parity contract with
   the reference site, the two-layer test architecture, and every lesson from
   the Session 1 remediation.
-version: 1.0.0
+version: 1.1.0
 last_updated: 2026-10-12
 tags:
   - react
@@ -18,7 +18,7 @@ tags:
   - visual-parity
   - testing
   - skill
-project_state: "typecheck clean · 25/25 unit · build green · 104/104 E2E (chromium + mobile)"
+project_state: "typecheck clean · 25/25 unit · build green · 120/120 E2E (chromium + mobile)"
 ---
 
 # HomeNest Store G — Project Skill
@@ -244,7 +244,7 @@ pinned). `lib/store.tsx` is the only stateful module.
 | File | Lines | Purpose |
 |---|---|---|
 | `src/App.tsx` | 106 | Route switch (`matchPath` → page), auth/admin gating, skip link |
-| `src/components/chrome.tsx` | 655 | `Header` (+ search overlay + portal mobile nav), `CartDrawer`, `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
+| `src/components/chrome.tsx` | 766 | `Header` (+ search overlay + portal mobile nav), `CartDrawer` (modal), `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
 | `src/components/product.tsx` | 100 | `ProductCard` (badges, quick-add), `Stars`, price row |
 | `src/pages/home.tsx` | 199 | Hero carousel, FeatureBar, 8 category cards, Featured + New grids, CTA banner |
 | `src/pages/shop.tsx` | 339 | Products list (URL-driven search/category/sort), PDP, 404 |
@@ -366,7 +366,8 @@ Category slugs are also filter query values on `/products` — E2E covers
 
 **Orders:** created at runtime by `placeOrder()`, persisted in the same
 storage key, listed in account + admin. `nextOrderNumber()` generates
-`ORD-XXXXXXX` (random suffix, collision-checked against existing orders).
+`ORD-YYYY-NNN` **sequentially** (per-year max + 1, zero-padded, collision-safe
+against existing orders; the clock is injectable for deterministic tests).
 Status flow and labels: see `statusLabel()` in `commerce.ts` and the 5-step
 vertical stepper (Order Placed → Confirmed → Processing → Shipped →
 Delivered) on the track/account pages.
@@ -396,11 +397,17 @@ Verified behaviors (kept honest by E2E):
   mobile-navigation.spec.ts`); search inputs all have `htmlFor`-linked sr-only
   labels; the desktop search input uses `role="combobox"` with
   `aria-expanded` + `aria-autocomplete="list"` and a `role="listbox"` popup.
-- **Mobile menu:** closes on Escape (keyboard path pinned by E2E), scroll-
-  locks the body while open, overlay button is labelled
+- **Mobile menu:** a true modal — `role="dialog" aria-modal="true"
+  aria-label="Site menu"` with a focus trap (focus enters at the search
+  pill/input, Tab cycles within the panel, Escape restores focus to the
+  trigger), closes on Escape (keyboard path pinned by E2E), scroll-locks the
+  body while open, overlay button is labelled
   (`aria-label="Close menu overlay"`), active link carries
-  `aria-current="page"`. Known gap (registered): no focus trap / `aria-modal`
-  yet — see remediation plan §8.
+  `aria-current="page"`.
+- **Cart drawer:** the same modal contract — `aria-modal="true"`, focus
+  moves into the drawer on open (close button first), Tab/Shift+Tab cycle
+  within it, Escape and the backdrop click-catcher close it, focus restores
+  to the cart trigger (pinned by `tests/e2e/cart-drawer.spec.ts`).
 - **Touch targets:** nav rows `min-h-11` (44 px); icon buttons h-10/h-11.
 - **Reduced motion:** global `prefers-reduced-motion` clamp in `index.css`
   (all durations → 0.01 ms).
@@ -529,6 +536,24 @@ E2E never targets :5173.
 `prisma/` anchor, pinned by `tests/db-path.test.ts` (8 tests).
 **Lesson:** env contracts deserve contract tests too.
 
+### T-13: v4 computed-value serialization drifts from v3-era references
+(SESSION 4)
+**Symptom:** a parity pin asserting an exact computed value fails even though
+the class "looks right": `bg-card/80` computes to `oklab(... / 0.8)` (v4
+opacity modifiers color-mix in oklab) where the reference emits
+`rgba(255,255,255,0.8)`; `rounded-full` computes to `calc(infinity * 1px)`
+(≈ `3.35544e+07px` in Chromium) where the reference emits the v3-era literal
+`9999px`.
+**Root cause:** Tailwind v4 serializes these utilities differently from the
+older builds the reference was produced with; visually identical, but the
+repo's parity gate pins computed strings.
+**Fix:** bake parity-critical alpha into a token (`--color-panel: hsl(0 0%
+100% / 0.8)` → `bg-panel`) and use `rounded-[9999px]` where an exact radius
+string is pinned. Both fixes found while matching the reference's menu panel
+(session 4).
+**Lesson:** measure `getComputedStyle` on BOTH sides before writing the pin;
+choose the utility whose *computed* value — not whose name — matches.
+
 ---
 
 ## §10 Debugging Guide
@@ -585,7 +610,7 @@ every push):
 npm run typecheck   # tsc --noEmit — zero errors
 npm run test        # vitest — 25/25 (3 files)
 npm run build       # vite build — single-file dist/index.html
-npm run e2e         # playwright — 104/104 (52 specs × chromium+mobile)
+npm run e2e         # playwright — 120/120 (60 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
@@ -682,8 +707,8 @@ and navigates, checkout places an order, track-order finds it.
 - Don't store anything real (passwords/payments) in the client store — the
   current plaintext `localStorage` users are demo fixtures only; the
   production path is server-side auth (see PAD threat model).
-- Don't "fix" guest tokens with `crypto` ad hoc — it's a registered follow-up
-  (remediation plan §8) so docs and tests move together.
+- Guest tokens are crypto-grade since session 3 (`generateGuestToken()` in
+  `lib/commerce.ts`); don't regress them to `Math.random`.
 
 **Performance**
 - Don't import icon barrels beyond used icons (single-file bundle inflates).
@@ -767,7 +792,7 @@ string)
 ```tsx
 const { search, navigate } = useRouter();
 const params = new URLSearchParams(search);
-const q = params.get("q") ?? "";
+const q = params.get("search") ?? "";
 // on change:
 navigate(`/products?${next.toString()}`, { replace: true });
 ```
@@ -908,9 +933,9 @@ neither):
 | `badge` | `hsl(38 92% 50%)` = `#F59F0A` | amber "Featured" pill |
 | `footer` | `hsl(24 14% 11%)` = `#201B18` | dark footer background |
 
-Opacity conventions: primary at 22% for `::selection`; white at 70% + 2 px
-backdrop blur for the mobile-menu dim; `bg-card/95` for the translucent
-sticky header.
+Opacity conventions: primary at 22% for `::selection`; the mobile-menu panel
+is `--color-panel` = `hsl(0 0% 100% / 0.8)` (alpha baked into the token —
+see trap T-13); `bg-card/95` for the translucent sticky header.
 
 Forbidden colors: any blue/purple/indigo; raw Tailwind palette classes
 (`bg-orange-500` etc.) — use semantic tokens only (pinned by visual-parity
@@ -1008,10 +1033,10 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
 
 - Unit (vitest, node env): `src/lib/commerce.test.ts` + `tests/db-path.test.ts`
   + `tests/catalog-hash.test.ts` = **25 tests, 3 files, all green**.
-- E2E (playwright, production build via preview server): **52 specs** —
-  smoke 5, mobile-navigation 11, mobile-header-parity 4, catalog 6,
-  cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 4 — × 2 projects
-  (chromium, mobile) = **104 executions, all green**.
+- E2E (playwright, production build via preview server): **60 specs** —
+  smoke 5, mobile-navigation 14, mobile-header-parity 4, cart-drawer 3,
+  catalog 6, cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 6 —
+  × 2 projects (chromium, mobile) = **120 executions, all green**.
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site
@@ -1025,7 +1050,11 @@ Measured live (agent-browser, desktop + mobile) and pinned by
    hamburger is the TRAILING header icon (right of the cart) and toggles to a
    green circular close button; no page dim (session-3 re-measurement);
    closes on navigation and Escape; modal focus trap keeps Tab inside the
-   panel.
+   panel. Session-4 re-measurement: the panel is translucent white/80
+   (`--color-panel`) with NO drop shadow; rows are 14px/500 with
+   muted-foreground inactive text and a 12px active-row radius; the search
+   control is a compact muted pill at rest (the reference's pill is inert —
+   the clone expands it into a working input, registered divergence #13).
 4. Cart summary shows Subtotal / Shipping (Free ≥ $50) / Total — **no tax
    line**.
 5. Checkout defaults to Cash on Delivery; card is the registered superset.
@@ -1041,7 +1070,9 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 | Session | Date | Scope | Outcome |
 |---|---|---|---|
 | 1 | 2026-10-12 | Full Mode C audit → parity redesign → test infra → docs | 17 findings (F-01…F-17) remediated (R-01…R-24); gate 22/22 unit + 82/82 E2E; see `docs/remediation-plan.md` + `docs/session_1.md` |
+| 2 | 2026-10-12 | Session-1 transcript validation → remediation plan → SKILL distillation | Ledger validated against code; `docs/remediation-plan.md` + this SKILL created per both distill skills; 18 screenshots; gate re-verified 22/22 unit + 82/82 E2E; see `docs/session_2.md` |
 | 3 | 2026-10-12 | Ledger validation → follow-ups (TDD) → live parity re-measurement | R-05 over-claim corrected; `isExpiryValid` rolling window, 128-bit crypto guest tokens, mobile-menu modal dialog + focus trap, axe structural gate, catalog↔key registry contract; 5 mobile parity gaps fixed (hamburger trailing, no header search button, 2×2 feature bar, carousel order, no page dim); STORAGE_KEY → homenest.v3; gate 25/25 unit + 104/104 E2E |
+| 4 | 2026-10-12 | Session-3 transcript validation → audit → live parity re-sweep → TDD follow-ups | SKILL drift corrected (§7 order numbers, §8 stale a11y gap, §13, §15, §19); cart drawer became a full modal (aria-modal + focus trap + focus restore); axe gate extended to authenticated surfaces (account, admin); 5 more menu parity gaps fixed (translucent shadowless panel, compact search pill + expand-on-tap superset, 14px/500 rows, muted inactive text, 12px active radius); traps T-13 (oklab opacity-mix, calc(infinity) radius); gate 25/25 unit + 120/120 E2E; see `docs/session_4.md` |
 
 *End of skill. Maintain per the meta-skill: bump minor version on sprints,
 major on stack upgrades; re-verify §2 versions, §11 counts, and §19 hexes

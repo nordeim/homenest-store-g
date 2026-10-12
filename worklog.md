@@ -205,3 +205,27 @@ Stage Summary:
 - Verification ledger: typecheck ✓ 25/25 unit ✓ build ✓ 104/104 E2E ✓ — all observed this session
 - Ledger integrity restored: R-05 over-claim corrected with the fix actually landed and unit-pinned
 - Follow-ups from remediation plan §8: 4 of 5 executed (WebKit blocked by sandbox root), plus 5 new parity pins
+
+---
+Task ID: 9
+Agent: main (Super Z)
+Task: Session 4 — transcript validation, doc-drift audit, cart-drawer modal, authenticated axe gate, menu parity re-sweep, push
+
+Work Log:
+- git pull: fast-forwarded 0b20fab..59bdb29 (docs/session_3.md + prompt-to-validate-3.md)
+- Re-read full doc suite (AGENTS/CLAUDE/README/PAD/SKILL + remediation plan, worklog, session_3) and validated against code; baseline gate green (typecheck ✓ 25/25 unit ✓ build 495 KB ✓ 104/104 E2E ✓)
+- AUDIT: 6 stale SKILL claims (§7 ORD-XXXXXXX vs code's sequential ORD-YYYY-NNN; §8 stale "no focus trap yet"; §13 stale guest-token deferral; §15 q→search; §19 stale menu dim; Appendix D missing session-2 row) + 1 real a11y gap: cart drawer had role=dialog but no aria-modal/focus trap/focus management
+- Live parity re-sweep @390×844 (§9.6.2): reference re-measured — panel rgba(255,255,255,0.8) NO shadow; menu search = compact muted inert icon pill (unclickable: reference's own toast viewport covers it); rows 14px/500 muted-foreground; active row radius 12px; desktop spot-checks match pins
+- R4-01 (TDD, red→green): cart drawer is a real modal — aria-modal, focus in on open, Tab/Shift+Tab trap, backdrop tabIndex=-1, focus restore on close; new tests/e2e/cart-drawer.spec.ts (3 × 2)
+- R4-02 (TDD): axe gate extended to authenticated surfaces — /account + /admin via real-UI login, zero critical/serious structural violations; a11y-smoke now 6 specs; test bug fixed (login lands on /account, navigate to /admin after)
+- R4-03: SKILL drift corrected (all 6 claims), SKILL v1.0.0→1.1.0
+- R4-04 (TDD): menu panel → bg-panel token (--color-panel, alpha baked in), shadow removed; search pill at rest + expand-on-tap superset (registered divergence PAD §5.6 #13); rows text-sm text-muted-foreground; active row rounded-md; 4 new/updated pins (mobile-navigation 14 specs) + mobile-header-parity search pin updated
+- NEW TRAP T-13 (AGENTS.md + SKILL §9): v4 /NN opacity modifiers compute oklab color-mix; rounded-full computes calc(infinity*1px) — use token-baked alpha + rounded-[9999px] for exact-string pins
+- Full gate: typecheck ✓ · 25/25 unit ✓ · build 497 KB ✓ · 120/120 E2E (60 specs × 2) ✓ · axe clean on 6 surfaces ✓
+- Session-4 captures (6) against the production preview: session4-home-desktop, session4-products-desktop, session4-pdp-desktop, session4-cart-drawer, session4-mobile-home, session4-mobile-menu-open → docs/screenshots/
+- Docs aligned same-change: remediation plan §10 addendum, PAD (§5.2 panel token, §5.6 #13, §7.1, §7.4, §11), AGENTS.md (trap 8 + quirks), README/CLAUDE counts + session_4 link, SKILL (§5/§7/§8/§9/§11/§13/§15/§19 + Appendices B–D), docs/session_4.md, worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 25/25 unit ✓ build ✓ 120/120 E2E ✓ — all observed this session
+- Parity posture: menu resting visuals now match the reference to the computed-string level; clone remains a functional superset (search expands and works where the reference's pill is inert)
+- Next-session candidates: server-backed auth workstream (F-10), future menu re-sweeps (reference resting visuals changed twice in three sweeps), desktop combobox arrow-key navigation

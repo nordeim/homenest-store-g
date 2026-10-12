@@ -371,6 +371,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `badge` | — | `rgb(245,159,10)` | "Featured" pill, filled stars | white bold text on amber is decorative/large |
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
 | `card` | `hsl(0 0% 100%)` | `rgb(255,255,255)` | Card surfaces | — |
+| `panel` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Mobile menu panel (alpha baked into the token — v4 `/NN` modifiers color-mix in oklab; trap T-13) | — |
 | `footer` | — | `rgb(32,27,24)` | Footer canvas | white/60 body text |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
 
@@ -402,6 +403,7 @@ These supersets are intentional; they must not change the **resting visuals** of
 10. "Sign in" row in the mobile menu (the reference's menu lists the five nav links only) — the demo auth entry point; the reference delegates auth to its platform screen.
 11. The mobile menu panel does NOT dim the page beneath it (session-3 re-measurement of the live reference; the session-1 measurement read a dim that is no longer present). Scroll-lock and the focus trap remain.
 12. Color-contrast pairs on parity surfaces (white-on-orange CTAs, white-on-amber "Featured" pills, orange category labels, muted grays) match the reference tokens and fail WCAG AA contrast — documented exclusion from the axe gate (remediation plan §9.2 R3-04).
+13. The mobile menu's search control is a compact muted pill at rest (session-4 measurement, matching the reference) that expands into a working search input on tap — the reference's pill is functionally inert (and unclickable: the reference's own toast viewport covers it). Resting visuals match; function exceeds (registered superset).
 
 ---
 
@@ -445,14 +447,15 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | DB URL contract | 1 | 8 | `tests/db-path.test.ts` | Vitest (node) |
 | Catalog ↔ storage-key registry | 1 (+ registry JSON) | 2 | `tests/catalog-hash.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
-| Mobile navigation | 1 | 11 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| Mobile navigation | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
 | Mobile header parity | 1 | 4 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
+| Cart drawer modal | 1 | 3 | `tests/e2e/cart-drawer.spec.ts` | Playwright |
 | Catalog | 1 | 6 | `tests/e2e/catalog.spec.ts` | Playwright |
 | Cart & checkout | 1 | 9 | `tests/e2e/cart-checkout.spec.ts` | Playwright |
 | Auth & admin | 1 | 7 | `tests/e2e/auth-admin.spec.ts` | Playwright |
 | Visual parity | 1 | 6 | `tests/e2e/visual-parity.spec.ts` | Playwright |
-| A11y smoke (axe) | 1 | 4 | `tests/e2e/a11y-smoke.spec.ts` | Playwright |
-| **Total** | **12** | **77 specs → 129 runs** (25 unit × 1 + 52 E2E × 2 projects) | | |
+| A11y smoke (axe) | 1 | 6 | `tests/e2e/a11y-smoke.spec.ts` | Playwright |
+| **Total** | **13** | **85 specs → 145 runs** (25 unit × 1 + 60 E2E × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -470,8 +473,8 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 
 1. `npm run typecheck` — exit 0
 2. `npm run test` — 25/25
-3. `npm run build` — succeeds (~495 KB single file)
-4. `npm run e2e` — 104/104 across chromium + mobile
+3. `npm run build` — succeeds (~497 KB single file)
+4. `npm run e2e` — 120/120 across chromium + mobile
 5. Docs updated in the same commit when contracts/visuals changed
 6. `AGENTS.md` trap log grown (not worked around) if a new trap was discovered
 7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same commit
@@ -558,7 +561,7 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 
 | File | Lines | Purpose |
 |---|---|---|
-| `src/components/chrome.tsx` | ~640 | Header + portaled mobile menu, cart drawer, toaster, chat FAB, footer, feature bar, form primitives |
+| `src/components/chrome.tsx` | ~766 | Header + portaled mobile menu, modal cart drawer, toaster, chat FAB, footer, feature bar, form primitives |
 | `src/lib/store.tsx` | ~495 | Single store: state, persistence, all mutations |
 | `src/pages/checkout-flow.tsx` | ~820 | Cart, checkout (COD + card), token-gated success |
 | `src/pages/account-pages.tsx` | ~760 | Auth card, account tabs, order detail, track order + stepper |
@@ -567,9 +570,10 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | `src/lib/commerce.ts` | ~235 | Money/shipping/promo/validation/tracking seams |
 | `src/pages/admin-pages.tsx` | ~360 | Role-gated admin console (7 surfaces) |
 | `src/lib/router.tsx` | ~130 | History router + matchPath (27 routes) |
-| `src/index.css` | ~115 | `@theme` tokens + base styles |
+| `src/index.css` | ~104 | `@theme` tokens (+ `--color-panel`) + base styles |
 | `src/lib/db-path.ts` | ~60 | DATABASE_URL resolution contract |
-| `tests/e2e/mobile-navigation.spec.ts` | ~100 | The parity-critical menu behaviors |
+| `tests/e2e/mobile-navigation.spec.ts` | ~211 | The parity-critical menu behaviors (incl. session-4 resting-visual pins) |
+| `tests/e2e/cart-drawer.spec.ts` | ~70 | Cart drawer modal semantics (focus trap, restore) |
 | `tests/e2e/visual-parity.spec.ts` | ~50 | Computed-style build-breakers |
 | `tests/db-path.test.ts` | ~75 | DB URL contract tests |
 

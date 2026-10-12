@@ -72,7 +72,7 @@ Demo passwords are stored in plain text inside localStorage by design (client-on
 ## 5. Testing Strategy
 
 - **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 25 tests.
-- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, catalog, cart/checkout, auth/admin, a11y smoke (axe structural gate), visual parity. 52 specs = 104 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
+- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, a11y smoke (axe structural gate on six surfaces incl. authenticated account/admin), visual parity. 60 specs = 120 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
 - **Visual parity gate**: `tests/e2e/visual-parity.spec.ts` asserts computed colors/fonts from the reference measurement. Treat it as a build-breaker.
 - Bugs get a failing regression test at the same seam before the fix.
 

@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-25%20unit%20%2B%20104%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-25%20unit%20%2B%20120%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -26,8 +26,8 @@ Everything ships as one self-contained `dist/index.html` (~500 KB): no server, n
 | ✅ Order success & tracking | Token-gated confirmation view, COD amount notice, delivery window estimate, 5-step order-progress tracker by order number |
 | 👤 Accounts | Email/password auth with redirect validation (open-redirect hardened), profile, password change, address book, wishlist |
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
-| ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu with focus trap, axe structural-a11y gate |
-| 🧪 Tested | 25 Vitest unit tests on pure seams + 52 Playwright E2E specs (104 runs) including computed-style visual-parity, mobile header parity, and a11y smoke gates |
+| ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on six surfaces |
+| 🧪 Tested | 25 Vitest unit tests on pure seams + 60 Playwright E2E specs (120 runs) including computed-style visual-parity, mobile header parity, cart-drawer modal semantics, and a11y smoke gates |
 
 ## Architecture
 
@@ -79,8 +79,8 @@ Full details — ADRs, data model, security posture, testing strategy — live i
 │   ├── 📄 catalog-hash.test.ts    # catalog ↔ STORAGE_KEY registry contract
 │   ├── 📄 catalog-registry.json   # catalog revision → storage key pin
 │   └── 📂 e2e                     # smoke, mobile-navigation, mobile-header-parity,
-│                                  # catalog, cart-checkout, auth-admin, a11y-smoke,
-│                                  # visual-parity specs
+│                                  # cart-drawer, catalog, cart-checkout, auth-admin,
+│                                  # a11y-smoke, visual-parity specs
 ├── 📂 db                          # catalog.json brand config (custom.db is git-ignored)
 ├── 📂 docs/screenshots            # Dev-server screen captures
 └── 📂 public/images               # Product/hero imagery
@@ -120,7 +120,7 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
 npm run test            # Vitest unit tests (25)
 npm run build           # production single-file build
-npm run e2e             # Playwright E2E (52 specs / 104 runs) — requires npm run build first
+npm run e2e             # Playwright E2E (60 specs / 120 runs) — requires npm run build first
 npm run verify          # typecheck + unit + build in one command
 ```
 
@@ -159,8 +159,10 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`CLAUDE.md`](CLAUDE.md) — six-phase workflow and per-tech standards
 - [`Project_Architecture_Document.md`](Project_Architecture_Document.md) — ADRs, layer model, data & security architecture, testing strategy
 - [`homenest-store-g_SKILL.md`](homenest-store-g_SKILL.md) — distilled engineering skill: 20-section reference (stack, design system, trap log, patterns, debugging) for any agent working on this repo
-- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24, R3-01…R3-06), residual risks, session-3 addendum
+- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24, R3-01…R3-06, R4-01…R4-04), residual risks, session-3/4 addenda
 - [`docs/session_1.md`](docs/session_1.md) — Session 1 execution transcript (audit → parity → tests → docs → push)
 - [`docs/session_2.md`](docs/session_2.md) — Session 2 execution transcript (validation → remediation plan → SKILL distillation → push)
+- [`docs/session_3.md`](docs/session_3.md) — Session 3 execution transcript (ledger validation → TDD follow-ups → mobile parity → push)
+- [`docs/session_4.md`](docs/session_4.md) — Session 4 execution transcript (doc-drift audit → cart-drawer modal → authenticated axe gate → menu re-sweep → push)
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)
