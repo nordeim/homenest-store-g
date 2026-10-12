@@ -9,6 +9,7 @@ import {
 } from "react";
 import { CAROUSEL, DEMO_USERS, PRODUCTS, productById } from "@/data/catalog";
 import { STORAGE_KEY } from "@/lib/storage-key";
+import { hashPassword, isHashedPassword, verifyPassword } from "@/lib/password";
 import {
   cartTotals,
   clampQuantity,
@@ -55,6 +56,18 @@ function seedState(): PersistedState {
   };
 }
 
+// Legacy persisted records (pre session-5) kept the password under a
+// `password` field as plaintext. Normalize the shape so the store only ever
+// reads `passwordHash`; the value stays plaintext until upgrade-on-login
+// migrates it (the v4 storage-key bump re-seeds most clients anyway).
+function normalizeUser(raw: User): User {
+  const { password: legacyPassword, ...rest } = raw as User & { password?: string };
+  if (legacyPassword !== undefined && !rest.passwordHash) {
+    return { ...rest, passwordHash: legacyPassword };
+  }
+  return rest as User;
+}
+
 function loadState(): PersistedState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -62,7 +75,7 @@ function loadState(): PersistedState {
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
     const seed = seedState();
     return {
-      users: parsed.users?.length ? parsed.users : seed.users,
+      users: (parsed.users?.length ? parsed.users : seed.users).map(normalizeUser),
       sessionUserId: parsed.sessionUserId ?? null,
       cart: parsed.cart ?? [],
       wishlist: parsed.wishlist ?? [],
@@ -100,11 +113,11 @@ interface StoreValue {
   removeLine: (productId: string) => void;
   toggleWishlist: (productId: string) => void;
   setPromo: (code: string | null) => void;
-  login: (email: string, password: string) => string | null;
-  register: (email: string, password: string, name: string) => string | null;
+  login: (email: string, password: string) => Promise<string | null>;
+  register: (email: string, password: string, name: string) => Promise<string | null>;
   logout: () => void;
   updateProfile: (name: string, email: string) => string | null;
-  changePassword: (current: string, next: string) => string | null;
+  changePassword: (current: string, next: string) => Promise<string | null>;
   saveAddress: (address: Address) => void;
   deleteAddress: (id: string) => void;
   placeOrder: (input: {
@@ -227,34 +240,52 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, promoCode: code }));
   }, []);
 
-  const login = useCallback((email: string, password: string) => {
-    const found = state.users.find((item) => item.email.toLowerCase() === email.trim().toLowerCase());
-    if (!found || found.password !== password) return "Email or password is incorrect.";
-    setState((prev) => ({ ...prev, sessionUserId: found.id }));
-    return null;
-  }, [state.users]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const found = state.users.find((item) => item.email.toLowerCase() === email.trim().toLowerCase());
+      if (!found) return "Email or password is incorrect.";
+      const ok = await verifyPassword(password, found.passwordHash);
+      if (!ok) return "Email or password is incorrect.";
+      // Upgrade-on-login: pre-hash plaintext records get a salted digest in
+      // the same write that opens the session.
+      const passwordHash = isHashedPassword(found.passwordHash)
+        ? found.passwordHash
+        : await hashPassword(password);
+      setState((prev) => ({
+        ...prev,
+        users: prev.users.map((item) => (item.id === found.id ? { ...item, passwordHash } : item)),
+        sessionUserId: found.id,
+      }));
+      return null;
+    },
+    [state.users],
+  );
 
-  const register = useCallback((email: string, password: string, name: string) => {
-    const normalized = email.trim().toLowerCase();
-    if (state.users.some((item) => item.email.toLowerCase() === normalized)) {
-      return "An account with that email already exists.";
-    }
-    const id = `u-${Date.now()}`;
-    const next: User = {
-      id,
-      email: normalized,
-      name: name.trim() || normalized.split("@")[0] || "Guest",
-      role: "customer",
-      password,
-      addresses: [],
-    };
-    setState((prev) => ({
-      ...prev,
-      users: [...prev.users, next],
-      sessionUserId: id,
-    }));
-    return null;
-  }, [state.users]);
+  const register = useCallback(
+    async (email: string, password: string, name: string) => {
+      const normalized = email.trim().toLowerCase();
+      if (state.users.some((item) => item.email.toLowerCase() === normalized)) {
+        return "An account with that email already exists.";
+      }
+      const id = `u-${Date.now()}`;
+      const passwordHash = await hashPassword(password);
+      const next: User = {
+        id,
+        email: normalized,
+        name: name.trim() || normalized.split("@")[0] || "Guest",
+        role: "customer",
+        passwordHash,
+        addresses: [],
+      };
+      setState((prev) => ({
+        ...prev,
+        users: [...prev.users, next],
+        sessionUserId: id,
+      }));
+      return null;
+    },
+    [state.users],
+  );
 
   const logout = useCallback(() => {
     setState((prev) => ({ ...prev, sessionUserId: null }));
@@ -276,15 +307,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return null;
   }, [state.sessionUserId, state.users]);
 
-  const changePassword = useCallback((current: string, next: string) => {
-    if (!user) return "Sign in to change your password.";
-    if (user.password !== current) return "Current password is incorrect.";
-    setState((prev) => ({
-      ...prev,
-      users: prev.users.map((item) => (item.id === user.id ? { ...item, password: next } : item)),
-    }));
-    return null;
-  }, [user]);
+  const changePassword = useCallback(
+    async (current: string, next: string) => {
+      if (!user) return "Sign in to change your password.";
+      const ok = await verifyPassword(current, user.passwordHash);
+      if (!ok) return "Current password is incorrect.";
+      const passwordHash = await hashPassword(next);
+      setState((prev) => ({
+        ...prev,
+        users: prev.users.map((item) => (item.id === user.id ? { ...item, passwordHash } : item)),
+      }));
+      return null;
+    },
+    [user],
+  );
 
   const saveAddress = useCallback((address: Address) => {
     if (!state.sessionUserId) return;

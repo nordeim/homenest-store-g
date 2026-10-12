@@ -635,7 +635,7 @@ export const DEMO_USERS: User[] = [
     email: "john@example.com",
     name: "John Mercer",
     role: "customer",
-    password: "Demo1234!",
+    passwordHash: "s1$e2d3c4b5a6978879aabbcddceeff0112$bd4f3809ba651555953425022f9edfe5ada2cdb279266fa2d1d356bb515d637e", // salted digest of "Demo1234!" — see src/lib/password.ts
     addresses: [
       {
         id: "a-john-1",
@@ -656,7 +656,7 @@ export const DEMO_USERS: User[] = [
     email: "admin@homenest.kitchen",
     name: "Atelier Admin",
     role: "admin",
-    password: "Admin1234!",
+    passwordHash: "s1$99a8b7c6d5e4f3021495a687b8c9d0e1$c5cd03ffac36d1a62501b0e26df8a02ee8e05dcc7400e6e2296baf4348f3d3db", // salted digest of "Admin1234!"
     addresses: [],
   },
 ];

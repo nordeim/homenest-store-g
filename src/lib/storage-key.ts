@@ -6,4 +6,4 @@
 // pulling React. The catalog-hash test enforces the pairing between this key
 // and the seed catalog: change `src/data/catalog.ts` without bumping this key
 // and the gate fails.
-export const STORAGE_KEY = "homenest.v3";
+export const STORAGE_KEY = "homenest.v4";

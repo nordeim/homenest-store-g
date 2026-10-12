@@ -39,7 +39,7 @@ function AuthCard({ mode }: { mode: "login" | "register" }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const onSubmit = (event: FormEvent) => {
+  const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     if (!isEmail(email)) {
@@ -56,7 +56,9 @@ function AuthCard({ mode }: { mode: "login" | "register" }) {
     }
     setPending(true);
     const message =
-      mode === "login" ? login(email, password) : register(email, password, email.split("@")[0] ?? "Guest");
+      mode === "login"
+        ? await login(email, password)
+        : await register(email, password, email.split("@")[0] ?? "Guest");
     setPending(false);
     if (message) {
       setError(message);
@@ -376,15 +378,18 @@ export function AccountPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <div className="flex items-center justify-between rounded-xl border border-border bg-card p-6 shadow-card">
-        <div className="flex items-center gap-4">
-          <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+      {/* R5-06: the row wraps and the identity block has a min-width floor —
+          long names/emails used to push the Log out control off-viewport on
+          phones (pinned by tests/e2e/account-layout.spec.ts). */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-6 shadow-card">
+        <div className="flex min-w-0 items-center gap-4">
+          <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Package className="h-8 w-8" strokeWidth={1.6} />
           </span>
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">{user.name}</h1>
-            <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Mail className="h-3.5 w-3.5" /> {user.email}
+          <div className="min-w-0">
+            <h1 className="break-words font-display text-2xl font-bold text-foreground">{user.name}</h1>
+            <p className="mt-0.5 flex items-center gap-1.5 break-all text-sm text-muted-foreground">
+              <Mail className="h-3.5 w-3.5 shrink-0" /> {user.email}
             </p>
           </div>
         </div>
@@ -479,7 +484,7 @@ export function AccountPage() {
           <Card>
             <form
               className="grid gap-4 p-6"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
                 if (pw.next !== pw.confirm) {
                   setPwMsg("Passwords do not match.");
@@ -489,7 +494,7 @@ export function AccountPage() {
                   setPwMsg("Password must be at least 8 characters.");
                   return;
                 }
-                const err = changePassword(pw.current, pw.next);
+                const err = await changePassword(pw.current, pw.next);
                 setPwMsg(err ?? "Password updated.");
                 if (!err) setPw({ current: "", next: "", confirm: "" });
               }}

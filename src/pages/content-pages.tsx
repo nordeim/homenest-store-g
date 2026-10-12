@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Award, Globe, Heart, HeartHandshake, Mail, MapPin, Phone, Send, Users } from "lucide-react";
 import { PrimaryButton, inputClass } from "@/components/chrome";
 import { useStore } from "@/lib/store";
+import { STORAGE_KEY } from "@/lib/storage-key";
 import { BRAND } from "@/data/catalog";
 import { cn } from "@/utils/cn";
 
@@ -227,7 +228,7 @@ export function PrivacyPage() {
       <h2>What we store</h2>
       <p>
         Account details (name, email, hashed-for-demo password), cart contents, wishlist, addresses you save, and the
-        orders you place are kept in local storage under the key <code>homenest.v1</code> so that your cart survives a
+        orders you place are kept in local storage under the key <code>{STORAGE_KEY}</code> so that your cart survives a
         refresh and your order history stays available offline.
       </p>
       <h2>What we never do</h2>
@@ -307,7 +308,7 @@ export function CookiePage() {
       </p>
       <h2>Local storage keys</h2>
       <ul>
-        <li><code>homenest.v1</code> — cart, wishlist, session, orders, and product overrides.</li>
+        <li><code>{STORAGE_KEY}</code> — cart, wishlist, session, orders, and product overrides.</li>
       </ul>
       <p>
         You can inspect or delete this at any time in your browser's developer tools; the app re-seeds cleanly on the

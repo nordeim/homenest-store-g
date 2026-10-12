@@ -4,6 +4,7 @@ import { CATEGORIES } from "@/data/catalog";
 import { formatMoney, statusLabel } from "@/lib/commerce";
 import { Link, useRouter } from "@/lib/router";
 import { useStore } from "@/lib/store";
+import { STORAGE_KEY } from "@/lib/storage-key";
 import type { OrderStatus } from "@/types";
 
 const ADMIN_NAV = [
@@ -341,8 +342,8 @@ export function AdminSettings() {
   return (
     <AdminFrame title="Settings">
       <p className="text-sm text-muted-foreground">
-        Storefront origin is this browser. Catalog persistence is local (`homenest.v1`). Demo payments never hit a
-        network. Database pointer: file:../db/custom.db
+        Storefront origin is this browser. Catalog persistence is local (<code>{STORAGE_KEY}</code>). Demo payments
+        never hit a network. Database pointer: file:../db/custom.db
       </p>
     </AdminFrame>
   );

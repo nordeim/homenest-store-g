@@ -60,7 +60,13 @@ export interface User {
   email: string;
   name: string;
   role: "customer" | "admin";
-  password: string;
+  /**
+   * Salted WebCrypto digest — `s1$<salt>$<sha256(salt:password)>` (see
+   * src/lib/password.ts). Pre-session-5 records were plaintext under a
+   * `password` field; they are normalized on rehydrate and migrated to a
+   * digest on the next successful login (upgrade-on-login).
+   */
+  passwordHash: string;
   addresses: Address[];
 }
 
