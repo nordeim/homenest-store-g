@@ -1,4 +1,43 @@
-Resuming from where the session stopped. First, let me check shell health and clean up any stale background preview servers:
+I'll start by setting up a task plan and refreshing the workspace. Let me first check the current state of the environment.
+The workspace already has the repo cloned. Let me refresh it with `git pull`.
+Workspace refreshed. Previous sessions already did substantial remediation work. Now let me review all the key documents.
+Session 2 is complete and pushed at `8b7cf0c`. This session is a continuation — I need to validate the current state, review the new docs (`remediation-plan.md`, `session_2.md`, `SKILL.md`), then close remaining gaps. Let me read the remediation plan and architecture doc.
+Now let me read the two remaining root docs — the architecture document and the distilled SKILL file.
+The PAD lists `isExpiryValid` as still open, but remediation R-05 claims it was fixed — I need to verify this against the code. Let me validate the doc claims against the codebase now.
+Key finding: **`isExpiryValid` still hardcodes `year >= 26`** while remediation plan R-05 claims it was fixed — a doc/code misalignment to correct this session. Let me check the skills catalog and repo state, then run the baseline gate.
+相关技能已识别。让我为本次会话的 TDD 工作加载关键的技能文件，然后建立基准。
+Line 48 looks suspicious (`const enuOpen, setMenuOpen]` — possibly corrupted). Let me inspect the actual file.
+File is intact (earlier output was a display artifact). Let me read the mobile menu portal section.
+The codebase structure is clear now. Let me check remaining details (`.env`, `db/catalog.json`, storage key location), then run the baseline verification gate.
+Baseline verify is green. Now the E2E baseline:
+Full baseline gate is green (typecheck ✓ · 22/22 unit ✓ · build ✓ · 82/82 E2E ✓). Docs are validated against code with one misalignment found: **R-05 was claimed done but `isExpiryValid` still hardcodes `year >= 26`**. This session will close the remaining follow-ups. Let me update the plan and start TDD work.
+Starting TDD with R3-01 (expiry rolling window) and R3-02 (crypto guest token). First, let me confirm the E2E doesn't hardcode the guest token format:
+E2E reads the token dynamically — format change is safe. Now writing the RED tests (test-first):
+Now update the imports in the test file and run to confirm RED:
+RED confirmed (2 failing tests). Now GREEN — implement both fixes in `commerce.ts`:
+Now wire `generateGuestToken` into the store (replacing `Math.random`):
+R3-01 and R3-02 are GREEN (15/15). Now R3-03 — mobile nav focus trap + aria-modal, E2E-first. Adding the RED specs:
+RED confirmed — 3 new specs fail, 8 existing pass. Now GREEN — implement the modal dialog + focus management in `chrome.tsx`:
+The E2E runs against the production build — I need to rebuild before re-running:
+Off-by-one in my test: the panel has 7 focusables (input + 6 links), so 7 Tabs (not 8) complete the cycle back to the input. Fixing the spec:
+R3-03 GREEN (22/22 incl. new a11y specs). Now R3-04 — axe-core smoke checks. Installing and probing the current state:
+All 4 surfaces report `color-contrast` violations. Since visual parity with the reference is the higher-priority contract, let me probe exactly which elements fail to separate real fixes from reference-design artifacts:
+The script must live inside the repo to resolve its node_modules:
+The Bash tool is currently unresponsive (4+ consecutive failures) — likely the background preview server is blocking the persistent shell session.
+
+**Please click the restart button (top right corner) to restart the session and try again.**
+
+Once restarted, I can resume exactly where I left off — all progress is already saved:
+
+**Completed so far this session:**
+1. ✅ Workspace refreshed (`git pull` → `7c73267`), all docs reviewed & validated against code
+2. ✅ Baseline gate green: typecheck ✓ · 22/22 unit ✓ · build ✓ · 82/82 E2E ✓
+3. ✅ **R3-01 (GREEN)**: `isExpiryValid` rolling-window fix — the R-05 discrepancy I caught is now actually fixed, pinned by 8 injected-clock unit tests
+4. ✅ **R3-02 (GREEN)**: `generateGuestToken()` via `crypto.getRandomValues` (128-bit) replaces `Math.random` in `store.tsx`
+5. ✅ **R3-03 (GREEN)**: mobile nav is now a proper modal dialog (`role="dialog"` + `aria-modal` + focus trap + focus restore) — 11 specs × 2 projects pass
+
+**Remaining work:** axe contrast triage (probe script ready at `scripts/probe-contrast.mjs`), catalog hash-pin test, WebKit attempt, full gate, parity sweep, screenshots, docs update, commit+push via SSH wrapper.
+
 Shell is responsive again. Killing stale vite processes before continuing:
 Clean. Verifying the repo state survived the restart (R3-01/02/03 edits + new specs):
 All session work intact. Continuing R3-04 contrast triage — starting the preview server detached:
