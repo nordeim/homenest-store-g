@@ -4,10 +4,12 @@ import { expect, test } from "@playwright/test";
  * Mobile navigation — the parity-critical surface.
  *
  * Reference behavior (measured live 2026-10-12 on nest-culinary-hub.base44.app
- * at 390x844): the hamburger toggles an INLINE dropdown panel below the header
- * (not a side drawer). The trigger swaps to a green circle with a white X, the
- * active route renders as an orange pill row, the page below is dimmed, body
- * scroll locks while open, Escape closes, and navigating closes the menu.
+ * at 390x844): the TRAILING-EDGE hamburger (right of the cart icon) toggles an
+ * INLINE dropdown panel below the header (not a side drawer). The trigger
+ * swaps to a green circle with a white X, the active route renders as an
+ * orange pill row, body scroll locks while open, Escape closes, navigating
+ * closes the menu, and the page below stays UNDIMMED (matching the current
+ * reference; session-3 measurement).
  *
  * Implementation note: the menu is portaled to <body>. Tailwind v4's
  * backdrop-filter on the sticky header creates a containing block for fixed
@@ -96,4 +98,45 @@ test("menu search submits to the products page", async ({ page }) => {
   await nav.getByPlaceholder("Search products...").press("Enter");
   await expect(page).toHaveURL(/\/products\?search=knife/);
   await expect(page.getByRole("heading", { name: "All Products" })).toBeVisible();
+});
+
+test("open menu is announced as a modal dialog", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const dialog = page.locator('[role="dialog"][aria-modal="true"]');
+  await expect(dialog).toBeVisible();
+  // The inner nav keeps its landmark role and accessible name (E2E contract).
+  await expect(dialog.getByRole("navigation", { name: "Mobile" })).toBeVisible();
+  await page.getByRole("button", { name: "Close menu", exact: true }).click();
+  await expect(page.locator('[role="dialog"][aria-modal="true"]')).toHaveCount(0);
+});
+
+test("focus moves into the menu on open and Tab cycles within it", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+
+  // Initial focus lands on the first focusable (the search input).
+  const search = page.getByRole("dialog", { name: "Site menu" }).getByPlaceholder("Search products...");
+  await expect(search).toBeFocused();
+
+  // Tab past every focusable in the panel (input + 6 links = 7 focusables):
+  // the full cycle wraps back onto the input — focus must never reach the
+  // background page.
+  const panel = page.locator("#mobile-nav-holder");
+  for (let i = 0; i < 7; i += 1) await page.keyboard.press("Tab");
+  await expect(search).toBeFocused();
+  expect(panel.locator("a[href]")).not.toHaveCount(0);
+
+  // Shift+Tab from the first focusable wraps to the last link.
+  await page.keyboard.press("Shift+Tab");
+  await expect(panel.getByRole("link", { name: "Sign in" })).toBeFocused();
+});
+
+test("closing the menu restores focus to the trigger", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("dialog", { name: "Site menu" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Site menu" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Open menu" })).toBeFocused();
 });

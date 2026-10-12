@@ -599,22 +599,22 @@ export const PRODUCTS: Product[] = [
 export const CAROUSEL: CarouselSlide[] = [
   {
     id: "slide-1",
-    kicker: "Collection",
-    title: "New Arrivals",
-    body: "Explore our latest collection of beautifully designed kitchen essentials.",
-    cta: "Browse Collection",
-    href: "/products",
-    image: "/images/hero-1.png",
-    active: true,
-  },
-  {
-    id: "slide-2",
     kicker: "The house",
     title: "Elevate Your Kitchen",
     body: "Discover premium cookware and tools crafted for the modern home chef.",
     cta: "Shop Now",
     href: "/products",
     image: "/images/chef-knife-set.png",
+    active: true,
+  },
+  {
+    id: "slide-2",
+    kicker: "Collection",
+    title: "New Arrivals",
+    body: "Explore our latest collection of beautifully designed kitchen essentials.",
+    cta: "Browse Collection",
+    href: "/products",
+    image: "/images/hero-1.png",
     active: true,
   },
   {

@@ -70,14 +70,44 @@ export function Header() {
   useEffect(() => {
     if (!menuOpen) return;
     const previous = document.body.style.overflow;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
+    // Move focus into the modal panel (first focusable = search input).
+    document
+      .querySelector<HTMLElement>("#mobile-nav-holder input, #mobile-nav-holder a[href]")
+      ?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      // Focus trap: cycle Tab/Shift+Tab within the modal panel so keyboard
+      // users cannot reach the dimmed background page (aria-modal contract).
+      const holder = document.getElementById("mobile-nav-holder");
+      if (!holder) return;
+      const focusables = Array.from(
+        holder.querySelectorAll<HTMLElement>('a[href], input:not([disabled]), button:not([tabindex="-1"])'),
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      const inside = active instanceof HTMLElement && holder.contains(active);
+      if (event.shiftKey && (active === first || !inside)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !inside)) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKey);
+      // Restore focus to the trigger so keyboard users keep their place.
+      previouslyFocused?.focus?.();
     };
   }, [menuOpen]);
 
@@ -94,22 +124,6 @@ export function Header() {
     <header className="sticky top-0 z-[300] border-b border-border bg-card/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
-          <button
-            type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground md:hidden"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? (
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white">
-                <X className="h-5 w-5" strokeWidth={2.2} />
-              </span>
-            ) : (
-              <Menu strokeWidth={2} />
-            )}
-          </button>
           <Link href="/" className="rounded-md" aria-label="HomeNest home">
             <BrandMark />
           </Link>
@@ -153,7 +167,7 @@ export function Header() {
           </button>
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground lg:hidden"
+            className="hidden h-11 w-11 items-center justify-center rounded-full text-foreground md:inline-flex lg:hidden"
             aria-label="Search products"
             aria-expanded={searchOpen}
             aria-controls={searchId}
@@ -189,6 +203,22 @@ export function Header() {
               <span className="absolute right-0.5 top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
                 {cartCount}
               </span>
+            )}
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground md:hidden"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? (
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white">
+                <X className="h-5 w-5" strokeWidth={2.2} />
+              </span>
+            ) : (
+              <Menu strokeWidth={2} />
             )}
           </button>
         </div>
@@ -242,10 +272,17 @@ export function Header() {
       {typeof document !== "undefined" &&
         createPortal(
           menuOpen ? (
-            <div className="fixed inset-x-0 top-16 z-[350] md:hidden" id="mobile-nav-holder">
+            <div
+              className="fixed inset-x-0 top-16 z-[350] md:hidden"
+              id="mobile-nav-holder"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+            >
               <button
                 type="button"
-                className="fixed inset-0 top-16 -z-10 h-[calc(100vh-4rem)] cursor-default bg-white/70 backdrop-blur-[2px]"
+                tabIndex={-1}
+                className="fixed inset-0 top-16 -z-10 h-[calc(100vh-4rem)] cursor-default bg-transparent"
                 aria-label="Close menu overlay"
                 onClick={() => setMenuOpen(false)}
               />
@@ -547,7 +584,7 @@ export function FeatureBar() {
   ];
   return (
     <section aria-label="Store highlights">
-      <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
         {items.map((item) => (
           <div key={item.title} className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
             <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
