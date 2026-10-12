@@ -55,3 +55,6 @@ research/
 
 # vitest cache
 .vitest/
+
+# vite build output
+dist/

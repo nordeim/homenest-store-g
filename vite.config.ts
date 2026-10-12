@@ -16,4 +16,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  optimizeDeps: {
+    // Limit dependency scanning to app sources; the vendored skills/ folder
+    // contains reference HTML that breaks the scanner (imports like `three`).
+    entries: ["index.html", "src/**/*.{ts,tsx}"],
+  },
 });
