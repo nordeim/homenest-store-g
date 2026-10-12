@@ -404,6 +404,8 @@ These supersets are intentional; they must not change the **resting visuals** of
 11. The mobile menu panel does NOT dim the page beneath it (session-3 re-measurement of the live reference; the session-1 measurement read a dim that is no longer present). Scroll-lock and the focus trap remain.
 12. Color-contrast pairs on parity surfaces (white-on-orange CTAs, white-on-amber "Featured" pills, orange category labels, muted grays) match the reference tokens and fail WCAG AA contrast — documented exclusion from the axe gate (remediation plan §9.2 R3-04).
 13. The mobile menu's search control is a compact muted pill at rest (session-4 measurement, matching the reference) that expands into a working search input on tap — the reference's pill is functionally inert (and unclickable: the reference's own toast viewport covers it). Resting visuals match; function exceeds (registered superset).
+14. **SEO posture superset (session 8).** The reference's robots.txt disallows nothing and its sitemap.xml lists `/admin/*`, `/account`, `/cart` with zero product URLs; the clone disallows private surfaces and lists every visible product as `/products/{slug}`. The reference's manifest 302s (broken) — no manifest is shipped.
+15. **Per-route head superset (session 8).** The reference ships a static-title map for 23 paths (PDPs keep the static title, admin titles leak an `admin/` namespace artifact); the clone pins the same map (incl. the "Order Tracking" / "Terms Of Service" quirks) and extends it: PDP → "{Product} | HomeNest Kitchen", humanized unknown slugs, auth/not-found titles, admin titles cleaned. Canonical links + per-route og:url and per-PDP Product JSON-LD are additive (the reference has none).
 
 ---
 
@@ -449,6 +451,8 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | DB URL contract | 1 | 8 | `tests/db-path.test.ts` | Vitest (node) |
 | Catalog ↔ storage-key registry | 1 (+ registry JSON) | 2 | `tests/catalog-hash.test.ts` | Vitest (node) |
 | Password-at-rest contract | 1 | 8 | `tests/password.test.ts` | Vitest (node) |
+| Route-head seam (R8-05) | 1 | 29 | `tests/seo.test.ts` | Vitest (node) |
+| Robots/sitemap artifacts (R8-01/02/03) | 1 | 33 | `tests/sitemap.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
 | Mobile navigation | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
 | Mobile header parity | 1 | 4 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
@@ -461,7 +465,8 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Search combobox keyboard (R5-02) | 1 | 5 | `tests/e2e/search-keyboard.spec.ts` | Playwright |
 | Password at rest E2E (R5-01) | 1 | 4 | `tests/e2e/password-hash.spec.ts` | Playwright |
 | Account header layout (R5-06) | 1 | 1 | `tests/e2e/account-layout.spec.ts` | Playwright |
-| **Total** | **16** | **33 unit tests + 72 E2E specs → 177 runs** (33 × 1 + 72 × 2 projects) | | |
+| SEO head gate (R8-06) | 1 | 19 | `tests/e2e/seo-head.spec.ts` | Playwright |
+| **Total** | **19** | **95 unit tests + 91 E2E specs → 277 runs** (95 × 1 + 91 × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -505,6 +510,7 @@ npm run build      # → dist/index.html (single file, ~502 KB / ~127 KB gzip)
 | `DATABASE_URL` | Yes | Schema-relative SQLite URL; resolves to repo-root `db/custom.db` via `src/lib/db-path.ts` (contract-tested) | `file:../db/custom.db` |
 | `E2E_PORT` | No | Playwright preview port | `4173` |
 | `E2E_BASE_URL` | No | Playwright base URL override | `http://127.0.0.1:4173` |
+| `VITE_SITE_URL` | No | Absolute origin for the SEO layer (canonical/og:url fallbacks in `index.html`, `src/lib/seo.ts`, sitemap generation). Override + re-run `node scripts/generate-sitemap.mjs` when deploying elsewhere | `http://localhost:4173` |
 | `CI` | No | Tightens Playwright (forbidOnly, 2 retries, no server reuse) | unset |
 
 ### 8.3 CI/CD
@@ -563,6 +569,7 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | LOW | Color-contrast pairs on parity surfaces (orange/amber/gray tokens) fail WCAG AA | axe `color-contrast` findings on parity-pinned tokens | Accepted — the reference itself fails these pairs; visual parity wins (remediation plan §9.2 R3-04); structural a11y is gated clean on 8 surfaces |
 | LOW | Carousel kicker field is stored but not rendered | Reference hero shows no kicker; kept for admin-editing future | Registered divergence |
 | LOW | Desktop search combobox options are not announced with result counts | APG pattern shipped with Arrow/Home/End/Enter/Escape (R5-02); `aria-live` result announcements remain a nice-to-have | Open — cosmetic |
+| LOW | Static SEO fallbacks hardcode the default origin (`http://localhost:4173`) | Deploying elsewhere needs `VITE_SITE_URL` + `node scripts/generate-sitemap.mjs`; the committed artifacts are test-gated against the catalog | Accepted — documented in `.env.example` (session 8) |
 
 ---
 
@@ -577,6 +584,9 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | `src/data/catalog.ts` | ~700 | Seed catalog (24 products), categories, carousel, demo users (hashed credentials) |
 | `src/pages/shop.tsx` | ~380 | Products list (URL-driven filters), PDP, 404 |
 | `src/lib/commerce.ts` | ~235 | Money/shipping/promo/validation/tracking seams |
+| `src/lib/seo.ts` | ~170 | Pure route-head seam (`buildRouteMeta`): reference title map, canonical/og:url, Product JSON-LD (R8-05) |
+| `src/components/head-manager.tsx` | ~100 | Applies the route-head contract to document.title/meta/canonical/JSON-LD inside RouterProvider |
+| `scripts/generate-sitemap.mjs` | ~120 | Writes `public/robots.txt` + `public/sitemap.xml` from the catalog (`prebuild` hook; catalog-gated by `tests/sitemap.test.ts`) |
 | `src/lib/password.ts` | ~75 | Salted WebCrypto digest contract (`s1$…`), verify w/ legacy fallback |
 | `src/pages/admin-pages.tsx` | ~360 | Role-gated admin console (7 surfaces) |
 | `src/lib/router.tsx` | ~130 | History router + matchPath (27 routes) |
@@ -587,6 +597,9 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | `tests/e2e/search-keyboard.spec.ts` | ~106 | APG combobox keyboard plan (arrows/Home/End/Enter/Escape) |
 | `tests/e2e/password-hash.spec.ts` | ~121 | Password-at-rest E2E: hashed seed, register, round-trip, legacy upgrade |
 | `tests/e2e/account-layout.spec.ts` | ~36 | Account header stays inside the viewport with long identities |
+| `tests/seo.test.ts` | ~190 | Route-head seam pins: reference title map, canonical/og:url split, Product JSON-LD shape |
+| `tests/sitemap.test.ts` | ~130 | Committed robots.txt/sitemap.xml ↔ catalog consistency gate |
+| `tests/e2e/seo-head.spec.ts` | ~185 | Served SEO artifacts + per-route titles + PDP canonical/og/JSON-LD |
 | `tests/e2e/visual-parity.spec.ts` | ~50 | Computed-style build-breakers |
 | `tests/db-path.test.ts` | ~75 | DB URL contract tests |
 

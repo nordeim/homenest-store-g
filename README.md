@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-25%20unit%20%2B%20120%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-95%20unit%20%2B%20182%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -14,6 +14,8 @@ HomeNest Kitchen solves a specific engineering problem: replicate a reference st
 
 Everything ships as one self-contained `dist/index.html` (~500 KB): no server, no runtime API calls, no tracking. Commerce state persists in `localStorage`; the repo also pins a schema-relative `DATABASE_URL` contract (`file:../db/custom.db` → repo-root `db/`) so the layout matches the reference architecture for future server work.
 
+SEO is a registered superset: per-route titles/canonicals/OG-Twitter tags, a generated `robots.txt` + `sitemap.xml` (all 24 products), and schema.org JSON-LD (Organization/WebSite + per-product Product nodes) — the reference ships none of the dynamic layer and lists private routes in its sitemap.
+
 ## Key Features
 
 | Feature | Description |
@@ -26,8 +28,9 @@ Everything ships as one self-contained `dist/index.html` (~500 KB): no server, n
 | ✅ Order success & tracking | Token-gated confirmation view, COD amount notice, delivery window estimate, 5-step order-progress tracker by order number |
 | 👤 Accounts | Email/password auth with redirect validation (open-redirect hardened), profile, password change, address book, wishlist |
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
-| ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on six surfaces |
-| 🧪 Tested | 25 Vitest unit tests on pure seams + 60 Playwright E2E specs (120 runs) including computed-style visual-parity, mobile header parity, cart-drawer modal semantics, and a11y smoke gates |
+| ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on eight surfaces |
+| 🔍 SEO-ready | Per-route titles/canonical/OG-Twitter via a pure head seam, generated robots.txt + sitemap.xml (24 product URLs), schema.org JSON-LD (Organization, WebSite, per-PDP Product nodes) |
+| 🧪 Tested | 95 Vitest unit tests on pure seams + 91 Playwright E2E specs (182 runs) including computed-style visual-parity, mobile header parity, modal semantics, a11y smoke gates, and the served SEO artifacts |
 
 ## Architecture
 
@@ -113,14 +116,15 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 | `DATABASE_URL` | Yes | `file:../db/custom.db` | Schema-relative URL; resolves to the repo-root `db/` folder (contract-tested in `tests/db-path.test.ts`). The SPA keeps runtime state in localStorage — this pins the reference architecture's storage layout. |
 | `E2E_PORT` | No | `4173` | Port for the Playwright preview server. |
 | `E2E_BASE_URL` | No | `http://127.0.0.1:4173` | Override to run E2E against an already-running server. |
+| `VITE_SITE_URL` | No | `http://localhost:4173` | Absolute origin for the SEO layer (canonical/og:url fallbacks, sitemap generation). Override + `npm run seo:generate` when deploying elsewhere. |
 
 ## Testing
 
 ```bash
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
-npm run test            # Vitest unit tests (33)
-npm run build           # production single-file build
-npm run e2e             # Playwright E2E (72 specs / 144 runs) — requires npm run build first
+npm run test            # Vitest unit tests (95)
+npm run build           # production single-file build (prebuild regenerates SEO artifacts)
+npm run e2e             # Playwright E2E (91 specs / 182 runs) — requires npm run build first
 npm run verify          # typecheck + unit + build in one command
 ```
 

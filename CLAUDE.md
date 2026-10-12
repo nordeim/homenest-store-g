@@ -6,6 +6,8 @@ This file is read fresh for every conversation. Be brief and practical. The exha
 
 HomeNest Kitchen is a production-grade e-commerce storefront + admin console — a visual and functional clone of `nest-culinary-hub.base44.app` (reference measured live 2026-10-12) implemented as a **client-only SPA**: Vite 7, React 19, TypeScript strict, Tailwind CSS v4 (CSS-first `@theme`), shipped as a single HTML file via `vite-plugin-singlefile`. There is no server: commerce state (cart, wishlist, orders, sessions) persists in browser `localStorage` (`homenest.v4`), with `DATABASE_URL="file:../db/custom.db"` pinned for the repo-root `db/` tooling contract.
 
+The SEO layer (session 8) is a generated + seam-driven superset: `src/lib/seo.ts` owns the per-route head contract (the reference's inline title map incl. its quirks, plus dynamic PDP/auth/not-found titles, canonical, og:url, Product JSON-LD), `src/components/head-manager.tsx` applies it, and `scripts/generate-sitemap.mjs` writes `public/robots.txt` + `public/sitemap.xml` (catalog-gated by `tests/sitemap.test.ts`) via the `prebuild` hook. Never hand-edit the artifacts or set `document.title` outside the seam (AGENTS.md rules 10–11).
+
 ## 2. Foundational Principles — The Meticulous Six-Phase Workflow
 
 1. **ANALYZE** — Read the relevant files completely before proposing anything. Check `AGENTS.md` (trap log) and this file first.
@@ -71,8 +73,8 @@ Passwords are hashed at rest (session 5, R5-01): `User.passwordHash` = `s1$<salt
 
 ## 5. Testing Strategy
 
-- **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry, password-at-rest contract. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 33 tests.
-- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, search-combobox keyboard plan, account-header layout, password-at-rest, a11y smoke (axe structural gate on eight surfaces incl. checkout/contact and authenticated account/admin), visual parity. 72 specs = 144 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
+- **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry, password-at-rest contract, route-head seam (`buildRouteMeta`), committed robots/sitemap ↔ catalog consistency. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 95 tests.
+- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, search-combobox keyboard plan, account-header layout, password-at-rest, a11y smoke (axe structural gate on eight surfaces incl. checkout/contact and authenticated account/admin), visual parity, SEO head gate (served robots/sitemap, per-route titles, PDP canonical/og/JSON-LD). 91 specs = 182 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
 - **Visual parity gate**: `tests/e2e/visual-parity.spec.ts` asserts computed colors/fonts from the reference measurement. Treat it as a build-breaker.
 - Bugs get a failing regression test at the same seam before the fix.
 

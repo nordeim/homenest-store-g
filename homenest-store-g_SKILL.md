@@ -8,7 +8,7 @@ description: >
   containing block, hsl() literals, oklab gradients), the parity contract with
   the reference site, the two-layer test architecture, and every lesson from
   the Session 1 remediation.
-version: 1.2.0
+version: 1.3.0
 last_updated: 2026-10-12
 tags:
   - react
@@ -18,7 +18,7 @@ tags:
   - visual-parity
   - testing
   - skill
-project_state: "typecheck clean · 33/33 unit · build green · 144/144 E2E (chromium + mobile)"
+project_state: "typecheck clean · 95/95 unit · build green · 182/182 E2E (chromium + mobile) · SEO head contract gated"
 ---
 
 # HomeNest Store G — Project Skill
@@ -611,14 +611,18 @@ every push):
 
 ```bash
 npm run typecheck   # tsc --noEmit — zero errors
-npm run test        # vitest — 33/33 (4 files)
-npm run build       # vite build — single-file dist/index.html
-npm run e2e         # playwright — 144/144 (72 specs × chromium+mobile)
+npm run test        # vitest — 95/95 (6 files)
+npm run build       # vite build — single-file dist/index.html (prebuild regenerates SEO artifacts)
+npm run e2e         # playwright — 182/182 (91 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
 - [ ] No `.env` staged (git-ignored); `.env.example` still matches the
-      `DATABASE_URL` contract.
+      `DATABASE_URL` contract (+ `VITE_SITE_URL` documentation).
+- [ ] If visible catalog slugs changed: `public/sitemap.xml` regenerated
+      (`npm run seo:generate`) — `tests/sitemap.test.ts` enforces it.
+- [ ] New routes got a title in `src/lib/seo.ts` (unit-pinned) — never
+      `document.title` ad hoc in a page (AGENTS.md rule 10).
 - [ ] `db/*.db` binaries not staged.
 - [ ] If persisted shapes or the seed catalog changed: `STORAGE_KEY` bumped
       **and** the new hash → key row added to `tests/catalog-registry.json`
@@ -846,6 +850,29 @@ const bg = await page.evaluate(() => getComputedStyle(document.querySelector("#m
 expect(bg).toBe("rgb(217, 110, 38)"); // primary hsl(24 70% 50%) measured from the reference
 ```
 
+**Pattern: route-head contract (session 8)** (`src/lib/seo.ts` + `src/components/head-manager.tsx`)
+
+```tsx
+// Pure seam — unit-pinned, no DOM:
+const meta = buildRouteMeta("/products/cast-iron-dutch-oven", PRODUCTS);
+// → { title: "Cast Iron Dutch Oven | HomeNest Kitchen",
+//     canonicalUrl: SITE_URL + "/products/cast-iron-dutch-oven",
+//     ogUrl: SITE_URL + "/products/..." (query preserved),
+//     jsonLd: { "@type": "Product", offers: { price: cents/100, ... } } }
+
+// Application — one effect inside RouterProvider (HeadManager):
+document.title = meta.title;
+upsertCanonical(meta.canonicalUrl);
+writeRouteJsonLd(meta.jsonLd); // scoped #route-jsonld, removed when null
+```
+
+Rules: titles/canonical/og:url/JSON-LD come ONLY from the seam; new routes
+get a `buildRouteMeta` entry (or static-map row) unit-pinned in
+`tests/seo.test.ts`; robots.txt/sitemap.xml are generated
+(`npm run seo:generate`), never hand-edited; the origin lives in
+`VITE_SITE_URL` (`.env.example`) shared by the seam, the generator, and the
+index.html fallbacks.
+
 ---
 
 ## §16 Coding Anti-Patterns
@@ -1037,13 +1064,14 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
 ## Appendix B: Verification & Test Ledger
 
 - Unit (vitest, node env): `src/lib/commerce.test.ts` + `tests/db-path.test.ts`
-  + `tests/catalog-hash.test.ts` + `tests/password.test.ts` = **33 tests, 4
-  files, all green**.
-- E2E (playwright, production build via preview server): **72 specs** —
+  + `tests/catalog-hash.test.ts` + `tests/password.test.ts` +
+  `tests/seo.test.ts` + `tests/sitemap.test.ts` = **95 tests, 6 files, all
+  green**.
+- E2E (playwright, production build via preview server): **91 specs** —
   smoke 5, mobile-navigation 14, mobile-header-parity 4, cart-drawer 3,
   catalog 6, cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 8,
-  search-keyboard 5, password-hash 4, account-layout 1 —
-  × 2 projects (chromium, mobile) = **144 executions, all green**.
+  search-keyboard 5, password-hash 4, account-layout 1, seo-head 19 —
+  × 2 projects (chromium, mobile) = **182 executions, all green**.
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site
@@ -1083,6 +1111,7 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 | 3 | 2026-10-12 | Ledger validation → follow-ups (TDD) → live parity re-measurement | R-05 over-claim corrected; `isExpiryValid` rolling window, 128-bit crypto guest tokens, mobile-menu modal dialog + focus trap, axe structural gate, catalog↔key registry contract; 5 mobile parity gaps fixed (hamburger trailing, no header search button, 2×2 feature bar, carousel order, no page dim); STORAGE_KEY → homenest.v3; gate 25/25 unit + 104/104 E2E |
 | 4 | 2026-10-12 | Session-3 transcript validation → audit → live parity re-sweep → TDD follow-ups | SKILL drift corrected (§7 order numbers, §8 stale a11y gap, §13, §15, §19); cart drawer became a full modal (aria-modal + focus trap + focus restore); axe gate extended to authenticated surfaces (account, admin); 5 more menu parity gaps fixed (translucent shadowless panel, compact search pill + expand-on-tap superset, 14px/500 rows, muted inactive text, 12px active radius); traps T-13 (oklab opacity-mix, calc(infinity) radius); gate 25/25 unit + 120/120 E2E; see `docs/session_4.md` |
 | 5 | 2026-10-12 | §10.5 candidates → audit → re-sweep → TDD follow-ups | Password-at-rest hardened (R5-01: `src/lib/password.ts` salted WebCrypto digests, async auth, upgrade-on-login, hashed demo seed, STORAGE_KEY → homenest.v4 — downgrades F-10); desktop search became a full APG combobox (R5-02); reference re-sweep caught the green close disc removed (R5-03) and carousel auto-rotation explained; axe gate extended to checkout + contact (R5-04); stale `homenest.v1` copy fixed (R5-05); account-header phone overflow fixed (R5-06); gate 33/33 unit + 144/144 E2E; see `docs/session_6.md` |
+| 8 | 2026-10-12 | Sitemap & SEO workstream (user mandate; template pattern adapted to the SPA) → re-sweep → TDD follow-ups | Re-sweep found NO drift (first time in four); reference SEO shape decoded; robots.txt + generated sitemap.xml (24 product URLs, private surfaces excluded — R8-01/02/03, catalog-gated); index.html static head set (OG/Twitter/canonical/JSON-LD/CDN favicon — R8-04); per-route head contract `src/lib/seo.ts` + `HeadManager` (R8-05); served-artifact E2E gate (R8-06); VITE_SITE_URL documented; gate 95/95 unit + 182/182 E2E; see `docs/session_8.md` |
 
 *End of skill. Maintain per the meta-skill: bump minor version on sprints,
 major on stack upgrades; re-verify §2 versions, §11 counts, and §19 hexes

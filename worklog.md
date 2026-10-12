@@ -256,3 +256,31 @@ Stage Summary:
 - F-10 downgraded: passwords hashed at rest (SHA-256 not a KDF — server workstream stays open, honestly scoped)
 - Parity posture: trigger re-pinned to the reference's third resting-visual change; re-sweep doctrine revalidated
 - Next-session candidates: server-backed auth (unchanged), another reference re-sweep (visuals changed 3 sweeps running), aria-live combobox announcements, ESLint flat config
+
+---
+Task ID: 11
+Agent: main (Super Z)
+Task: Session 8 — sitemap & SEO workstream, reference re-sweep, docs, push
+
+Work Log:
+- git pull: fast-forwarded 84b8191..35f676f (docs/session_7.md — the session-5 final record)
+- Re-read full doc suite (AGENTS/CLAUDE/README/PAD/SKILL + remediation plan §11, worklog, session_6/7) and validated against code; baseline gate green (typecheck ✓ 33/33 unit ✓ build 499 KB ✓ 144/144 E2E ✓); .env/.env.example/db contract verified
+- AUDIT: SEO/sitemap gap confirmed — no robots.txt, no sitemap.xml, no OG/Twitter/canonical/JSON-LD, zero document.title management in src/; template SEO pattern decoded from ecommerce-store (sitemap.ts, robots.ts, root metadata, JSON-LD)
+- Live re-sweep (agent-browser @390×844): NO drift — first sweep in four with zero visual changes; all session-4/5 menu pins re-confirmed (white/80 shadowless panel, bare dark trigger, 14px/500 muted rows, 44px height, 12px active radius on rgb(217,110,38) + white text); sweep lesson: the trailing hamburger sits AFTER the cart button
+- Reference SEO shape decoded live: 23-path inline title map (incl. "Order Tracking"/"Terms Of Service" quirks; PDPs left static; admin titles leak "admin/" artifact), site-wide description, full OG/Twitter w/ CDN logo, robots.txt that disallows NOTHING, sitemap.xml with /admin/* and ZERO product URLs, manifest 302
+- R8-01 (TDD): public/robots.txt — allow-all + disallow /admin /account /cart /checkout /order-success + sitemap pointer
+- R8-02/03 (TDD): scripts/generate-sitemap.mjs (prebuild hook + seo:generate alias) writes robots.txt + sitemap.xml — 12 public statics at template priorities + 24 visible products as /products/{slug}; tests/sitemap.test.ts gates committed artifacts against the real catalog import (33 pins)
+- R8-04 (TDD): index.html static head — reference description verbatim, robots meta, theme-color, canonical, CDN-logo favicon (template FAVICON-1 precedent), full OG + Twitter summary_large_image, Organization + WebSite JSON-LD (one node per script)
+- R8-05 (TDD): src/lib/seo.ts pure seam (buildRouteMeta — reference title map + dynamic supersets: PDP {Product} titles resolving slug OR id, humanized unknown slugs, auth/not-found titles, cleaned admin titles; canonical query-dropped vs og:url query-preserved; Product JSON-LD w/ brand/offers/aggregateRating) + src/components/head-manager.tsx applied inside RouterProvider; tests/seo.test.ts (29 pins)
+- R8-06 (TDD): tests/e2e/seo-head.spec.ts — 19 specs × 2: served robots/sitemap, 13 route titles, PDP title=h1 + canonical + og:url + Product JSON-LD (USD/InStock), humanized unknown slug w/o Product node, static OG/Twitter/JSON-LD, client-side title updates (fixed-1280 describe — mobile nav lives in the menu panel)
+- Tooling lessons: Write/Edit payloads in this environment can eat the "[h" character pair (workaround: build attribute selectors by string concatenation or line-index surgery); Playwright call logs render attribute selectors lossily; product cards link /product/{id} (not /products/{slug})
+- VITE_SITE_URL documented in .env.example (default http://localhost:4173, shared by seo.ts + generator + index.html fallbacks)
+- Full gate: typecheck ✓ · 95/95 unit ✓ (6 files) · build 506 KB ✓ (prebuild regenerates SEO artifacts) · 182/182 E2E (91 specs × 2) ✓
+- Session-8 captures (4) against the production preview: session8-home-desktop, session8-pdp-desktop, session8-mobile-home, session8-mobile-menu-open → docs/screenshots/
+- Docs aligned same-change: remediation plan §12 addendum, docs/session_8.md, PAD (§5.6 #14–15, §7.1, §8.2, §10, §11), AGENTS.md (rules 10–11, seo:generate command, testing quirks), CLAUDE.md (SEO layer + counts), README (SEO feature row, env var, counts, badge), SKILL v1.3.0 (Appendix B/D, §11 checklist, §15 pattern), worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 95/95 unit ✓ build 506 KB ✓ 182/182 E2E ✓ — all observed this session
+- SEO posture: clone is now a genuine SEO superset (per-route heads + JSON-LD + canonicals the reference lacks; private surfaces excluded where the reference lists them; 24 product URLs where the reference has none)
+- Parity posture: resting visuals unchanged (no-drift sweep); menu pins intact
+- Next-session candidates: server-backed auth (unchanged), re-sweep doctrine (no drift this time), aria-live combobox announcements, ESLint flat config, optional PWA manifest

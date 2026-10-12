@@ -16,6 +16,7 @@ Production e-commerce storefront + admin console: Vite 7 · React 19 · TypeScri
 | Single unit test | `npx vitest run src/lib/commerce.test.ts` |
 | E2E (**requires build first**) | `npm run e2e` (Playwright against `vite preview` on :4173) |
 | Single E2E spec | `npx playwright test tests/e2e/cart-checkout.spec.ts` |
+| Regenerate SEO artifacts | `npm run seo:generate` (also runs via the `prebuild` hook) |
 | Full pre-push gate | `npm run verify && npm run e2e` |
 
 There is no ESLint config — `tsc --noEmit` with `noUnusedLocals`/`noUnusedParameters` is the lint gate. Do not add ESLint casually; if you do, wire it into `npm run verify`.
@@ -37,6 +38,8 @@ There is no ESLint config — `tsc --noEmit` with `noUnusedLocals`/`noUnusedPara
 7. **Cart mutations are delta-based with stock clamps** (`mergeCartLine`, `clampQuantity`) — no absolute-quantity writes, so rapid stepper clicks cannot lose updates.
 8. **Deliberate divergences from the reference site are registered** in `Project_Architecture_Document.md` §5.6. Do not "fix" them: promo codes (collapsed in cart), card payment option (second radio), wishlist, admin console, delivery-window estimates, chat FAB → `/contact`, 24-product catalog.
 9. **Passwords are never stored as plaintext.** `User.passwordHash` holds `s1$<salt>$<sha256(salt:password)>` (`src/lib/password.ts`, WebCrypto + CSPRNG salt). `login`/`register`/`changePassword` are async; `verifyPassword` still accepts legacy plaintext records and upgrade-on-login re-hashes them. The demo seed ships pre-hashed (static salts — a static seed cannot carry random ones); do not revert it to plaintext, and never log or dump passwords. SHA-256 is not a KDF — the server-backed workstream (PAD §6.3) remains the real fix.
+10. **The route-head contract has one seam.** `src/lib/seo.ts` (`buildRouteMeta`) owns titles, canonical, og:url, and the Product JSON-LD shape; `src/components/head-manager.tsx` only APPLIES it inside `RouterProvider`. New routes need a title there (or an entry in the static map) — never set `document.title` ad hoc in a page. The per-route title map mirrors the reference's inline map (incl. "Order Tracking" / "Terms Of Service" quirks); admin titles drop its `admin/` artifact; PDPs get `{Product} | HomeNest Kitchen` (registered divergences, PAD §5.6 #15).
+11. **SEO artifacts are generated, never hand-edited.** `public/robots.txt` + `public/sitemap.xml` come from `scripts/generate-sitemap.mjs` (runs via the `prebuild` hook). `tests/sitemap.test.ts` gates the committed artifacts against the catalog — a catalog edit that changes visible slugs requires re-running the generator, and the origin must stay in sync with `VITE_SITE_URL` (see `.env.example`).
 
 ## Tailwind v4 trap log (violations here silently break visual parity)
 
@@ -69,6 +72,8 @@ Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from
 - **Computed styles are the parity gate, not screenshots.** Colors above are asserted with `toHaveCSS`. When you change a token, re-measure and update the spec in the same commit.
 - **Passwords, sessions and persistence interplay in E2E:** `login()` is async now — after a UI logout, wait for the logged-out chrome (header "Sign in" link) before a full-reload `goto`, or the persist effect races the navigation and the session restores (bit the password round-trip spec on mobile).
 - **Reference-side carousel auto-rotates** and the active slide title becomes the page `h1` — read slide 1 on load (or reload) before comparing hero content in sweeps.
+- **Playwright error logs render CSS attribute selectors lossily** — a locator that displays mangled in a call log may be correct; verify against the DOM before "fixing" the selector (bit the SEO head spec twice).
+- **Product cards link `/product/{id}`** (the reference URL shape); `/products/{slug}` exists as deep-link + sitemap URLs only — href-based locators on `/products` must target `/product/`.
 
 ## Conventions
 
