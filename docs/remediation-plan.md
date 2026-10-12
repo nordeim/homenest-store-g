@@ -744,3 +744,73 @@ ESLint flat config, and the optional PWA manifest are the remaining
 optional candidates. New deployment-specific notes (SPA fallback on the
 host, `VITE_SITE_URL` in production) are documented in
 `docs/DEPLOYMENT.md` §8 and PAD §10 rather than tracked as risks.
+
+---
+
+## 14. Session-12 Addendum (2026-10-13) — Fresh-Clone Rebuild, Full Re-Validation, Re-Sweep (No Drift, Third Consecutive)
+
+Session 12 started from a **reset workspace**: the local checkout was
+gone, so the mandate's clone branch ran instead of `git pull`. The
+remote had advanced by exactly one commit (`6a7fc4f` — the raw
+session-10 execution transcript saved as `docs/session_11.md`; no code
+or doc-suite changes). The session re-proved the whole ledger from a
+pristine clone and re-ran the mandated sweeps; **no defects surfaced
+and no code changes were needed** — the budget went to validation
+evidence, captures, and this record.
+
+### 14.1 Fresh-clone validation (all green, from zero)
+
+- Clone → `6a7fc4f` on `main`. `git diff 7a67fc1..HEAD` confirmed the
+  doc suite (AGENTS/CLAUDE/README/PAD/SKILL/remediation plan/worklog)
+  is byte-identical to the session-10 push — the session-10 review
+  carries over verbatim.
+- `.env` recreated with the pinned contract
+  (`DATABASE_URL="file:../db/custom.db"`); `git check-ignore` confirms
+  `.env` and `db/custom.db` stay out of version control.
+- Baseline gate reproduced the session-10 ledger exactly from a bare
+  `npm install`: typecheck ✓ · **95/95 unit** ✓ · build 506.37 KB ✓ ·
+  **182/182 E2E** ✓.
+- **SEO determinism re-proven:** the `prebuild`-hook regeneration of
+  `public/robots.txt` + `public/sitemap.xml` in the fresh clone
+  produced artifacts **byte-identical to the committed ones**
+  (`git status` clean after build) — the catalog-gated generator is
+  stable, and the sitemap still carries 36 URLs (12 statics + 24
+  products) with private surfaces disallowed.
+
+### 14.2 Live sweeps (both sides, no drift)
+
+- Reference (agent-browser @390×844, 2026-10-13): **no visual drift —
+  third consecutive sweep.** Panel `rgba(255,255,255,0.8)` shadowless
+  with the 1px bottom border, active row 14px/500 white on 12px radius
+  at 44px height, inactive rows muted `rgb(126,111,103)`. Reference SEO
+  posture unchanged: sitemap = 22 statics, 0 product URLs.
+- Clone (mobile + desktop): menu dialog contract verified live
+  (`role="dialog"` + `aria-modal`, focus enters at the search pill, 7 ×
+  Tab cycles inside the panel, Escape restores the "Open menu"
+  trigger); row pins match the reference exactly; served PDP head
+  contract re-probed (title = h1, canonical, Product JSON-LD USD);
+  robots.txt + sitemap.xml served by `vite preview`.
+- **Conclusion: no functional or visual gaps found on either side.**
+
+### 14.3 Follow-ups executed
+
+- ✅ **R12-01 — fresh-clone reproducibility evidence** (§14.1): a
+  stranger's `git clone && npm install` path re-produces the exact
+  gate and byte-identical SEO artifacts — the CLAUDE.md "fresh clone
+  in under two minutes" success metric held.
+- ✅ **R12-02 — session captures** (3, visually verified post-capture):
+  `session12-home-desktop`, `session12-mobile-home`,
+  `session12-mobile-menu-open` → `docs/screenshots/`; README
+  Documentation list extended with the session_10/11/12 rows.
+
+### 14.4 Verification gate (post session-12)
+
+Docs-only change set (3 screenshots + 4 markdown files) after the
+observed gate: typecheck ✓ · 95/95 unit ✓ · build 506.37 KB ✓ ·
+182/182 E2E ✓ — all observed this session from the fresh clone; docs
+sit outside every gate's file set.
+
+### 14.5 Residual risks & follow-up candidates (unchanged)
+
+Same list as §13.4: server-backed auth workstream, `aria-live`
+combobox announcements, ESLint flat config, optional PWA manifest.

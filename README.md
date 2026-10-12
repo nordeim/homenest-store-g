@@ -172,6 +172,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_5.md`](docs/session_5.md) — Session 4 continuation transcript (context-reset session that executed the R4 work)
 - [`docs/session_6.md`](docs/session_6.md) — Session 5 execution transcript (password hardening → combobox keyboard → re-sweep → account layout fix → push)
 - [`docs/session_8.md`](docs/session_8.md) — Session 8 execution transcript (sitemap & SEO workstream → reference re-sweep → docs → push)
-- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) — raw session transcripts for the session-5 and session-8 records
+- [`docs/session_10.md`](docs/session_10.md) — Session 10 execution record (DEPLOYMENT.md alignment → full re-validation → no-drift re-sweep → push)
+- [`docs/session_12.md`](docs/session_12.md) — Session 12 execution record (fresh-clone rebuild → full re-validation → third no-drift sweep → push)
+- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) — raw session transcripts for the session-5, session-8, and session-10 records
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)

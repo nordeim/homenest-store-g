@@ -308,3 +308,28 @@ Stage Summary:
 - DEPLOYMENT.md now describes the actual Vite SPA contract end-to-end (was a foreign ORBITAL template)
 - Parity posture: no drift for the second sweep running; menu pins and the SEO superset both hold
 - Next-session candidates: server-backed auth (unchanged), aria-live combobox announcements, ESLint flat config, optional PWA manifest
+
+---
+Task ID: 13
+Agent: main (Super Z)
+Task: Session 12 — fresh-clone rebuild, full re-validation, reference re-sweep, docs, push
+
+Work Log:
+- Workspace was reset since session 10 → ran the clone branch: fresh clone at 6a7fc4f on main; git diff 7a67fc1..HEAD proves the doc suite is byte-identical to the session-10 push (remote advanced by exactly one commit: docs/session_11.md = raw session-10 transcript)
+- Re-read session_10/11 + remediation plan §13 + worklog Task 12; session-10 review carries over verbatim
+- Rebuilt environment from zero: npm install; .env recreated with the pinned DATABASE_URL="file:../db/custom.db" (git check-ignore verified untracked); .env.example verified matching
+- Baseline gate from pristine clone: typecheck ✓ · 95/95 unit ✓ · build 506.37 KB ✓ · 182/182 E2E ✓
+- SEO determinism re-proven: prebuild regeneration of robots.txt/sitemap.xml in the fresh clone produced byte-identical committed artifacts (git status clean after build); sitemap still 36 URLs, private surfaces disallowed
+- Live reference re-sweep (agent-browser @390×844): NO drift — third consecutive zero-change sweep (panel white/80 shadowless 1px border, 14px/500 rows, 44px, 12px active radius, muted rgb(126,111,103) inactive); reference SEO posture unchanged (22 statics, 0 product URLs)
+- Clone-side sweep: menu dialog contract verified live (role=dialog + aria-modal, focus at search pill, 7×Tab trap, Escape restores trigger); row pins exact vs reference; served PDP head (title=h1, canonical, Product JSON-LD USD); robots/sitemap served
+- No defects found — no TDD cycle required; session budget went to reproducibility evidence + captures + records
+- R12-01: fresh-clone reproducibility evidence recorded (clone && npm install re-produces the exact ledger + byte-identical SEO artifacts)
+- R12-02: 3 captures visually verified post-capture (session12-home-desktop, session12-mobile-home, session12-mobile-menu-open) → docs/screenshots/; README Documentation rows for session_10/11/12
+- Sandbox note: vite preview binds IPv6-only here — localhost works, raw 127.0.0.1 refuses
+- Docs updated: remediation plan §14 addendum, docs/session_12.md, README rows, worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 95/95 unit ✓ build 506.37 KB ✓ 182/182 E2E ✓ — all observed this session from a pristine clone
+- Reproducibility: the full gate + deterministic SEO artifacts hold from a stranger's clone path
+- Parity posture: third consecutive no-drift sweep on both sides; menu contract and SEO superset hold
+- Next-session candidates: server-backed auth (unchanged), aria-live combobox announcements, ESLint flat config, optional PWA manifest
