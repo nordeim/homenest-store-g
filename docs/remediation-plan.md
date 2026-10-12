@@ -670,3 +670,77 @@ agent-browser sweep @390×844 (2026-10-12) against the live reference:
 4. ESLint flat config wired into `npm run verify` (PAD §10 known issue).
 5. Optional PWA layer (the reference's manifest 302s; a valid
    `manifest.webmanifest` would extend the superset if ever wanted).
+
+---
+
+## 13. Session-10 Addendum (2026-10-13) — DEPLOYMENT.md Alignment, Full Re-Validation, Re-Sweep (No Drift)
+
+Session 10's mandate re-ran the standing validation doctrine and carried
+one explicit new workstream: **customize `docs/DEPLOYMENT.md`** (the file
+the template hand-off left as a verbatim copy of the `ecommerce-store`
+ORBITAL guide — a Next.js/Bun/Prisma app this repo shares nothing with)
+"as appropriate to suit/align with the current codebase". No code defects
+surfaced; the session's entire budget went to the deployment doc, doc
+cross-links, and re-validation.
+
+### 13.1 Validation & audit (all green, nothing new)
+
+- Doc suite re-read and validated against the code: AGENTS.md, CLAUDE.md,
+  README.md, PAD, SKILL.md (v1.3.0), remediation plan §11–12, worklog
+  (Tasks 1–11), session_8/9 (session_9 is session 8's raw transcript).
+- Baseline gate reproduced the session-8 ledger exactly: typecheck ✓ ·
+  95/95 unit ✓ · build 506 KB ✓ · **182/182 E2E** ✓.
+- SEO/sitemap posture re-verified in place: generated robots.txt
+  (private surfaces disallowed) + sitemap.xml (36 URLs = 12 statics +
+  24 products), served by `vite preview`; served PDP head contract
+  (title = h1, canonical, og:title, Product JSON-LD USD) re-probed live.
+- Live reference re-sweep (agent-browser @390×844, 2026-10-13): **no
+  visual drift — second consecutive sweep with zero changes.** All
+  session-4/5/8 menu pins re-confirmed (white/80 shadowless panel with
+  the 1px bottom border, 14px/500 rows, 44px height, 12px active radius,
+  white active text, muted `rgb(126,111,103)` inactive rows). Reference
+  SEO posture unchanged (robots disallows nothing; sitemap = 22 statics,
+  0 product URLs).
+- Clone-side sweep (agent-browser @390×844 + 1440×900): menu dialog
+  contract verified live (`role="dialog"`, `aria-modal`, focus enters at
+  the search pill, 7× Tab cycles inside the panel, Escape restores the
+  trigger), inactive-row color matches the reference exactly, and the
+  humanized unknown-slug PDP behavior (title from slug, h1 "Product not
+  found", no Product JSON-LD) re-confirmed against a deliberately wrong
+  slug before re-testing a real one.
+
+### 13.2 Follow-ups executed
+
+- ✅ **R10-01 — `docs/DEPLOYMENT.md` rewritten for this codebase.** The
+  template copy described ORBITAL's Next.js standalone build, bun
+  runtime, Prisma migrations, AUTH_SECRET, and rate-limited logins —
+  none of which exist here. The customized guide documents the real
+  contract: the single-file build (prebuild regenerates the SEO
+  artifacts), the static-host serving matrix (`vite preview`, Netlify/
+  Vercel rewrites, gh-pages, `try_files`), the environment table
+  (`DATABASE_URL` tooling contract, `VITE_SITE_URL` as the production
+  origin knob, E2E/CI vars), the schema-relative DB location rules, the
+  §5 origin-sync procedure for real domains, the update flow, a browser
+  + curl verification checklist, and an issue table mapping the known
+  traps (SPA-fallback 404s, SEO origin mismatch, stale localStorage,
+  port 4173, npm advisories, WebKit libs, hydration race).
+- ✅ **R10-02 — cross-links:** README Documentation section gains the
+  DEPLOYMENT.md row (plus the missing session_7/9 transcript rows);
+  PAD §8.1 now points at the deployment guide.
+
+### 13.3 Verification gate (post session-10)
+
+Docs-only change (4 screenshots + 4 docs); no source, test, or config
+files touched, so the session's observed gate remains the ledger:
+typecheck ✓ · 95/95 unit ✓ · build 506 KB ✓ · 182/182 E2E ✓ (all
+observed this session, before the doc edits; re-confirmed after edits —
+docs are outside every gate's file set).
+
+### 13.4 Residual risks & follow-up candidates (updated)
+
+Unchanged from §12.5/§12.6: server-backed auth remains the largest open
+item; re-sweep doctrine stays; `aria-live` combobox announcements,
+ESLint flat config, and the optional PWA manifest are the remaining
+optional candidates. New deployment-specific notes (SPA fallback on the
+host, `VITE_SITE_URL` in production) are documented in
+`docs/DEPLOYMENT.md` §8 and PAD §10 rather than tracked as risks.

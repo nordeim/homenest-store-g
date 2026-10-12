@@ -1,102 +1,130 @@
-# Deployment Guide (this is just a reference template meant to be customized to align to the actual codebase as appropriate)
+# Deployment Guide
 
-ORBITAL ships as a single Next.js **standalone** build with a SQLite file
-database — one process, zero external services. This guide covers the
-supported production paths and the environment contract.
+HomeNest Kitchen ships as a **single-file Vite SPA** (`dist/index.html`,
+~506 KB / ~130 KB gzip) with zero server and zero external services — one
+static artifact plus its asset folder. This guide covers the supported
+production paths and the environment contract. (Customized from the
+`ecommerce-store` template to align with this codebase; the template's
+Next.js standalone/Prisma paths do not apply here.)
 
 ## 1. Build
 
 ```bash
-bun install
-bun run build          # next build + standalone assembly (.next/standalone)
+npm install
+npm run build          # → dist/index.html (single file; SEO artifacts regenerate first)
 ```
 
-The build compiles the page shell and the 16 API route handlers, then copies
-`.next/static` and `public/` into `.next/standalone/` (see the `build`
-script in `package.json`). `next.config.ts` pins `outputFileTracingRoot` to
-the repo root — keep it; the standalone trace depends on it.
+The `prebuild` hook runs `npm run seo:generate`
+(`scripts/generate-sitemap.mjs`), which rewrites `public/robots.txt` and
+`public/sitemap.xml` from the seed catalog before Vite bundles. Vite then
+inlines all JS/CSS into `dist/index.html` (`vite-plugin-singlefile`) and
+copies `public/` — product/hero imagery, `robots.txt`, `sitemap.xml` —
+alongside it. Never hand-edit the SEO artifacts: `tests/sitemap.test.ts`
+gates the committed files against the catalog, and the build regenerates
+them anyway.
 
-## 2. Run
+## 2. Run (serve)
 
-```bash
-bun run start          # NODE_ENV=production bun .next/standalone/server.js
-```
+There is no server process to run. Serve `dist/` from any static host:
 
-The server listens on port 3000 by default (`PORT` overrides). Always start
-it from the repo root via the npm/bun script — the scripts guarantee the
-working directory that the SQLite path resolution and the standalone trace
-rely on. Behind a reverse proxy, forward `X-Forwarded-Proto` so cookie
-attributes derive the right scheme.
+| Context | How |
+|---|---|
+| Local check | `npm run preview` (vite preview, port 4173, SPA fallback) |
+| Netlify / Vercel | Publish `dist/`; add an SPA rewrite (`/* → /index.html`) so deep links like `/products/{slug}` resolve |
+| GitHub Pages | Publish `dist/` with a 404.html copy of `index.html` (or a 404 → root redirect) — client routing takes over from there |
+| nginx / any web server | Serve `dist/` with `try_files $uri $uri/ /index.html` |
+
+The SPA never calls a backend: cart, wishlist, orders, sessions and the
+admin console live in browser `localStorage` under the versioned key
+`homenest.v4`. Nothing to migrate, nothing to restart.
 
 ## 3. Environment variables
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `DATABASE_URL` | Yes | SQLite connection string. See §4. |
-| `AUTH_SECRET` | **Yes in production** | HMAC secret for session cookies. Generate with `openssl rand -hex 32`. An insecure dev constant is used when unset — never ship that. |
-| `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical public origin, used for metadata URLs and `sitemap.xml` (e.g. `https://orbital.example.com`). |
+| `DATABASE_URL` | Yes (repo contract) | Schema-relative SQLite URL `file:../db/custom.db` — see §4. The deployed SPA never reads it; it pins the reference architecture's storage layout for tooling parity and the admin Settings surface. |
+| `VITE_SITE_URL` | **Yes in production** | Absolute public origin for the SEO layer: canonical links, `og:url`, JSON-LD offer URLs, and `robots.txt`/`sitemap.xml` generation (e.g. `https://homenest.example.com`). Defaults to `http://localhost:4173` — shipping that default to a real domain would emit wrong canonicals and sitemap URLs. |
+| `E2E_PORT` / `E2E_BASE_URL` | No | Playwright preview port / base URL override (test-time only). |
+| `CI` | No | Tightens Playwright (forbidOnly, 2 retries, no server reuse). |
 
 ## 4. Database location (§4 — the `.env.example` reference)
 
-`DATABASE_URL` accepts three forms:
+`DATABASE_URL` accepts two forms:
 
-1. **Relative `file:` URL (the default, zero-config local story).**
+1. **Relative `file:` URL (the default, zero-config contract).**
    ```
    DATABASE_URL="file:../db/custom.db"
    ```
-   Relative URLs resolve against the **`prisma/` directory that owns
-   `schema.prisma`** — exactly like the Prisma CLI — so this string points
-   at `<repo>/db/custom.db` for `prisma db push`, `prisma/seed.ts`,
-   `next build` and the running server alike, regardless of the process
-   working directory. The resolution rule lives in
-   `src/lib/db-path.ts` and is pinned by `tests/db-path.test.ts`.
+   The URL is **schema-relative** — it resolves the way the Prisma CLI
+   would (against a `prisma/` anchor), so this string always points at
+   `<repoRoot>/db/custom.db` regardless of the working directory. The
+   resolution rules live in `src/lib/db-path.ts` and are pinned by
+   `tests/db-path.test.ts` — do not simplify them.
 
-2. **Absolute `file:` URL (recommended for production).**
+2. **Absolute `file:` URL.**
    ```
-   DATABASE_URL="file:/var/lib/orbital/custom.db"
+   DATABASE_URL="file:/var/lib/homenest/custom.db"
    ```
-   Absolute paths pass through untouched — immune to any working-directory
-   ambiguity across service managers, containers, or cron wrappers. Point
-   them at a persisted volume and back the file up.
+   Absolute paths pass through untouched. Point them at a persisted
+   volume if a tool (Prisma CLI, an admin script) actually writes there.
 
-3. **PostgreSQL.** Switch `provider = "postgresql"` in
-   `prisma/schema.prisma`, set a `postgresql://` URL, then
-   `bun run db:push && bun run db:seed`.
+`db/custom.db` is git-ignored; the repo ships `db/catalog.json` (brand
+config). Every fresh clone recreates whatever the tooling needs from the
+pinned contract. The storefront's runtime state stays in `localStorage`
+— see §2.
 
-Initialize (or reset) the database with:
+## 5. Deploying to a different origin (SEO sync)
+
+The committed SEO artifacts and the static head fallbacks in `index.html`
+hardcode the documented default origin. When deploying to a real domain:
 
 ```bash
-bun run db:push        # apply schema (db push — no migrations folder)
-bun run db:seed        # idempotent demo workspace (wipes domain tables)
+export VITE_SITE_URL="https://your-domain.example"
+npm run build        # prebuild regenerates robots.txt + sitemap.xml with the new origin
+# deploy dist/
 ```
 
-`db/*.db` is gitignored; every fresh clone recreates it from the two
-commands above.
+The sync is test-gated: `tests/sitemap.test.ts` re-parses the committed
+artifacts against the catalog, so a catalog edit without regenerating
+fails the gate. `src/lib/seo.ts` reads `VITE_SITE_URL` at build time for
+per-route canonicals and JSON-LD offer URLs.
 
-## 5. Updating
+## 6. Updating
 
 ```bash
 git pull
-bun install
-bunx prisma generate   # after schema changes
-bun run db:push
-bun run build
-# restart the server process
+npm install
+npm run build
+# redeploy dist/ (it is fully self-contained; no cache to warm, no process to restart)
 ```
 
-## 6. Verification checklist
+If the seed catalog changed, the release also bumped `STORAGE_KEY`
+(`src/lib/storage-key.ts`, enforced by `tests/catalog-hash.test.ts`) so
+returning visitors re-hydrate the new catalog instead of seeing stale
+localStorage data. No action is needed on the deploy side.
+
+## 7. Verification checklist
 
 ```bash
-curl -s https://your-host/api/health          # {"status":"ok",...}
-bun run lint && bun run typecheck && bun run test
-./scripts/smoke-test.sh                       # 30 E2E checks (local)
-bun run test:e2e                              # Playwright suite (local)
+npm run verify && npm run e2e    # typecheck + unit + build + 182 E2E runs
+curl -s https://your-host/robots.txt        # private surfaces disallowed + sitemap pointer
+curl -s https://your-host/sitemap.xml       # 36 URLs (12 statics + 24 products) at your origin
+curl -s -o /dev/null -w "%{http_code}" https://your-host/products/nonexistent-slug   # 200 — SPA fallback serves index.html
 ```
 
-## 7. Common production issues
+In a browser: load the home page (hero carousel renders), open a deep
+link (`/products/ceramic-mixing-bowl-set`) after a hard refresh (SPA
+fallback works), add to cart and reload (cart persists via localStorage),
+and check `document.title` changes per route (head contract live).
+
+## 8. Common production issues
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `Error code 14: Unable to open the database file` | Server started from a directory that has no `prisma/schema.prisma` and no absolute `DATABASE_URL` | Start via `bun run start`, or set an absolute `file:` URL (§4) |
-| Logins loop back to `/login` | `AUTH_SECRET` changed between restarts | Keep the secret stable across restarts |
-| Rate-limited logins (429) | 10 attempts/IP/15 min fixed window | Wait for `Retry-After`, or restart to clear the in-memory buckets (single-node) |
+| Deep links (e.g. `/products/…`, `/track-order`) 404 on the host | Static host without SPA fallback | Add the rewrite/`try_files` rule from §2 — client routing owns every non-asset path |
+| Wrong canonicals / sitemap URLs after deploying to a real domain | `VITE_SITE_URL` left at the default `http://localhost:4173` | Set `VITE_SITE_URL` and rebuild (§5); the prebuild hook rewrites the artifacts |
+| Visitors see the old catalog after a release | Catalog changed without a `STORAGE_KEY` bump (stale localStorage shadows the seed) | The `tests/catalog-hash.test.ts` gate blocks this at CI time; if you bypassed it, bump `STORAGE_KEY` and add a `tests/catalog-registry.json` row |
+| `npm run e2e` fails to bind port 4173 | Stale preview server | `pkill -f "vite preview"`, or set `E2E_PORT` |
+| `npm audit` flags braces/micromatch | Build-time-only dependency of `vite-plugin-singlefile`'s glob handling | Accepted risk — inputs are trusted repo files; do not downgrade the plugin |
+| WebKit/mobile project complains about missing host libs | The mobile project pins the chromium engine on the iPhone 14 profile | Install WebKit host libs only if you need Safari coverage; the pin is intentional |
+| Admin/account pages bounce to login after a hard refresh | You reintroduced the hydration race (navigation before the store's `ready` flag) | Gate on `ready` before redirecting — see AGENTS.md rule 3 |

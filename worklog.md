@@ -284,3 +284,27 @@ Stage Summary:
 - SEO posture: clone is now a genuine SEO superset (per-route heads + JSON-LD + canonicals the reference lacks; private surfaces excluded where the reference lists them; 24 product URLs where the reference has none)
 - Parity posture: resting visuals unchanged (no-drift sweep); menu pins intact
 - Next-session candidates: server-backed auth (unchanged), re-sweep doctrine (no drift this time), aria-live combobox announcements, ESLint flat config, optional PWA manifest
+
+---
+Task ID: 12
+Agent: main (Super Z)
+Task: Session 10 — DEPLOYMENT.md alignment, full re-validation, reference re-sweep, docs, push
+
+Work Log:
+- git pull: fast-forwarded ab202dc.. (docs/session_9.md = session-8 raw transcript, docs/DEPLOYMENT.md = verbatim ORBITAL template copy, docs/prompt-to-validate-4.md)
+- Re-read full doc suite (AGENTS/CLAUDE/README/PAD/SKILL v1.3.0 + remediation plan §11–12, worklog Tasks 1–11, session_8/9) and validated against code
+- Baseline gate reproduced the session-8 ledger exactly: typecheck ✓ · 95/95 unit ✓ · build 506 KB ✓ · 182/182 E2E ✓; .env/db contract verified
+- AUDIT: the one real gap = docs/DEPLOYMENT.md describing a foreign stack (Next.js standalone, bun, Prisma, AUTH_SECRET, rate-limited logins — none exist here); SEO/sitemap posture re-verified in place (36-URL sitemap, disallowing robots, catalog-gated, prebuild-regenerated, served + PDP head probed live)
+- Live reference re-sweep (agent-browser @390×844): NO drift — second consecutive zero-change sweep; all session-4/5/8 menu pins re-confirmed; reference SEO posture unchanged (22 statics, 0 product URLs, disallows nothing)
+- Clone-side sweep (mobile + desktop): menu dialog contract verified live (role=dialog + aria-modal, focus at search pill, 7×Tab trap cycle, Escape restores trigger, muted row color exact); humanized unknown-slug PDP re-confirmed with a deliberately wrong slug before a real one; no gaps found
+- R10-01: docs/DEPLOYMENT.md rewritten for this codebase — single-file build w/ SEO-regenerating prebuild, static-host matrix (preview/Netlify/Vercel/gh-pages/nginx try_files), env contract (DATABASE_URL pin, VITE_SITE_URL required-in-production), §4 DB-location rules, §5 origin-sync procedure, update flow, curl+browser checklist, real-trap issue table
+- R10-02: README Documentation section + DEPLOYMENT.md row + missing session_7/9 transcript rows; PAD §8.1 pointer to the deployment guide
+- Session-10 captures (4, visually verified post-capture): session10-home-desktop, session10-pdp-desktop, session10-mobile-home, session10-mobile-menu-open → docs/screenshots/
+- Sandbox lesson: vite preview binds IPv6-only here — curl localhost works, raw 127.0.0.1 fails (deployment doc's checklist uses localhost)
+- Docs-only change set (4 md + 4 png); npm run verify re-run green after edits as the final check
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 95/95 unit ✓ build 506 KB ✓ 182/182 E2E ✓ — all observed this session
+- DEPLOYMENT.md now describes the actual Vite SPA contract end-to-end (was a foreign ORBITAL template)
+- Parity posture: no drift for the second sweep running; menu pins and the SEO superset both hold
+- Next-session candidates: server-backed auth (unchanged), aria-live combobox announcements, ESLint flat config, optional PWA manifest

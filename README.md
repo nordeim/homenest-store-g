@@ -162,6 +162,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`AGENTS.md`](AGENTS.md) — agent rules, Tailwind v4 trap log, testing quirks
 - [`CLAUDE.md`](CLAUDE.md) — six-phase workflow and per-tech standards
 - [`Project_Architecture_Document.md`](Project_Architecture_Document.md) — ADRs, layer model, data & security architecture, testing strategy
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — deployment guide for the single-file SPA: build, static-host serving, env contract, SEO origin sync, troubleshooting
 - [`homenest-store-g_SKILL.md`](homenest-store-g_SKILL.md) — distilled engineering skill: 20-section reference (stack, design system, trap log, patterns, debugging) for any agent working on this repo
 - [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24, R3-01…R3-06, R4-01…R4-04, R5-01…R5-06), residual risks, session-3/4/5 addenda
 - [`docs/session_1.md`](docs/session_1.md) — Session 1 execution transcript (audit → parity → tests → docs → push)
@@ -170,5 +171,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_4.md`](docs/session_4.md) — Session 4 execution transcript (doc-drift audit → cart-drawer modal → authenticated axe gate → menu re-sweep → push)
 - [`docs/session_5.md`](docs/session_5.md) — Session 4 continuation transcript (context-reset session that executed the R4 work)
 - [`docs/session_6.md`](docs/session_6.md) — Session 5 execution transcript (password hardening → combobox keyboard → re-sweep → account layout fix → push)
+- [`docs/session_8.md`](docs/session_8.md) — Session 8 execution transcript (sitemap & SEO workstream → reference re-sweep → docs → push)
+- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) — raw session transcripts for the session-5 and session-8 records
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)

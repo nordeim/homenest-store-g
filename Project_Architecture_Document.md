@@ -501,7 +501,7 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 npm run build      # → dist/index.html (single file, ~502 KB / ~127 KB gzip)
 ```
 
-`vite-plugin-singlefile` inlines all JS/CSS; `public/images/*` ships alongside as static assets. Serve `dist/` from any static host with SPA fallback (`vite preview` locally; Netlify/Vercel/gh-pages rewrites on a host).
+`vite-plugin-singlefile` inlines all JS/CSS; `public/images/*` ships alongside as static assets. Serve `dist/` from any static host with SPA fallback (`vite preview` locally; Netlify/Vercel/gh-pages rewrites on a host). The full deployment procedure — static-host matrix, SEO origin sync, verification checklist, troubleshooting — lives in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ### 8.2 Environment Variables
 
