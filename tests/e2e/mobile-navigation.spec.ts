@@ -5,11 +5,16 @@ import { expect, test } from "@playwright/test";
  *
  * Reference behavior (measured live 2026-10-12 on nest-culinary-hub.base44.app
  * at 390x844): the TRAILING-EDGE hamburger (right of the cart icon) toggles an
- * INLINE dropdown panel below the header (not a side drawer). The trigger
- * swaps to a green circle with a white X, the active route renders as an
- * orange pill row, body scroll locks while open, Escape closes, navigating
- * closes the menu, and the page below stays UNDIMMED (matching the current
- * reference; session-3 measurement).
+ * INLINE dropdown panel below the header (not a side drawer). The active route
+ * renders as an orange pill row, body scroll locks while open, Escape closes,
+ * navigating closes the menu, and the page below stays UNDIMMED (matching the
+ * current reference; session-3 measurement).
+ *
+ * Session-5 re-measurement (same reference, same day): the trigger no longer
+ * swaps to the session-3 green disc — BOTH states render a bare dark icon
+ * (transparent button, foreground-colored glyph, no inner span). The clone
+ * follows the latest measurement, per the follow-the-latest-measurement
+ * doctrine (remediation plan §10.5.2).
  *
  * Session-4 re-measurement (same reference, same day): the panel is a
  * translucent white/80 surface with NO drop shadow; menu rows render at
@@ -110,13 +115,20 @@ test("active route renders as the orange pill row", async ({ page }) => {
   await expect(activeLink).toHaveAttribute("aria-current", "page");
 });
 
-test("hamburger swaps to the green close circle while open", async ({ page }) => {
+test("menu trigger renders a bare dark icon in both states (no colored disc)", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Open menu" }).click();
+  const open = page.getByRole("button", { name: "Open menu" });
+  // Closed state: transparent button, foreground glyph, no inner span disc.
+  await expect(open).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(open.locator("span")).toHaveCount(0);
+  await open.click();
   const close = page.getByRole("button", { name: "Close menu", exact: true });
   await expect(close).toBeVisible();
-  // The green disc lives on the inner span (button itself is transparent).
-  await expect(close.locator("span").first()).toHaveCSS("background-color", "rgb(69, 161, 130)");
+  // Open state: SAME treatment — the reference dropped its green disc in the
+  // session-5 re-measurement; the X renders directly in the trigger.
+  await expect(close).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(close.locator("span")).toHaveCount(0);
+  await expect(close).toHaveCSS("color", "rgb(29, 24, 22)");
 });
 
 test("body scroll locks while the menu is open and unlocks after navigation", async ({ page }) => {

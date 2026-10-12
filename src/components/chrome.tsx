@@ -6,6 +6,7 @@ import {
   useState,
   type ButtonHTMLAttributes,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -52,6 +53,10 @@ export function Header() {
   const [menuSearchOpen, setMenuSearchOpen] = useState(false);
   const searchId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  // APG combobox state (session 5, R5-02): which suggestion the arrow keys
+  // have activated. -1 = none active. The DOM focus stays in the input; the
+  // active option is exposed via aria-activedescendant + aria-selected.
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -136,7 +141,48 @@ export function Header() {
     if (!q) return;
     setMenuOpen(false);
     setSearchOpen(false);
+    setActiveIndex(-1);
     navigate(`/products?search=${encodeURIComponent(q)}`);
+  };
+
+  // WAI-ARIA 1.2 combobox, listbox-popup variant (session 5, R5-02). The
+  // overlay previously had no keyboard path to its suggestions at all.
+  const onSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      setSearchOpen(false);
+      setActiveIndex(-1);
+      return;
+    }
+    if (matches.length === 0) return;
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        setActiveIndex((prev) => (prev + 1) % matches.length); // -1 → 0, last wraps to first
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        setActiveIndex((prev) => (prev <= 0 ? matches.length - 1 : prev - 1)); // -1/0 → last
+        break;
+      case "Home":
+        event.preventDefault();
+        setActiveIndex(0);
+        break;
+      case "End":
+        event.preventDefault();
+        setActiveIndex(matches.length - 1);
+        break;
+      case "Enter": {
+        if (activeIndex < 0) return; // default form submit → /products?search=
+        event.preventDefault();
+        const product = matches[activeIndex];
+        if (!product) return;
+        setMenuOpen(false);
+        setSearchOpen(false);
+        setActiveIndex(-1);
+        navigate(`/product/${product.id}`);
+        break;
+      }
+    }
   };
 
   return (
@@ -232,13 +278,9 @@ export function Header() {
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            {menuOpen ? (
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white">
-                <X className="h-5 w-5" strokeWidth={2.2} />
-              </span>
-            ) : (
-              <Menu strokeWidth={2} />
-            )}
+            {/* Session-5 re-measurement: the reference dropped the green close
+                disc — BOTH states are a bare dark icon in the trigger. */}
+            {menuOpen ? <X className="h-5 w-5" strokeWidth={2.2} /> : <Menu strokeWidth={2} />}
           </button>
         </div>
       </div>
@@ -257,23 +299,46 @@ export function Header() {
                 role="combobox"
                 aria-expanded={matches.length > 0}
                 aria-autocomplete="list"
+                aria-controls={matches.length > 0 ? "site-search-listbox" : undefined}
+                aria-activedescendant={
+                  activeIndex >= 0 && matches.length > 0 ? `site-search-opt-${activeIndex}` : undefined
+                }
                 autoComplete="off"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setActiveIndex(-1); // new query, fresh activation
+                }}
+                onKeyDown={onSearchKeyDown}
                 placeholder="Search products..."
                 className="h-12 w-full rounded-full border border-border bg-background pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
               />
             </div>
-            {query.trim() && (
-              <ul className="mt-2 overflow-visible rounded-xl border border-border bg-card p-1 shadow-pop" role="listbox">
-                {matches.length === 0 && (
-                  <li className="px-4 py-3 text-sm text-muted-foreground">No products match that search.</li>
-                )}
-                {matches.map((product) => (
-                  <li key={product.id} role="option">
+            {query.trim() && matches.length === 0 && (
+              <div className="mt-2 rounded-xl border border-border bg-card p-1 shadow-pop">
+                <p className="px-4 py-3 text-sm text-muted-foreground">No products match that search.</p>
+              </div>
+            )}
+            {matches.length > 0 && (
+              <ul
+                id="site-search-listbox"
+                className="mt-2 overflow-visible rounded-xl border border-border bg-card p-1 shadow-pop"
+                role="listbox"
+                aria-label="Suggested products"
+              >
+                {matches.map((product, index) => (
+                  <li
+                    key={product.id}
+                    role="option"
+                    id={`site-search-opt-${index}`}
+                    aria-selected={index === activeIndex}
+                  >
                     <Link
                       href={`/product/${product.id}`}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-muted"
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-muted",
+                        index === activeIndex && "bg-muted",
+                      )}
                       onClick={() => setSearchOpen(false)}
                     >
                       <img src={product.image} alt="" width={40} height={40} className="h-10 w-10 rounded-md object-cover" />

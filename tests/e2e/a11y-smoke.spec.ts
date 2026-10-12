@@ -96,4 +96,23 @@ test.describe("a11y smoke", () => {
     console.log(`[a11y] admin: ${contrastCount} color-contrast nodes (parity-pinned, documented)`);
     expect(serious(results).map((v) => `${v.id}: ${v.nodes.length} nodes`)).toEqual([]);
   });
+
+  // Session-5 extension (audit finding): the transactional + support surfaces
+  // join the gate — checkout is the highest-stakes form in the funnel.
+  test("checkout page has no critical/serious structural violations", async ({ page }) => {
+    await page.goto("/product/p-knife-set");
+    await page.getByRole("button", { name: /Add to cart/i }).first().click();
+    await page.goto("/checkout");
+    await expect(page).toHaveURL(/\/checkout$/);
+    const { results, contrastCount } = await analyzeForGate(page);
+    console.log(`[a11y] checkout: ${contrastCount} color-contrast nodes (parity-pinned, documented)`);
+    expect(serious(results).map((v) => `${v.id}: ${v.nodes.length} nodes`)).toEqual([]);
+  });
+
+  test("contact page has no critical/serious structural violations", async ({ page }) => {
+    await page.goto("/contact");
+    const { results, contrastCount } = await analyzeForGate(page);
+    console.log(`[a11y] contact: ${contrastCount} color-contrast nodes (parity-pinned, documented)`);
+    expect(serious(results).map((v) => `${v.id}: ${v.nodes.length} nodes`)).toEqual([]);
+  });
 });
