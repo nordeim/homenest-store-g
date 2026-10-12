@@ -162,3 +162,19 @@ Work Log:
 Stage Summary:
 - Remaining gaps from the user's brief closed: session_1.md reviewed+validated, docs/remediation-plan.md saved, homenest-store-g_SKILL.md distilled per both skills, worklog.md at repo root, 18 screenshots, .env.example verified in tree
 - Verification ledger: typecheck ✓ 22/22 unit ✓ build ✓ 82/82 E2E ✓ — all observed this session
+
+---
+Task ID: 7-final
+Agent: main (Super Z)
+Task: Final commit + push of session-2 artifacts
+
+Work Log:
+- Pre-push gate re-run (wrapper contract rule 2): typecheck ✓ · 22/22 unit ✓ · build ✓ (4.47s) · 82/82 E2E ✓ (1.4 min)
+- 2 atomic Conventional Commits: da57ecf docs (remediation plan + SKILL.md + cross-refs + worklog snapshot), 394c6cb chore(screenshots) (3 captures + capture-screenshots.mjs)
+- Wrapper dry-run: fast-forward 54306d0..394c6cb confirmed, no refs touched
+- Real push via docs/ssh_git_wrapper_v3.py --key-file (paramiko shim on PATH at /home/z/my-project/bin/ssh, outside repo): exit 0, "remote verified: refs/heads/main @ 394c6cb == local HEAD", origin/main tracking ref synced
+- Operator key file shredded after push; wrapper shredded its temp copies
+
+Stage Summary:
+- Remote state: github.com:nordeim/homenest-store-g main @ 394c6cb (5 new commits total across sessions: d914875→2109282 parity/test/docs batch, 54306d0 session_1.md, da57ecf + 394c6cb session-2 artifacts)
+- No branches created; all commits on main; key material never persisted in-repo
