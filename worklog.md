@@ -333,3 +333,26 @@ Stage Summary:
 - Reproducibility: the full gate + deterministic SEO artifacts hold from a stranger's clone path
 - Parity posture: third consecutive no-drift sweep on both sides; menu contract and SEO superset hold
 - Next-session candidates: server-backed auth (unchanged), aria-live combobox announcements, ESLint flat config, optional PWA manifest
+
+---
+Task ID: 14
+Agent: main (Super Z)
+Task: Session 14 — fourth no-drift sweep, R14-01 combobox live-region announcements (TDD), docs, push
+
+Work Log:
+- git pull fast-forwarded 3d40509..01259a1 (remote added only docs/session_13.md, the raw session-12 transcript); working tree showed 1659 spurious file-mode flips → neutralized with git config core.fileMode false, content byte-clean
+- Reviewed session_12/13 + remediation §14 + worklog Task 13; root doc suite byte-identical to the session-10-reviewed state (git diff 7a67fc1..HEAD --stat) — review carries over; .env contract, node_modules, paramiko shim all survived this time
+- Skills consulted: tdd-workflow, webapp-testing, agent-browser (--args reference enabled the DNS workaround), code-review-and-audit, Tailwind v4 (portal trap re-check)
+- Sandbox quirk: agent-browser 0.39.0 Chromium failed DNS for the reference host (OS DNS fine); /etc/hosts unwritable, AGENT_BROWSER_ARGS not honored → moved reference sweeps to repo Playwright Chromium with --host-resolver-rules=MAP … 216.24.57.16 (scripts in /home/z/my-project/scripts/)
+- Baseline gate reproduced pre-change: typecheck ✓ 95/95 unit ✓ build 506.37 KB ✓ 182/182 E2E ✓; SEO determinism held (prebuild regeneration byte-identical, 36-URL sitemap, 5 private surfaces disallowed)
+- Reference re-sweep (Playwright @390×844): NO drift — fourth consecutive (bare 36×36 trigger; NAV.bg-card/80 white/80 shadowless 1px border; active 14px/500 white on rgb(217,110,38) 12px/44px; inactive muted rgb(126,111,103); no dialog semantics/focus management; robots allows everything, sitemap 22 statics 0 product URLs)
+- Clone sweep: dialog contract live-verified (role/aria-modal/label, portal-to-body, initial focus search pill, 7×Tab trap + wrap, Escape restores trigger); row pins exact + superset Sign in row; served PDP head (title=h1, canonical, og:title, Product JSON-LD USD); static-curl PDP head shows base shell (expected — client-side contract covered by browser sweeps + seo-head spec)
+- R14-01 via TDD: RED — 3 specs in tests/e2e/search-keyboard.spec.ts (status scoped to search form; count announcement, no-results announcement, empty-until-queried) observed failing 6×, 10 pre-existing green; GREEN — sr-only role="status" aria-live="polite" region in src/components/chrome.tsx announcing result counts only while a query is non-empty; served probe shows 1×1 px clipped box (zero visual footprint)
+- Post-change gate re-run: typecheck ✓ 95/95 unit ✓ build 506.59 KB (+0.22 KB) ✓ 188/188 E2E (94 specs × 2 projects) ✓; SEO artifacts byte-identical; post-change clone re-sweep green ("3 products match your search." observed live)
+- R14-02: 4 captures visually verified post-capture (session14-home-desktop, session14-pdp-desktop, session14-mobile-home, session14-mobile-menu-open) → docs/screenshots/
+- Docs updated: remediation plan §15, docs/session_14.md, README rows (session_14 + session_13 transcript), worklog (this entry); DEPLOYMENT.md unchanged (no new build/runtime/deployment contract)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 95/95 unit ✓ build 506.59 KB ✓ 188/188 E2E ✓ — observed post-change
+- Parity posture: fourth consecutive no-drift sweep on both sides; menu pins, dialog superset, and SEO superset all hold
+- Standing candidate list shrunk: aria-live combobox announcements CLOSED (R14-01); remaining — server-backed auth, ESLint flat config, optional PWA manifest

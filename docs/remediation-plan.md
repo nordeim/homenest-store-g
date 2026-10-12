@@ -814,3 +814,82 @@ sit outside every gate's file set.
 
 Same list as §13.4: server-backed auth workstream, `aria-live`
 combobox announcements, ESLint flat config, optional PWA manifest.
+
+## 15. Session-14 Addendum (2026-10-13) — Fourth No-Drift Sweep, R14-01 Screen-Reader Search Announcements (TDD)
+
+Session 14 ran on the persisted checkout (no reset this time): `git
+pull` fast-forwarded `3d40509..01259a1` — the remote had advanced by
+exactly one commit adding `docs/session_13.md`, the raw session-12
+transcript. A sandbox quirk (1659 pure file-mode flips) was neutralized
+with `git config core.fileMode false`; content was byte-clean. With no
+defects to fix, the session spent its change budget on the smallest
+standing candidate — **aria-live combobox announcements** — executed
+strictly RED→GREEN.
+
+### 15.1 Validation (baseline ledger reproduced, then re-run post-change)
+
+- Baseline gate before any change: typecheck ✓ · **95/95 unit** ✓ ·
+  build 506.37 KB ✓ · **182/182 E2E** ✓ — session-12 ledger reproduced
+  on the pulled tree; SEO determinism held again (prebuild
+  regeneration byte-identical, sitemap 36 URLs, private surfaces
+  disallowed).
+- agent-browser 0.39.0's Chromium began failing DNS for the reference
+  host while OS DNS worked; sweeps moved to repo-installed Playwright
+  Chromium with `--host-resolver-rules=MAP …` (scripts persisted under
+  `/home/z/my-project/scripts/`).
+
+### 15.2 Live sweeps (both sides, no drift — fourth consecutive)
+
+- Reference (@390×844): trigger bare (transparent bg, no border/shadow,
+  36×36); sticky `NAV.bg-card/80` panel `rgba(255,255,255,0.8)`,
+  shadowless, `1px solid rgba(229,224,220,0.5)` bottom border; active
+  row 14px/500 white on `rgb(217,110,38)` at 12px radius / 44px;
+  inactive rows muted `rgb(126,111,103)`. Reference still ships **no**
+  dialog semantics, no focus management, no Escape handling; SEO
+  posture unchanged (robots disallows nothing; sitemap 22 statics,
+  0 product URLs — the 7 `/admin/*` and 4 private surfaces are all
+  still listed).
+- Clone: dialog contract verified live (role/aria-modal/label,
+  portal-to-body, initial focus at the search pill, 7 × Tab trap with
+  wrap, Escape restores the trigger); row pins exact + superset
+  `Sign in` row; served PDP head (title = h1, canonical, og:title,
+  Product JSON-LD USD); robots 5 disallows; sitemap 36 URLs.
+- **Conclusion: no functional or visual gaps on either side.**
+
+### 15.3 R14-01 — combobox result announcements (closed a standing candidate)
+
+- **RED**: three specs appended to `tests/e2e/search-keyboard.spec.ts`
+  (status region scoped via `getByRole("search").getByRole("status")`):
+  count announcement matching the option count, "no results"
+  announcement, empty-until-queried + `aria-live="polite"`. Observed 6
+  failures across both projects; 10 pre-existing combobox specs green.
+- **GREEN**: `src/components/chrome.tsx` gains a visually-hidden
+  `role="status" aria-live="polite"` region inside the search form —
+  "N products match your search." / "1 product matches your search." /
+  "No products match that search." only while a query is non-empty.
+  Served-page probe: 1×1 px clipped box (`sr-only`), zero visual
+  footprint; visual-parity suite green.
+- Post-change gate: typecheck ✓ · 95/95 unit ✓ · build 506.59 KB
+  (+0.22 KB) ✓ · **188/188 E2E** (94 specs × 2 projects) ✓ · SEO
+  artifacts byte-identical ✓ · post-change clone re-sweep green
+  (announcement observed live: "3 products match your search.").
+
+### 15.4 Follow-ups executed
+
+- ✅ **R14-01** — combobox result announcements (§15.3).
+- ✅ **R14-02** — 4 session captures, visually verified post-capture
+  (`session14-home-desktop`, `session14-pdp-desktop`,
+  `session14-mobile-home`, `session14-mobile-menu-open`) →
+  `docs/screenshots/`; README Documentation rows extended.
+
+### 15.5 Verification gate (post session-14)
+
+typecheck ✓ · 95/95 unit ✓ · build 506.59 KB ✓ · 188/188 E2E ✓ —
+observed after the R14-01 change; docs-only remainder sits outside
+every gate's file set.
+
+### 15.6 Residual risks & follow-up candidates (shrunk by one)
+
+Remaining from the §13.4/§14.5 list: server-backed auth workstream,
+ESLint flat config into `npm run verify`, optional PWA manifest.
+(Closed this session: aria-live combobox announcements.)

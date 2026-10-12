@@ -314,6 +314,21 @@ export function Header() {
                 className="h-12 w-full rounded-full border border-border bg-background pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
               />
             </div>
+            {/*
+              R14-01 (session 14): polite live region announcing result-count
+              changes. Sightless SR users previously got no feedback that the
+              suggestion list appeared/changed — the visual list alone is not
+              announced while focus stays in the combobox (APG combobox,
+              listbox-popup variant). Visually hidden (sr-only): zero impact on
+              the reference parity pins.
+            */}
+            <div role="status" aria-live="polite" className="sr-only">
+              {query.trim()
+                ? matches.length === 0
+                  ? "No products match that search."
+                  : `${matches.length} ${matches.length === 1 ? "product matches" : "products match"} your search.`
+                : ""}
+            </div>
             {query.trim() && matches.length === 0 && (
               <div className="mt-2 rounded-xl border border-border bg-card p-1 shadow-pop">
                 <p className="px-4 py-3 text-sm text-muted-foreground">No products match that search.</p>

@@ -104,3 +104,43 @@ test("Escape dismisses the overlay", async ({ page }) => {
     "false",
   );
 });
+
+// ---------------------------------------------------------------------------
+// R14-01 — screen-reader result announcements (aria-live superset).
+//
+// The combobox was fully operable (keyboard + ARIA wiring) but silent: a
+// sighted user sees the suggestion list appear, while a screen-reader user
+// gets no announcement that results changed. APG combobox guidance pairs the
+// pattern with a polite live region so result-count changes are announced
+// without moving focus. The region is visually hidden (sr-only) — zero
+// visual impact, verified against the reference parity pins.
+// ---------------------------------------------------------------------------
+
+test("announces the result count via a polite live region", async ({ page }) => {
+  const { listbox } = await openSearch(page);
+  // The status region lives inside the search form, uniquely scoped.
+  const status = page.getByRole("search").getByRole("status");
+  await expect(status).toBeAttached();
+
+  const count = await listbox.getByRole("option").count();
+  expect(count).toBeGreaterThan(0);
+  await expect(status).toHaveText(new RegExp(`^${count} products? match(?:es)? your search\\.$`));
+});
+
+test("announces 'no results' when the query matches nothing", async ({ page }) => {
+  const { input } = await openSearch(page);
+  await input.fill("zzqqxx-no-match");
+  await expect(page.getByRole("search").getByRole("status")).toHaveText(
+    "No products match that search.",
+  );
+});
+
+test("status region is empty before a query is typed", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Search products" }).click();
+  // Attached and polite from the start, but announces nothing until queried.
+  const status = page.getByRole("search").getByRole("status");
+  await expect(status).toBeAttached();
+  await expect(status).toHaveAttribute("aria-live", "polite");
+  await expect(status).toHaveText("");
+});
