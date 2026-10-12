@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/*
+  Tailwind v4 CSS-first tokens.
+  Pins from ecommerce-store trap log:
+  1. Theme colors are full hsl() values (bare triplets resolve transparent).
+  2. shadow-sm is pinned to v3 geometry — v4 shifted the scale one notch.
+  3. Gradients that need sRGB parity use explicit linear-gradient, not bg-gradient-to-*.
+  4. space-y-* must not wrap children that also carry mt-* (v4 :where() loses specificity).
+*/
+
+@theme {
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Outfit", "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-linen: hsl(40 33% 96%);
+  --color-cream: hsl(38 38% 92%);
+  --color-paper: hsl(36 44% 88%);
+  --color-espresso: hsl(20 22% 10%);
+  --color-ink: hsl(20 18% 14%);
+  --color-copper: hsl(18 58% 44%);
+  --color-copper-dark: hsl(18 58% 34%);
+  --color-clay: hsl(16 42% 58%);
+  --color-sage: hsl(138 16% 32%);
+  --color-muted: hsl(24 12% 36%);
+  --color-line: hsl(32 20% 80%);
+  --color-danger: hsl(4 72% 42%);
+  --color-gold: hsl(38 62% 44%);
+  --color-success: hsl(148 32% 28%);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sheet: 8px 0 32px rgb(28 20 16 / 0.18);
+  --shadow-toast: 0 12px 32px rgb(28 20 16 / 0.18);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  --z-sticky: 300;
+  --z-dropdown: 350;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 800;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-linen);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: auto;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: hsl(18 58% 44% / 0.22);
+  color: var(--color-espresso);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-copper);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
