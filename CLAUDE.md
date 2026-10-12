@@ -1,6 +1,6 @@
 # CLAUDE.md — HomeNest Kitchen
 
-This file is read fresh for every conversation. Be brief and practical. The exhaustive rulebook (trap log, parity pins, testing quirks) lives in `AGENTS.md`; the full engineering reference is `Project_Architecture_Document.md`.
+This file is read fresh for every conversation. Be brief and practical. The exhaustive rulebook (trap log, parity pins, testing quirks) lives in `AGENTS.md`; the full engineering reference is `Project_Architecture_Document.md`; the distilled 20-section engineering skill (patterns, debugging, lessons) is `homenest-store-g_SKILL.md`; the audit ledger is `docs/remediation-plan.md`.
 
 ## 1. Core Identity
 

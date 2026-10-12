@@ -155,4 +155,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`AGENTS.md`](AGENTS.md) — agent rules, Tailwind v4 trap log, testing quirks
 - [`CLAUDE.md`](CLAUDE.md) — six-phase workflow and per-tech standards
 - [`Project_Architecture_Document.md`](Project_Architecture_Document.md) — ADRs, layer model, data & security architecture, testing strategy
+- [`homenest-store-g_SKILL.md`](homenest-store-g_SKILL.md) — distilled engineering skill: 20-section reference (stack, design system, trap log, patterns, debugging) for any agent working on this repo
+- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24), residual risks
+- [`docs/session_1.md`](docs/session_1.md) — Session 1 execution transcript (audit → parity → tests → docs → push)
+- [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)
