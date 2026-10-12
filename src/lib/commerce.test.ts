@@ -23,6 +23,7 @@ import {
   FLAT_SHIPPING_CENTS,
   FREE_SHIPPING_THRESHOLD,
   PROMO_MIN_SPEND,
+  TAX_BPS,
 } from "./commerce";
 import { resolveDbPath, isLocalFileUrl } from "./db-path";
 
@@ -58,14 +59,15 @@ describe("formatMoney", () => {
 });
 
 describe("shipping and tax", () => {
-  it("waives shipping at the $100 threshold", () => {
+  it("waives shipping at the $50 threshold (reference parity)", () => {
     expect(shippingCents(0)).toBe(0);
-    expect(shippingCents(9999)).toBe(FLAT_SHIPPING_CENTS);
+    expect(shippingCents(4999)).toBe(FLAT_SHIPPING_CENTS);
     expect(shippingCents(FREE_SHIPPING_THRESHOLD)).toBe(0);
   });
 
-  it("computes 8.25% tax on taxable amount", () => {
-    expect(taxCents(10000)).toBe(825);
+  it("adds no tax line (reference shows subtotal/shipping/total only)", () => {
+    expect(TAX_BPS).toBe(0);
+    expect(taxCents(10000)).toBe(0);
     expect(taxCents(0)).toBe(0);
   });
 });
@@ -103,11 +105,18 @@ describe("cart", () => {
     expect(mergeCartLine(merged, "p1", -2, 5)).toEqual([]);
   });
 
-  it("re-derives totals with free shipping over $100", () => {
+  it("re-derives totals with free shipping over $50", () => {
     const expensive: Product = { ...pan, priceCents: 12000 };
     const totals = cartTotals([{ productId: "p1", quantity: 1 }], [expensive], null);
     expect(totals.shippingCents).toBe(0);
-    expect(totals.totalCents).toBe(12000 + taxCents(12000));
+    expect(totals.totalCents).toBe(12000);
+  });
+
+  it("charges flat shipping under the threshold", () => {
+    const totals = cartTotals([{ productId: "p1", quantity: 1 }], [pan], null);
+    expect(pan.priceCents).toBe(3499);
+    expect(totals.shippingCents).toBe(FLAT_SHIPPING_CENTS);
+    expect(totals.totalCents).toBe(3499 + FLAT_SHIPPING_CENTS);
   });
 });
 
@@ -146,8 +155,8 @@ describe("orders and validation", () => {
 });
 
 describe("db path", () => {
-  it("keeps the schema-relative file URL", () => {
-    expect(resolveDbPath("file:../db/custom.db")).toBe("../db/custom.db");
+  it("keeps the schema-relative file URL contract", () => {
+    expect(resolveDbPath("file:../db/custom.db")).toBe("db/custom.db");
     expect(isLocalFileUrl("file:../db/custom.db")).toBe(true);
   });
 });

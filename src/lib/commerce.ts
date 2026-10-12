@@ -1,8 +1,10 @@
 import type { CartLine, OrderStatus, Product } from "@/types";
 
-export const FREE_SHIPPING_THRESHOLD = 10_000;
+// Reference parity (measured live 2026-10-12): free shipping at $50, flat rate
+// under the threshold, and no tax line in cart/checkout summaries.
+export const FREE_SHIPPING_THRESHOLD = 5_000;
 export const FLAT_SHIPPING_CENTS = 999;
-export const TAX_BPS = 825;
+export const TAX_BPS = 0;
 export const PROMO_CODE = "NEST10";
 export const PROMO_MIN_SPEND = 4_000;
 export const PROMO_BPS = 1_000;

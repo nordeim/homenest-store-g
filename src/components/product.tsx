@@ -1,93 +1,97 @@
-import { Heart, Star } from "lucide-react";
-import { formatMoney, discountPercent, starFloor } from "@/lib/commerce";
+import { ShoppingBag, Star } from "lucide-react";
 import { Link } from "@/lib/router";
 import { useStore } from "@/lib/store";
+import { discountPercent, formatMoney, starFloor } from "@/lib/commerce";
 import type { Product } from "@/types";
 import { cn } from "@/utils/cn";
 
 export function Stars({ rating, count }: { rating: number; count?: number }) {
   const filled = starFloor(rating);
   return (
-    <div className="flex items-center gap-1" role="img" aria-label={`${rating.toFixed(1)} out of 5 stars`}>
-      {Array.from({ length: 5 }, (_, index) => (
-        <Star
-          key={index}
-          className={cn("h-3.5 w-3.5", index < filled ? "fill-gold text-gold" : "text-line")}
-          strokeWidth={1.5}
-        />
-      ))}
-      {typeof count === "number" && <span className="ml-1 text-xs text-muted">({count})</span>}
-    </div>
+    <span className="flex items-center gap-1.5" aria-label={`Rated ${rating} out of 5`}>
+      <span className="flex" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((index) => (
+          <Star
+            key={index}
+            className={cn("h-3.5 w-3.5", index < filled ? "fill-badge text-badge" : "fill-border text-border")}
+          />
+        ))}
+      </span>
+      {typeof count === "number" && <span className="text-xs text-muted-foreground">({count})</span>}
+    </span>
   );
 }
 
 export function ProductCard({ product }: { product: Product }) {
-  const { addToCart, toggleWishlist, wishlist } = useStore();
-  const saved = wishlist.includes(product.id);
-  const off = discountPercent(product.priceCents, product.compareAtCents);
+  const { addToCart, toast } = useStore();
+  const discount = discountPercent(product.priceCents, product.compareAtCents);
+
+  const quickAdd = () => {
+    const error = addToCart(product.id, 1);
+    if (error) toast(error);
+  };
 
   return (
-    <article className="group flex flex-col">
-      <div className="relative overflow-hidden bg-cream">
-        <Link href={`/products/${product.slug}`} className="block">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card transition-shadow duration-300 hover:shadow-pop">
+      <div className="relative bg-muted">
+        <Link href={`/product/${product.id}`} className="block" aria-label={product.name}>
           <img
             src={product.image}
             alt={product.name}
-            width={720}
-            height={540}
-            className="aspect-[4/3] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.05]"
+            width={640}
+            height={640}
+            loading="lazy"
+            className="aspect-square w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03]"
           />
         </Link>
-        {product.badge && (
-          <span className="absolute left-3 top-3 bg-espresso px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-linen">
-            {product.badge}
-          </span>
-        )}
-        {off > 0 && (
-          <span className="absolute right-3 top-3 bg-danger px-2 py-1 font-mono text-[10px] text-linen">-{off}%</span>
-        )}
-        <button
-          type="button"
-          className="absolute bottom-3 right-3 inline-flex h-11 w-11 items-center justify-center bg-linen/90 text-espresso"
-          aria-label={saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
-          aria-pressed={saved}
-          onClick={() => toggleWishlist(product.id)}
-        >
-          <Heart className={cn("h-4 w-4", saved ? "fill-danger text-danger" : "text-muted")} />
-        </button>
-      </div>
-      <div className="flex flex-1 flex-col pt-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-copper">{product.category}</p>
-        <Link href={`/products/${product.slug}`} className="mt-1 font-medium text-espresso hover:text-copper">
-          {product.name}
-        </Link>
-        <div className="mt-1">
-          <Stars rating={product.rating} count={product.reviewCount} />
-        </div>
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="font-mono text-sm text-espresso">{formatMoney(product.priceCents)}</span>
-          {product.compareAtCents && (
-            <span className="font-mono text-xs text-muted line-through">{formatMoney(product.compareAtCents)}</span>
+        <span className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+          {discount > 0 && (
+            <span className="rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-white">
+              -{discount}%
+            </span>
           )}
-        </div>
+          {product.featured && (
+            <span className="rounded-full bg-badge px-2.5 py-1 text-xs font-bold text-white">Featured</span>
+          )}
+        </span>
         <button
           type="button"
-          className="mt-3 h-11 w-full border border-espresso text-sm text-espresso transition-colors duration-300 hover:bg-espresso hover:text-linen"
-          onClick={() => addToCart(product.id)}
+          className="absolute bottom-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/90 text-foreground shadow-lg backdrop-blur-sm transition-colors duration-200 hover:bg-primary hover:text-primary-foreground"
+          aria-label={`Add ${product.name} to cart`}
+          onClick={quickAdd}
         >
-          Add to cart
+          <ShoppingBag className="h-4 w-4" />
         </button>
       </div>
+      <Link href={`/product/${product.id}`} className="flex flex-1 flex-col gap-1.5 p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+          {product.category.replace("-", " ")}
+        </p>
+        <h3 className="font-display text-lg font-bold leading-snug text-foreground">{product.name}</h3>
+        <Stars rating={product.rating} count={product.reviewCount} />
+        <p className="mt-auto flex items-baseline gap-2 pt-1">
+          <span data-testid="card-price" className="text-lg font-bold text-foreground">{formatMoney(product.priceCents)}</span>
+          {product.compareAtCents && product.compareAtCents > product.priceCents && (
+            <span data-testid="card-compare-at" className="text-sm text-muted-foreground line-through">
+              {formatMoney(product.compareAtCents)}
+            </span>
+          )}
+        </p>
+      </Link>
     </article>
   );
 }
 
 export function ProductGrid({ products, empty }: { products: Product[]; empty: string }) {
   if (products.length === 0) {
-    return <p className="py-16 text-center text-muted">{empty}</p>;
+    return (
+      <div className="rounded-xl border border-border bg-card py-16 text-center">
+        <p className="text-sm text-muted-foreground">{empty}</p>
+      </div>
+    );
   }
   return (
-    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

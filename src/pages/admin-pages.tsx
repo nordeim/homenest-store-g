@@ -17,21 +17,23 @@ const ADMIN_NAV = [
 ] as const;
 
 function AdminFrame({ title, children }: { title: string; children: ReactNode }) {
-  const { user } = useStore();
+  const { user, ready } = useStore();
   const { path, navigate } = useRouter();
 
   useEffect(() => {
-    if (!user) navigate(`/login?redirect=${encodeURIComponent(path)}`);
-  }, [navigate, path, user]);
+    // Gate on `ready`: on a hard refresh the persisted session hydrates after
+    // mount — navigating before that kicks logged-in admins out to /login.
+    if (ready && !user) navigate(`/login?redirect=${encodeURIComponent(path)}`);
+  }, [navigate, path, ready, user]);
 
-  if (!user) {
+  if (!ready || !user) {
     return null;
   }
   if (user.role !== "admin") {
     return (
       <div className="mx-auto max-w-xl px-4 py-24 text-center">
         <h1 className="font-display text-3xl">Staff only</h1>
-        <p className="mt-3 text-muted">This console is gated to atelier operators.</p>
+        <p className="mt-3 text-muted-foreground">This console is gated to atelier operators.</p>
       </div>
     );
   }
@@ -39,13 +41,13 @@ function AdminFrame({ title, children }: { title: string; children: ReactNode })
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:flex-row">
       <aside className="w-full lg:w-52">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Admin</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">Admin</p>
         <nav className="mt-4 flex flex-col gap-1" aria-label="Admin">
           {ADMIN_NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-11 items-center px-3 text-sm ${path === item.href ? "bg-cream text-espresso" : "text-muted"}`}
+              className={`flex min-h-11 items-center px-3 text-sm ${path === item.href ? "bg-card text-foreground" : "text-muted-foreground"}`}
             >
               {item.label}
             </Link>
@@ -53,7 +55,7 @@ function AdminFrame({ title, children }: { title: string; children: ReactNode })
         </nav>
       </aside>
       <section className="min-w-0 flex-1">
-        <h1 className="font-display text-3xl text-espresso">{title}</h1>
+        <h1 className="font-display text-3xl text-foreground">{title}</h1>
         <div className="mt-8">{children}</div>
       </section>
     </div>
@@ -74,9 +76,9 @@ export function AdminDashboard() {
           { label: "Products", value: String(products.length) },
           { label: "Customers", value: String(users.filter((item) => item.role === "customer").length) },
         ].map((stat) => (
-          <div key={stat.label} className="border border-line bg-cream p-5">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-muted">{stat.label}</p>
-            <p className="mt-2 font-display text-3xl text-espresso">{stat.value}</p>
+          <div key={stat.label} className="border border-border bg-card p-5">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{stat.label}</p>
+            <p className="mt-2 font-display text-3xl text-foreground">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -97,7 +99,7 @@ export function AdminProducts() {
     <AdminFrame title="Products">
       <div className="mb-4 flex flex-wrap gap-3">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name" className={inputClass()} />
-        <select className="h-12 border border-line bg-linen px-2" value={category} onChange={(e) => setCategory(e.target.value)}>
+        <select className="h-12 border border-border bg-card px-2" value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="all">All categories</option>
           {CATEGORIES.map((item) => (
             <option key={item.id} value={item.id}>
@@ -106,11 +108,11 @@ export function AdminProducts() {
           ))}
         </select>
       </div>
-      {list.length === 0 && <p className="text-muted">No products match.</p>}
+      {list.length === 0 && <p className="text-muted-foreground">No products match.</p>}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-line text-muted">
+            <tr className="border-b border-border text-muted-foreground">
               <th className="py-2 font-medium">Name</th>
               <th className="py-2 font-medium">Stock</th>
               <th className="py-2 font-medium">Visible</th>
@@ -118,13 +120,13 @@ export function AdminProducts() {
           </thead>
           <tbody>
             {list.map((product) => (
-              <tr key={product.id} className="border-b border-line">
+              <tr key={product.id} className="border-b border-border">
                 <td className="py-3">{product.name}</td>
                 <td>
                   <input
                     type="number"
                     min={0}
-                    className="h-10 w-20 border border-line px-2"
+                    className="h-10 w-20 border border-border px-2"
                     value={product.stock}
                     onChange={(e) => updateProduct(product.id, { stock: Number(e.target.value) })}
                     aria-label={`${product.name} stock`}
@@ -133,7 +135,7 @@ export function AdminProducts() {
                 <td>
                   <button
                     type="button"
-                    className="text-copper underline"
+                    className="text-primary underline"
                     onClick={() => updateProduct(product.id, { visible: !product.visible })}
                   >
                     {product.visible ? "Visible" : "Hidden"}
@@ -162,7 +164,7 @@ export function AdminOrders() {
     <AdminFrame title="Orders">
       <div className="mb-4 flex flex-wrap gap-3">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Number or email" className={inputClass()} />
-        <select className="h-12 border border-line bg-linen px-2" value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select className="h-12 border border-border bg-card px-2" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="all">All statuses</option>
           {["pending", "paid", "processing", "in_transit", "delivered", "cancelled", "refunded"].map((value) => (
             <option key={value} value={value}>
@@ -171,14 +173,14 @@ export function AdminOrders() {
           ))}
         </select>
       </div>
-      {list.length === 0 && <p className="text-muted">No orders match those filters.</p>}
-      <ul className="divide-y divide-line">
+      {list.length === 0 && <p className="text-muted-foreground">No orders match those filters.</p>}
+      <ul className="divide-y divide-border">
         {list.map((order) => (
           <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-            <Link href={`/admin/orders/${order.id}`} className="font-mono text-sm text-copper">
+            <Link href={`/admin/orders/${order.id}`} className="font-mono text-sm text-primary">
               {order.number}
             </Link>
-            <span className="text-sm text-muted">{order.email}</span>
+            <span className="text-sm text-muted-foreground">{order.email}</span>
             <span className="text-sm">{statusLabel(order.status)}</span>
             <span className="font-mono text-sm">{formatMoney(order.totalCents)}</span>
           </li>
@@ -202,7 +204,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
   }
   return (
     <AdminFrame title={order.number}>
-      <p className="text-sm text-muted">
+      <p className="text-sm text-muted-foreground">
         {order.email} · {order.shippingAddress.line1}, {order.shippingAddress.city}
       </p>
       <ul className="mt-6 text-sm">
@@ -218,7 +220,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
       <label className="mt-6 block text-sm">
         Status
         <select
-          className="ml-2 h-11 border border-line bg-linen px-2"
+          className="ml-2 h-11 border border-border bg-card px-2"
           value={order.status}
           onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
         >
@@ -243,7 +245,7 @@ export function AdminOrderDetail({ id }: { id: string }) {
           Save tracking
         </PrimaryButton>
       </div>
-      <ol className="mt-8 text-sm text-muted">
+      <ol className="mt-8 text-sm text-muted-foreground">
         {order.timeline.map((event) => (
           <li key={event.at + event.label}>
             {event.label} · {new Date(event.at).toLocaleString()}
@@ -273,12 +275,12 @@ export function AdminAnalytics() {
       <h2 className="font-display text-xl">Units moved</h2>
       <ul className="mt-4">
         {units.map((row) => (
-          <li key={row.name} className="flex justify-between border-b border-line py-2 text-sm">
+          <li key={row.name} className="flex justify-between border-b border-border py-2 text-sm">
             <span>{row.name}</span>
             <span className="font-mono">{row.qty}</span>
           </li>
         ))}
-        {units.length === 0 && <li className="text-muted">No sales yet.</li>}
+        {units.length === 0 && <li className="text-muted-foreground">No sales yet.</li>}
       </ul>
     </AdminFrame>
   );
@@ -289,9 +291,9 @@ export function AdminCategories() {
     <AdminFrame title="Categories">
       <ul className="grid gap-3">
         {CATEGORIES.map((category) => (
-          <li key={category.id} className="border border-line p-4">
-            <p className="font-medium text-espresso">{category.name}</p>
-            <p className="text-sm text-muted">{category.blurb}</p>
+          <li key={category.id} className="border border-border p-4">
+            <p className="font-medium text-foreground">{category.name}</p>
+            <p className="text-sm text-muted-foreground">{category.blurb}</p>
           </li>
         ))}
       </ul>
@@ -305,7 +307,7 @@ export function AdminCarousel() {
     <AdminFrame title="Carousel">
       <ul className="grid gap-4">
         {carousel.map((slide, index) => (
-          <li key={slide.id} className="border border-line p-4">
+          <li key={slide.id} className="border border-border p-4">
             <Field id={`slide-title-${slide.id}`} label="Title">
               <input
                 id={`slide-title-${slide.id}`}
@@ -338,7 +340,7 @@ export function AdminCarousel() {
 export function AdminSettings() {
   return (
     <AdminFrame title="Settings">
-      <p className="text-sm text-muted">
+      <p className="text-sm text-muted-foreground">
         Storefront origin is this browser. Catalog persistence is local (`homenest.v1`). Demo payments never hit a
         network. Database pointer: file:../db/custom.db
       </p>

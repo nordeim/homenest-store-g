@@ -1,10 +1,12 @@
 export type CategoryId =
   | "cookware"
-  | "knives"
-  | "storage"
-  | "gadgets"
   | "bakeware"
-  | "tableware";
+  | "kitchen-tools"
+  | "storage"
+  | "appliances"
+  | "dining"
+  | "cleaning"
+  | "decor";
 
 export interface Category {
   id: CategoryId;

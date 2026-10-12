@@ -27,7 +27,9 @@ import type {
   User,
 } from "@/types";
 
-const STORAGE_KEY = "homenest.v1";
+// Versioned storage key: bump when PersistedState's shape or the seed catalog
+// changes so stale client data re-seeds instead of shadowing the new catalog.
+const STORAGE_KEY = "homenest.v2";
 
 interface PersistedState {
   users: User[];

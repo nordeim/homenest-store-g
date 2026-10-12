@@ -8,9 +8,11 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import {
-  Heart,
+  House,
   Menu,
+  MessageCircle,
   Search,
   ShoppingBag,
   UserRound,
@@ -18,25 +20,30 @@ import {
   Truck,
   RotateCcw,
   ShieldCheck,
-  ChefHat,
+  Headphones,
 } from "lucide-react";
-import { BRAND, FOOTER_LEGAL, FOOTER_SHOP, NAV_LINKS, productById } from "@/data/catalog";
+import { BRAND, FOOTER_LEGAL, FOOTER_QUICK_LINKS, NAV_LINKS, productById } from "@/data/catalog";
 import { formatMoney } from "@/lib/commerce";
 import { Link, useRouter } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { cn } from "@/utils/cn";
 
-export function AnnouncementBar() {
+export function BrandMark({ compact }: { compact?: boolean }) {
   return (
-    <p className="bg-copper px-4 py-2 text-center text-[13px] font-medium tracking-wide text-linen">
-      Free shipping on orders over $100 · Use NEST10 for 10% off $40+
-    </p>
+    <span className="flex items-center gap-2.5">
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <House className="h-5 w-5" strokeWidth={2.2} />
+      </span>
+      <span className="font-display text-[1.4rem] font-bold tracking-tight text-foreground">
+        {compact ? BRAND.name : BRAND.name}
+      </span>
+    </span>
   );
 }
 
 export function Header() {
   const { path, navigate } = useRouter();
-  const { cartCount, setCartOpen, user, wishlist, visibleProducts, setSearchOpen, searchOpen } = useStore();
+  const { cartCount, setCartOpen, user, setSearchOpen, searchOpen, visibleProducts } = useStore();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const searchId = useId();
@@ -49,7 +56,7 @@ export function Header() {
       .filter(
         (product) =>
           product.name.toLowerCase().includes(q) ||
-          product.category.includes(q) ||
+          product.category.replace("-", " ").includes(q) ||
           product.materials.some((material) => material.toLowerCase().includes(q)),
       )
       .slice(0, 6);
@@ -78,54 +85,61 @@ export function Header() {
     event.preventDefault();
     const q = query.trim();
     if (!q) return;
+    setMenuOpen(false);
     setSearchOpen(false);
     navigate(`/products?search=${encodeURIComponent(q)}`);
   };
 
   return (
-    <header className="sticky top-0 z-[300] border-b border-line bg-linen/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:h-[72px] sm:px-6">
-        <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-[300] border-b border-border bg-card/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-6">
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-espresso md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground md:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            {menuOpen ? <X strokeWidth={1.75} /> : <Menu strokeWidth={1.75} />}
+            {menuOpen ? (
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white">
+                <X className="h-5 w-5" strokeWidth={2.2} />
+              </span>
+            ) : (
+              <Menu strokeWidth={2} />
+            )}
           </button>
-          <Link href="/" className="flex items-baseline gap-2" aria-label="HomeNest Kitchen home">
-            <span className="font-display text-[1.35rem] font-semibold tracking-tight text-espresso sm:text-2xl">
-              HomeNest
-            </span>
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.28em] text-copper sm:inline">
-              Kitchen
-            </span>
+          <Link href="/" className="rounded-md" aria-label="HomeNest home">
+            <BrandMark />
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
-          {NAV_LINKS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-sm tracking-wide text-muted transition-colors duration-300 hover:text-espresso",
-                path === item.href && "text-espresso",
-              )}
-              aria-current={path === item.href ? "page" : undefined}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+          {NAV_LINKS.map((item) => {
+            const active = path === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+                aria-current={active ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-espresso"
+            className="hidden h-11 items-center gap-2 rounded-full border border-border bg-muted px-4 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
             aria-label="Search products"
             aria-expanded={searchOpen}
             aria-controls={searchId}
@@ -134,36 +148,45 @@ export function Header() {
               window.setTimeout(() => inputRef.current?.focus(), 40);
             }}
           >
-            <Search strokeWidth={1.75} className="h-5 w-5" />
+            <Search className="h-4 w-4" />
+            Search products...
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground lg:hidden"
+            aria-label="Search products"
+            aria-expanded={searchOpen}
+            aria-controls={searchId}
+            onClick={() => {
+              setSearchOpen(!searchOpen);
+              window.setTimeout(() => inputRef.current?.focus(), 40);
+            }}
+          >
+            <Search strokeWidth={2} />
           </button>
           <Link
             href="/account"
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-espresso"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
             aria-label={user ? "Account" : "Sign in"}
           >
-            <UserRound strokeWidth={1.75} className="h-5 w-5" />
-          </Link>
-          <Link
-            href="/account"
-            className="relative hidden h-11 w-11 items-center justify-center rounded-md text-espresso sm:inline-flex"
-            aria-label="Wishlist"
-          >
-            <Heart strokeWidth={1.75} className="h-5 w-5" />
-            {wishlist.length > 0 && (
-              <span className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-copper px-1 font-mono text-[10px] text-linen">
-                {wishlist.length}
-              </span>
-            )}
+            <span
+              className={cn(
+                "inline-flex h-9 w-9 items-center justify-center rounded-full",
+                user ? "bg-accent text-white" : "",
+              )}
+            >
+              <UserRound className="h-5 w-5" strokeWidth={2} />
+            </span>
           </Link>
           <button
             type="button"
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-espresso"
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
             aria-label="Open cart"
             onClick={() => setCartOpen(true)}
           >
-            <ShoppingBag strokeWidth={1.75} className="h-5 w-5" />
+            <ShoppingBag strokeWidth={2} />
             {cartCount > 0 && (
-              <span className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-copper px-1 font-mono text-[10px] text-linen">
+              <span className="absolute right-0.5 top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
                 {cartCount}
               </span>
             )}
@@ -172,13 +195,13 @@ export function Header() {
       </div>
 
       {searchOpen && (
-        <div id={searchId} className="border-t border-line bg-linen px-4 py-3 sm:px-6">
-          <form onSubmit={submitSearch} className="mx-auto max-w-6xl" role="search">
+        <div id={searchId} className="border-t border-border bg-card px-4 py-3 sm:px-6">
+          <form onSubmit={submitSearch} className="mx-auto max-w-7xl" role="search">
             <label htmlFor="site-search" className="sr-only">
               Search products
             </label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 ref={inputRef}
                 id="site-search"
@@ -188,25 +211,25 @@ export function Header() {
                 autoComplete="off"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search copper, knives, jars…"
-                className="h-12 w-full rounded-md border border-line bg-cream pl-10 pr-4 text-sm text-espresso placeholder:text-muted"
+                placeholder="Search products..."
+                className="h-12 w-full rounded-full border border-border bg-background pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
               />
             </div>
             {query.trim() && (
-              <ul className="mt-2 overflow-visible rounded-md border border-line bg-linen shadow-sm" role="listbox">
+              <ul className="mt-2 overflow-visible rounded-xl border border-border bg-card p-1 shadow-pop" role="listbox">
                 {matches.length === 0 && (
-                  <li className="px-4 py-3 text-sm text-muted">No matches in the atelier.</li>
+                  <li className="px-4 py-3 text-sm text-muted-foreground">No products match that search.</li>
                 )}
                 {matches.map((product) => (
                   <li key={product.id} role="option">
                     <Link
-                      href={`/products/${product.slug}`}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-espresso hover:bg-cream"
+                      href={`/product/${product.id}`}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-muted"
                       onClick={() => setSearchOpen(false)}
                     >
-                      <img src={product.image} alt="" width={40} height={40} className="h-10 w-10 object-cover" />
-                      <span>{product.name}</span>
-                      <span className="ml-auto font-mono text-xs text-muted">{formatMoney(product.priceCents)}</span>
+                      <img src={product.image} alt="" width={40} height={40} className="h-10 w-10 rounded-md object-cover" />
+                      <span className="font-medium">{product.name}</span>
+                      <span className="ml-auto font-semibold text-primary">{formatMoney(product.priceCents)}</span>
                     </Link>
                   </li>
                 ))}
@@ -216,59 +239,72 @@ export function Header() {
         </div>
       )}
 
-      {menuOpen && (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-[400] bg-espresso/40 md:hidden"
-            aria-label="Close menu overlay"
-            onClick={() => setMenuOpen(false)}
-          />
-          <nav
-            id="mobile-nav"
-            className="fixed inset-y-0 left-0 z-[500] flex w-72 flex-col bg-linen shadow-[8px_0_32px_rgb(28_20_16_/_0.18)] md:hidden"
-            aria-label="Mobile"
-          >
-            <div className="flex h-16 items-center justify-between border-b border-line px-4">
-              <span className="font-display text-lg text-espresso">Menu</span>
+      {typeof document !== "undefined" &&
+        createPortal(
+          menuOpen ? (
+            <div className="fixed inset-x-0 top-16 z-[350] md:hidden" id="mobile-nav-holder">
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md"
-                aria-label="Close menu"
+                className="fixed inset-0 top-16 -z-10 h-[calc(100vh-4rem)] cursor-default bg-white/70 backdrop-blur-[2px]"
+                aria-label="Close menu overlay"
                 onClick={() => setMenuOpen(false)}
+              />
+              <nav
+                id="mobile-nav"
+                className="border-b border-border bg-card px-4 pb-6 pt-3 shadow-pop"
+                aria-label="Mobile"
               >
-                <X strokeWidth={1.75} />
-              </button>
+                <form onSubmit={submitSearch} role="search" className="mb-2">
+                  <label htmlFor="mobile-search" className="sr-only">
+                    Search products
+                  </label>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      id="mobile-search"
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Search products..."
+                      className="h-11 w-full rounded-full border border-border bg-muted pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
+                    />
+                  </div>
+                </form>
+                <ul className="flex flex-col gap-1">
+                  {NAV_LINKS.map((item) => {
+                    const active = path === item.href;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex min-h-11 items-center rounded-full px-4 text-base font-medium",
+                            active
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-muted",
+                          )}
+                          aria-current={active ? "page" : undefined}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                  <li>
+                    <Link
+                      href="/account"
+                      className="flex min-h-11 items-center rounded-full px-4 text-base font-medium text-foreground hover:bg-muted"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {user ? "Account" : "Sign in"}
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
             </div>
-            <div className="flex flex-1 flex-col gap-1 p-4">
-              {NAV_LINKS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex min-h-11 items-center rounded-md px-3 text-base text-espresso"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <Link
-                href="/account"
-                className="flex min-h-11 items-center rounded-md px-3 text-base text-espresso"
-                onClick={() => setMenuOpen(false)}
-              >
-                {user ? "Account" : "Sign in"}
-              </Link>
-              <Link
-                href="/cart"
-                className="flex min-h-11 items-center rounded-md bg-copper px-3 text-base text-linen"
-                onClick={() => setMenuOpen(false)}
-              >
-                Cart
-              </Link>
-            </div>
-          </nav>
-        </>
-      )}
+          ) : null,
+          document.body,
+        )}
     </header>
   );
 }
@@ -297,16 +333,16 @@ export function CartDrawer() {
     <div className="fixed inset-0 z-[500]">
       <button
         type="button"
-        className="absolute inset-0 bg-espresso/40"
+        className="absolute inset-0 bg-foreground/40"
         aria-label="Close cart"
         onClick={() => setCartOpen(false)}
       />
-      <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-linen shadow-[8px_0_32px_rgb(28_20_16_/_0.18)]">
-        <div className="flex h-16 items-center justify-between border-b border-line px-5">
-          <h2 className="font-display text-xl text-espresso">Cart ({cartCount})</h2>
+      <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-card shadow-drawer" role="dialog" aria-label="Cart">
+        <div className="flex h-16 items-center justify-between border-b border-border px-5">
+          <h2 className="font-display text-xl font-bold text-foreground">Cart ({cartCount})</h2>
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
             aria-label="Close cart"
             onClick={() => setCartOpen(false)}
           >
@@ -314,30 +350,38 @@ export function CartDrawer() {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {cart.length === 0 && <p className="text-sm text-muted">Your cart is resting. The board is clear.</p>}
+          {cart.length === 0 && (
+            <p className="py-10 text-center text-sm text-muted-foreground">Your cart is empty.</p>
+          )}
           <ul className="flex flex-col gap-4">
             {cart.map((line) => {
               const product = productById(line.productId, products);
               if (!product) return null;
               return (
-                <li key={line.productId} className="flex gap-3 border-b border-line pb-4">
-                  <img src={product.image} alt="" width={72} height={72} className="h-[72px] w-[72px] object-cover" />
+                <li key={line.productId} className="flex gap-3 border-b border-border pb-4">
+                  <img
+                    src={product.image}
+                    alt=""
+                    width={72}
+                    height={72}
+                    className="h-[72px] w-[72px] rounded-lg border border-border bg-muted object-cover"
+                  />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-espresso">{product.name}</p>
-                    <p className="font-mono text-sm text-copper">{formatMoney(product.priceCents)}</p>
+                    <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>
+                    <p className="text-sm font-semibold text-primary">{formatMoney(product.priceCents)}</p>
                     <div className="mt-2 flex items-center gap-2">
                       <button
                         type="button"
-                        className="h-9 w-9 border border-line"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border"
                         aria-label={`Decrease ${product.name}`}
                         onClick={() => setLineQty(line.productId, line.quantity - 1)}
                       >
                         −
                       </button>
-                      <span className="w-6 text-center text-sm">{line.quantity}</span>
+                      <span className="w-6 text-center text-sm font-medium">{line.quantity}</span>
                       <button
                         type="button"
-                        className="h-9 w-9 border border-line"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border"
                         aria-label={`Increase ${product.name}`}
                         onClick={() => setLineQty(line.productId, line.quantity + 1)}
                       >
@@ -345,10 +389,11 @@ export function CartDrawer() {
                       </button>
                       <button
                         type="button"
-                        className="ml-auto text-xs text-muted underline"
+                        className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
+                        aria-label={`Remove ${product.name}`}
                         onClick={() => removeLine(line.productId)}
                       >
-                        Remove
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -357,14 +402,14 @@ export function CartDrawer() {
             })}
           </ul>
         </div>
-        <div className="border-t border-line px-5 py-4">
+        <div className="border-t border-border px-5 py-4">
           <div className="flex justify-between text-sm">
-            <span>Subtotal</span>
-            <span className="font-mono">{formatMoney(totals.subtotalCents)}</span>
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-semibold text-foreground">{formatMoney(totals.subtotalCents)}</span>
           </div>
           <button
             type="button"
-            className="mt-4 flex h-12 w-full items-center justify-center bg-copper text-sm font-medium text-linen"
+            className="mt-4 flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => {
               setCartOpen(false);
               navigate("/checkout");
@@ -375,7 +420,7 @@ export function CartDrawer() {
           </button>
           <button
             type="button"
-            className="mt-2 flex h-11 w-full items-center justify-center text-sm text-espresso underline"
+            className="mt-2 flex h-11 w-full items-center justify-center rounded-full text-sm font-medium text-foreground underline-offset-4 hover:underline"
             onClick={() => {
               setCartOpen(false);
               navigate("/cart");
@@ -396,7 +441,7 @@ export function Toaster() {
       {toasts.map((toast) => (
         <p
           key={toast.id}
-          className="pointer-events-auto max-w-xs bg-espresso px-4 py-3 text-sm text-linen shadow-[0_12px_32px_rgb(28_20_16_/_0.18)]"
+          className="pointer-events-auto max-w-xs rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-toast"
         >
           {toast.text}
         </p>
@@ -405,59 +450,39 @@ export function Toaster() {
   );
 }
 
-export function Footer() {
-  const { subscribe, toast } = useStore();
-  const [email, setEmail] = useState("");
-  const [note, setNote] = useState<string | null>(null);
-
-  const onSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (!email.includes("@")) {
-      setNote("Enter a valid email.");
-      return;
-    }
-    const message = subscribe(email);
-    setNote(message);
-    toast(message);
-    setEmail("");
-  };
-
+export function ChatButton() {
+  const { navigate } = useRouter();
   return (
-    <footer className="mt-20 bg-espresso text-linen">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <p className="font-display text-3xl">Stay Updated</p>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-linen/70">
-            Atelier notes, restocks, and the occasional recipe — never a blast.
+    <button
+      type="button"
+      className="fixed bottom-5 right-5 z-[420] inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pop transition-transform hover:scale-105"
+      aria-label="Chat with us"
+      onClick={() => navigate("/contact")}
+    >
+      <MessageCircle className="h-6 w-6" strokeWidth={2} />
+    </button>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="mt-20 bg-footer text-card-foreground">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-8">
+        <div>
+          <p className="flex items-center gap-2.5">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <House className="h-5 w-5" strokeWidth={2.2} />
+            </span>
+            <span className="font-display text-2xl font-bold text-white">{BRAND.name}</span>
           </p>
-          <form onSubmit={onSubmit} className="mt-6 flex max-w-md gap-2">
-            <label htmlFor="newsletter-email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@kitchen.email"
-              className="h-12 flex-1 border border-linen/20 bg-transparent px-3 text-sm text-linen placeholder:text-linen/40"
-            />
-            <button type="submit" className="h-12 bg-copper px-5 text-sm font-medium text-linen">
-              Join
-            </button>
-          </form>
-          {note && (
-            <p className="mt-2 text-sm text-linen/80" role="status" aria-label="Newsletter status">
-              {note}
-            </p>
-          )}
+          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">{BRAND.tagline}</p>
         </div>
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">Shop</p>
-          <ul className="mt-4 flex flex-col gap-2 text-sm text-linen/80">
-            {FOOTER_SHOP.map((item) => (
+          <p className="font-display text-lg font-bold text-white">Quick Links</p>
+          <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/60">
+            {FOOTER_QUICK_LINKS.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="hover:text-linen">
+                <Link href={item.href} className="hover:text-white">
                   {item.label}
                 </Link>
               </li>
@@ -465,30 +490,49 @@ export function Footer() {
           </ul>
         </div>
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-copper">House</p>
-          <ul className="mt-4 flex flex-col gap-2 text-sm text-linen/80">
-            <li>
-              <Link href="/about" className="hover:text-linen">
-                About
-              </Link>
-            </li>
-            <li>
-              <Link href="/contact" className="hover:text-linen">
-                Contact
-              </Link>
-            </li>
+          <p className="font-display text-lg font-bold text-white">Policies</p>
+          <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/60">
             {FOOTER_LEGAL.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="hover:text-linen">
+                <Link href={item.href} className="hover:text-white">
                   {item.label}
                 </Link>
               </li>
             ))}
+          </ul>
+        </div>
+        <div>
+          <p className="font-display text-lg font-bold text-white">Contact Us</p>
+          <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/60">
+            <li>
+              <a href={`mailto:${BRAND.email}`} className="hover:text-white">
+                {BRAND.email}
+              </a>
+            </li>
+            <li>
+              <a href={`tel:${BRAND.phone.replace(/[^+\d]/g, "")}`} className="hover:text-white">
+                {BRAND.phone}
+              </a>
+            </li>
+            <li>{BRAND.address}</li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-linen/10 px-4 py-5 text-center font-mono text-[11px] tracking-wide text-linen/50">
-        © {new Date().getFullYear()} {BRAND.name} · {BRAND.address}
+      <div className="border-t border-white/10 px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-sm text-white/50 sm:flex-row">
+          <p>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
+          <div className="flex gap-6">
+            <Link href="/privacy-policy" className="hover:text-white">
+              Privacy
+            </Link>
+            <Link href="/terms-of-service" className="hover:text-white">
+              Terms
+            </Link>
+            <Link href="/contact" className="hover:text-white">
+              Contact
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );
@@ -496,20 +540,22 @@ export function Footer() {
 
 export function FeatureBar() {
   const items = [
-    { icon: Truck, title: "Free over $100", body: "Flat $9.99 under the threshold." },
-    { icon: RotateCcw, title: "30-day returns", body: "Unused, original packing." },
-    { icon: ShieldCheck, title: "Lifetime honing", body: "Edges we sold, we keep true." },
-    { icon: ChefHat, title: "Atelier support", body: "Cooks, not a call center." },
+    { icon: Truck, title: "Free Shipping", body: "On orders over $50" },
+    { icon: ShieldCheck, title: "Secure Payment", body: "100% protected checkout" },
+    { icon: RotateCcw, title: "Easy Returns", body: "30-day return policy" },
+    { icon: Headphones, title: "24/7 Support", body: "Dedicated customer care" },
   ];
   return (
-    <section className="border-y border-line bg-cream">
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 md:grid-cols-4">
+    <section aria-label="Store highlights">
+      <div className="mx-auto grid max-w-7xl gap-4 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         {items.map((item) => (
-          <div key={item.title} className="flex gap-3">
-            <item.icon className="mt-0.5 h-5 w-5 text-copper" strokeWidth={1.6} />
+          <div key={item.title} className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
+            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <item.icon className="h-6 w-6" strokeWidth={1.8} />
+            </span>
             <div>
-              <p className="text-sm font-medium text-espresso">{item.title}</p>
-              <p className="text-sm text-muted">{item.body}</p>
+              <p className="text-sm font-bold text-foreground">{item.title}</p>
+              <p className="text-sm text-muted-foreground">{item.body}</p>
             </div>
           </div>
         ))}
@@ -520,21 +566,21 @@ export function FeatureBar() {
 
 export function PageShell({ children, admin }: { children: ReactNode; admin?: boolean }) {
   return (
-    <div className="flex min-h-screen flex-col bg-linen">
+    <div className="flex min-h-screen flex-col bg-background">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[800] focus:bg-copper focus:px-4 focus:py-2 focus:text-linen"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[800] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
       >
         Skip to content
       </a>
-      {!admin && <AnnouncementBar />}
       <Header />
       <main id="main" className="flex-1">
         {children}
       </main>
-      <Footer />
+      {!admin && <Footer />}
       <CartDrawer />
       <Toaster />
+      {!admin && <ChatButton />}
     </div>
   );
 }
@@ -552,12 +598,12 @@ export function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm text-espresso">
+      <label htmlFor={id} className="text-sm font-medium text-foreground">
         {label}
       </label>
       {children}
       {error && (
-        <p className="text-sm text-danger" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {error}
         </p>
       )}
@@ -567,8 +613,8 @@ export function Field({
 
 export function inputClass(error?: boolean) {
   return cn(
-    "h-12 w-full border bg-linen px-3 text-sm text-espresso",
-    error ? "border-danger" : "border-line",
+    "h-12 w-full rounded-lg border bg-card px-3.5 text-sm text-foreground placeholder:text-muted-foreground",
+    error ? "border-destructive" : "border-border",
   );
 }
 
@@ -581,7 +627,25 @@ export function PrimaryButton({
     <button
       {...props}
       className={cn(
-        "inline-flex h-12 min-w-[44px] items-center justify-center bg-copper px-6 text-sm font-medium text-linen transition-colors duration-300 hover:bg-copper-dark disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex h-12 min-w-[44px] items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-colors duration-200 hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function OutlineButton({
+  children,
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      {...props}
+      className={cn(
+        "inline-flex h-12 min-w-[44px] items-center justify-center rounded-full border border-border bg-card px-6 text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60",
         className,
       )}
     >

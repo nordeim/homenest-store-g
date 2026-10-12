@@ -94,6 +94,9 @@ export function matchPath(path: string): { name: string; params: Record<string, 
   if (path === "/products") return { name: "products", params: {} };
   const product = /^\/products\/([^/]+)$/.exec(path);
   if (product?.[1]) return { name: "product", params: { slug: decodeURIComponent(product[1]) } };
+  // Reference-site URL shape: /product/{id}. Slug deep-links (/products/{slug}) stay supported.
+  const productAlt = /^\/product\/([^/]+)$/.exec(path);
+  if (productAlt?.[1]) return { name: "product", params: { slug: decodeURIComponent(productAlt[1]) } };
   if (path === "/cart") return { name: "cart", params: {} };
   if (path === "/checkout") return { name: "checkout", params: {} };
   if (path === "/order-success") return { name: "order-success", params: {} };
