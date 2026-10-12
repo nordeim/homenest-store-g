@@ -8,6 +8,7 @@ import {
   formatCardNumber,
   formatExpiry,
   formatMoney,
+  generateGuestToken,
   isCardNumberValid,
   isEmail,
   isExpiryValid,
@@ -135,8 +136,26 @@ describe("orders and validation", () => {
     expect(formatCardNumber("4242424242424242")).toBe("4242 4242 4242 4242");
     expect(isCardNumberValid("4242424242424")).toBe(true);
     expect(formatExpiry("1228")).toBe("12/28");
-    expect(isExpiryValid("12/28")).toBe(true);
-    expect(isExpiryValid("13/28")).toBe(false);
+    // Rolling window: validity is pinned against an injected clock, not a
+    // hardcoded year. Cards are valid through the last day of their expiry
+    // month.
+    const now = new Date("2026-10-12T00:00:00Z");
+    expect(isExpiryValid("12/28", now)).toBe(true);
+    expect(isExpiryValid("10/26", now)).toBe(true); // current month is valid
+    expect(isExpiryValid("11/26", now)).toBe(true);
+    expect(isExpiryValid("09/26", now)).toBe(false); // last month is expired
+    expect(isExpiryValid("01/26", now)).toBe(false); // in-year past date (the old `year >= 26` bug accepted this)
+    expect(isExpiryValid("12/20", now)).toBe(false);
+    expect(isExpiryValid("13/28", now)).toBe(false);
+    expect(isExpiryValid("12/28")).toBe(true); // default clock: 2028 is in the future
+  });
+
+  it("generates url-safe high-entropy guest tokens", () => {
+    const a = generateGuestToken();
+    const b = generateGuestToken();
+    expect(a).toMatch(/^[0-9a-f]{32}$/); // 128-bit hex, URL-safe
+    expect(b).toMatch(/^[0-9a-f]{32}$/);
+    expect(a).not.toBe(b); // uniqueness across draws
   });
 
   it("builds carrier tracking URLs and rejects open redirects", () => {

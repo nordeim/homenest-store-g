@@ -8,9 +8,11 @@ import {
   type ReactNode,
 } from "react";
 import { CAROUSEL, DEMO_USERS, PRODUCTS, productById } from "@/data/catalog";
+import { STORAGE_KEY } from "@/lib/storage-key";
 import {
   cartTotals,
   clampQuantity,
+  generateGuestToken,
   mergeCartLine,
   nextOrderNumber,
   statusLabel,
@@ -26,10 +28,6 @@ import type {
   ToastMessage,
   User,
 } from "@/types";
-
-// Versioned storage key: bump when PersistedState's shape or the seed catalog
-// changes so stale client data re-seeds instead of shadowing the new catalog.
-const STORAGE_KEY = "homenest.v2";
 
 interface PersistedState {
   users: User[];
@@ -371,7 +369,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           { at: placedAt, label: "Order placed" },
           { at: placedAt, label: "Payment captured" },
         ],
-        guestToken: Math.random().toString(36).slice(2, 12),
+        guestToken: generateGuestToken(),
       };
       setState((prev) => ({
         ...prev,

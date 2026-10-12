@@ -167,13 +167,28 @@ export function isCardNumberValid(value: string): boolean {
   return cardDigits(value).length >= 13;
 }
 
-export function isExpiryValid(value: string): boolean {
+export function isExpiryValid(value: string, now: Date = new Date()): boolean {
   const match = /^(\d{2})\/(\d{2})$/.exec(value.trim());
   if (!match) return false;
   const month = Number(match[1]);
-  const year = Number(match[2]);
+  const year = 2000 + Number(match[2]);
   if (month < 1 || month > 12) return false;
-  return year >= 26;
+  // Cards are valid through the last day of the expiry month: the first
+  // millisecond of the following month is the expiry instant. The clock is
+  // injectable so the rolling window stays deterministically testable.
+  const expiryInstant = Date.UTC(year, month, 1);
+  return expiryInstant > now.getTime();
+}
+
+/**
+ * Capability token for guest order views. 128 bits from the platform CSPRNG,
+ * hex-encoded (URL-safe). Replaces the former ~59-bit `Math.random` token
+ * (remediation-plan.md F-11 / follow-up #3).
+ */
+export function generateGuestToken(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 export function trackingUrl(carrier: string | null, trackingNumber: string | null): string | null {
