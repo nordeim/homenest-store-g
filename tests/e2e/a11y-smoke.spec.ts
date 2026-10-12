@@ -70,4 +70,30 @@ test.describe("a11y smoke", () => {
     console.log(`[a11y] cart: ${contrastCount} color-contrast nodes (parity-pinned, documented)`);
     expect(serious(results).map((v) => `${v.id}: ${v.nodes.length} nodes`)).toEqual([]);
   });
+
+  // Session-4 extension (remediation plan §9.6.3): the authenticated surfaces
+  // join the gate. Login happens through the real UI (demo customer / admin).
+  test("account page (authenticated) has no critical/serious structural violations", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("john@example.com");
+    await page.getByLabel("Password").fill("Demo1234!");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await expect(page).toHaveURL(/\/account$/);
+    const { results, contrastCount } = await analyzeForGate(page);
+    console.log(`[a11y] account: ${contrastCount} color-contrast nodes (parity-pinned, documented)`);
+    expect(serious(results).map((v) => `${v.id}: ${v.nodes.length} nodes`)).toEqual([]);
+  });
+
+  test("admin dashboard (authenticated) has no critical/serious structural violations", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Email").fill("admin@homenest.kitchen");
+    await page.getByLabel("Password").fill("Admin1234!");
+    await page.getByRole("button", { name: "Sign in" }).click();
+    // Login lands on /account; navigate to the console, then gate it.
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    const { results, contrastCount } = await analyzeForGate(page);
+    console.log(`[a11y] admin: ${contrastCount} color-contrast nodes (parity-pinned, documented)`);
+    expect(serious(results).map((v) => `${v.id}: ${v.nodes.length} nodes`)).toEqual([]);
+  });
 });
