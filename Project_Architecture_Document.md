@@ -312,11 +312,11 @@ const setParams = (nextCategory: string, nextSearch: string) => {
 
 ## 4. Data Architecture
 
-### 4.1 Runtime Store (localStorage `homenest.v2`)
+### 4.1 Runtime Store (localStorage `homenest.v4`)
 
 | Field | Type | Notes |
 |---|---|---|
-| `users` | `User[]` | Seeded with demo customer + admin; registrations append. Passwords are demo-grade plaintext (§6.4). |
+| `users` | `User[]` | Seeded with demo customer + admin; registrations append. Passwords are salted WebCrypto digests (§6.2) — never plaintext at rest. |
 | `sessionUserId` | `string \| null` | Session pointer; `logout()` nulls it explicitly. |
 | `cart` | `CartLine[]` | `{ productId, quantity }`; quantities clamped to live stock on every mutation. |
 | `wishlist` | `string[]` | Product ids. |
@@ -326,7 +326,7 @@ const setParams = (nextCategory: string, nextSearch: string) => {
 | `promoCode` | `string \| null` | Applied code (NEST10). |
 | `newsletter` | `string[]` | Subscribed emails. |
 
-`STORAGE_KEY` is **versioned** (`homenest.v2`): bump it whenever the persisted shape or the seed catalog changes, otherwise stale client data shadows the new seed (observed during the redesign).
+`STORAGE_KEY` is **versioned** (`homenest.v4`, session 5 — the seed now ships hashed demo credentials): bump it whenever the persisted shape or the seed catalog changes, otherwise stale client data shadows the new seed (observed during the redesign). The pairing is enforced by `tests/catalog-hash.test.ts` + `tests/catalog-registry.json`.
 
 ### 4.2 Domain Types (summary)
 
@@ -425,11 +425,13 @@ These supersets are intentional; they must not change the **resting visuals** of
 
 Email + password against the seeded/registered user list; session = `sessionUserId` pointer in the store (persisted). Two roles: `customer`, `admin`. Login honors a validated `redirect` param; register auto-signs-in; logout nulls the session pointer and returns to `/`.
 
+**Password-at-rest (session 5, R5-01).** Records store `passwordHash: "s1$<salt>$<sha256(salt:password)>"` — a salted WebCrypto SHA-256 digest (see `src/lib/password.ts`; 16-byte CSPRNG salt per record). `login`/`register`/`changePassword` are async and verify through `verifyPassword`, which also accepts legacy plaintext records so pre-v4 clients keep working; such records are re-hashed **in place on the next successful login** (upgrade-on-login). The shipped demo seed is pre-hashed. SHA-256 is not a KDF — this is defense-in-depth against casual localStorage disclosure, not a replacement for the server-backed auth workstream (§6.3).
+
 ### 6.3 Threat Model & Accepted Residual Risks (honest, demo-scoped)
 
 | Vector | Mitigation | Residual risk |
 |---|---|---|
-| Credential theft | Nothing leaves the browser | **Accepted:** passwords stored plaintext in localStorage — a deliberate demo simplification; a server-backed deployment must replace `login`/`register`/`changePassword` with hashed, salted, rate-limited server auth |
+| Credential theft | Nothing leaves the browser; passwords stored as salted WebCrypto digests (session 5, R5-01) | **Reduced but accepted:** SHA-256 is fast (not a KDF), and a client-only store cannot rate-limit or revoke credentials — the server-backed workstream (ADR-001) remains the real fix. Demo seed salts are static by construction (the seed is static) |
 | Guest token forgery | 128-bit CSPRNG token (`crypto.getRandomValues`, hex) | Low: session 3 replaced the former ~59-bit `Math.random` token (R3-02); forgeability now requires brute-forcing 2¹²⁸ |
 | XSS | React escaping only | Low: no HTML injection surfaces exist |
 | Payment fraud | No real payments | None: card fields never leave the page; COD is simulated |
@@ -446,6 +448,7 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Commerce seam units | 1 | 15 | `src/lib/commerce.test.ts` | Vitest (node) |
 | DB URL contract | 1 | 8 | `tests/db-path.test.ts` | Vitest (node) |
 | Catalog ↔ storage-key registry | 1 (+ registry JSON) | 2 | `tests/catalog-hash.test.ts` | Vitest (node) |
+| Password-at-rest contract | 1 | 8 | `tests/password.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
 | Mobile navigation | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
 | Mobile header parity | 1 | 4 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
@@ -454,8 +457,11 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Cart & checkout | 1 | 9 | `tests/e2e/cart-checkout.spec.ts` | Playwright |
 | Auth & admin | 1 | 7 | `tests/e2e/auth-admin.spec.ts` | Playwright |
 | Visual parity | 1 | 6 | `tests/e2e/visual-parity.spec.ts` | Playwright |
-| A11y smoke (axe) | 1 | 6 | `tests/e2e/a11y-smoke.spec.ts` | Playwright |
-| **Total** | **13** | **85 specs → 145 runs** (25 unit × 1 + 60 E2E × 2 projects) | | |
+| A11y smoke (axe) | 1 | 8 | `tests/e2e/a11y-smoke.spec.ts` | Playwright |
+| Search combobox keyboard (R5-02) | 1 | 5 | `tests/e2e/search-keyboard.spec.ts` | Playwright |
+| Password at rest E2E (R5-01) | 1 | 4 | `tests/e2e/password-hash.spec.ts` | Playwright |
+| Account header layout (R5-06) | 1 | 1 | `tests/e2e/account-layout.spec.ts` | Playwright |
+| **Total** | **16** | **33 unit tests + 72 E2E specs → 177 runs** (33 × 1 + 72 × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -472,12 +478,13 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 ### 7.4 Pre-Push Checklist
 
 1. `npm run typecheck` — exit 0
-2. `npm run test` — 25/25
-3. `npm run build` — succeeds (~497 KB single file)
-4. `npm run e2e` — 120/120 across chromium + mobile
+2. `npm run test` — 33/33
+3. `npm run build` — succeeds (~499 KB single file)
+4. `npm run e2e` — 144/144 across chromium + mobile
 5. Docs updated in the same commit when contracts/visuals changed
 6. `AGENTS.md` trap log grown (not worked around) if a new trap was discovered
-7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same commit
+7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same change
+8. `src/data/catalog.ts` edits never reintroduce plaintext demo credentials — the seed ships `s1$…` digests (E2E `password-hash.spec.ts` fails the build otherwise)
 
 ---
 
@@ -546,14 +553,16 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 
 | Priority | Issue | Impact | Status |
 |---|---|---|---|
-| HIGH (accepted) | Demo passwords stored plaintext in localStorage | Unacceptable for any real deployment | Open — requires the server workstream (ADR-001) |
+| ~~HIGH (accepted)~~ | ~~Demo passwords stored plaintext in localStorage~~ | — | **Hardened (session 5, R5-01):** salted WebCrypto digests at rest, upgrade-on-login, hashed demo seed. Server-backed auth (ADR-001) remains open for real deployments — SHA-256 is not a KDF and a client-only store cannot rate-limit or revoke |
 | ~~HIGH (accepted)~~ | ~~Guest tokens use `Math.random()` (~59 bits)~~ | — | **Fixed (session 3, R3-02):** `generateGuestToken()` = 128-bit `crypto.getRandomValues`, hex-encoded |
 | MEDIUM (accepted) | 3 high npm advisories in braces/micromatch via vite-plugin-singlefile | Build-time only; no runtime exposure | Accepted, documented in README troubleshooting |
 | MEDIUM | No ESLint/Prettier config | Style consistency relies on tsc + review | Open — add flat-config ESLint wired into `npm run verify` if the team wants it |
 | ~~LOW~~ | ~~`isExpiryValid` hardcodes `year >= 26`~~ | — | **Fixed (session 3, R3-01):** rolling window with injectable clock; unit-pinned |
+| ~~LOW~~ | ~~Account header card overflows on phones with long identities~~ | — | **Fixed (session 5, R5-06):** wrapping header row + `min-w-0`/`break-words`; pinned by `tests/e2e/account-layout.spec.ts` |
 | LOW | WebKit not installed in this sandbox | Mobile project pins chromium engine; no Safari coverage locally | Accepted — host libs need root; browser binary cached, launch blocked (re-attempted session 3) |
-| LOW | Color-contrast pairs on parity surfaces (orange/amber/gray tokens) fail WCAG AA | axe `color-contrast` findings on parity-pinned tokens | Accepted — the reference itself fails these pairs; visual parity wins (remediation plan §9.2 R3-04); structural a11y is gated clean |
+| LOW | Color-contrast pairs on parity surfaces (orange/amber/gray tokens) fail WCAG AA | axe `color-contrast` findings on parity-pinned tokens | Accepted — the reference itself fails these pairs; visual parity wins (remediation plan §9.2 R3-04); structural a11y is gated clean on 8 surfaces |
 | LOW | Carousel kicker field is stored but not rendered | Reference hero shows no kicker; kept for admin-editing future | Registered divergence |
+| LOW | Desktop search combobox options are not announced with result counts | APG pattern shipped with Arrow/Home/End/Enter/Escape (R5-02); `aria-live` result announcements remain a nice-to-have | Open — cosmetic |
 
 ---
 
@@ -561,19 +570,23 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 
 | File | Lines | Purpose |
 |---|---|---|
-| `src/components/chrome.tsx` | ~766 | Header + portaled mobile menu, modal cart drawer, toaster, chat FAB, footer, feature bar, form primitives |
-| `src/lib/store.tsx` | ~495 | Single store: state, persistence, all mutations |
+| `src/components/chrome.tsx` | ~831 | Header + portaled mobile menu, APG search combobox (keyboard plan), modal cart drawer, toaster, chat FAB, footer, feature bar, form primitives |
+| `src/lib/store.tsx` | ~525 | Single store: state, persistence, all mutations (async hashed auth incl. upgrade-on-login) |
 | `src/pages/checkout-flow.tsx` | ~820 | Cart, checkout (COD + card), token-gated success |
-| `src/pages/account-pages.tsx` | ~760 | Auth card, account tabs, order detail, track order + stepper |
-| `src/data/catalog.ts` | ~700 | Seed catalog (24 products), categories, carousel, demo users |
+| `src/pages/account-pages.tsx` | ~863 | Auth card (async auth), account tabs, order detail, track order + stepper |
+| `src/data/catalog.ts` | ~700 | Seed catalog (24 products), categories, carousel, demo users (hashed credentials) |
 | `src/pages/shop.tsx` | ~380 | Products list (URL-driven filters), PDP, 404 |
 | `src/lib/commerce.ts` | ~235 | Money/shipping/promo/validation/tracking seams |
+| `src/lib/password.ts` | ~75 | Salted WebCrypto digest contract (`s1$…`), verify w/ legacy fallback |
 | `src/pages/admin-pages.tsx` | ~360 | Role-gated admin console (7 surfaces) |
 | `src/lib/router.tsx` | ~130 | History router + matchPath (27 routes) |
 | `src/index.css` | ~104 | `@theme` tokens (+ `--color-panel`) + base styles |
 | `src/lib/db-path.ts` | ~60 | DATABASE_URL resolution contract |
-| `tests/e2e/mobile-navigation.spec.ts` | ~211 | The parity-critical menu behaviors (incl. session-4 resting-visual pins) |
+| `tests/e2e/mobile-navigation.spec.ts` | ~223 | The parity-critical menu behaviors (incl. session-5 bare-icon trigger pins) |
 | `tests/e2e/cart-drawer.spec.ts` | ~70 | Cart drawer modal semantics (focus trap, restore) |
+| `tests/e2e/search-keyboard.spec.ts` | ~106 | APG combobox keyboard plan (arrows/Home/End/Enter/Escape) |
+| `tests/e2e/password-hash.spec.ts` | ~121 | Password-at-rest E2E: hashed seed, register, round-trip, legacy upgrade |
+| `tests/e2e/account-layout.spec.ts` | ~36 | Account header stays inside the viewport with long identities |
 | `tests/e2e/visual-parity.spec.ts` | ~50 | Computed-style build-breakers |
 | `tests/db-path.test.ts` | ~75 | DB URL contract tests |
 

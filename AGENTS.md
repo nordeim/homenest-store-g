@@ -24,7 +24,7 @@ There is no ESLint config — `tsc --noEmit` with `noUnusedLocals`/`noUnusedPara
 
 - `.env` pins `DATABASE_URL="file:../db/custom.db"`. `db/` sits at the **repo root** and is git-ignored.
 - The URL is **schema-relative** (resolves the way the Prisma CLI would: against a `prisma/` anchor), so `file:../db/custom.db` lands in `<repoRoot>/db/custom.db` regardless of CWD. The resolution rules live in `src/lib/db-path.ts` and are pinned by `tests/db-path.test.ts` — do not simplify them.
-- The SPA itself never opens the SQLite file: all state lives in `localStorage` under the key `homenest.v2`. The env contract exists for tooling parity with the reference architecture and for the admin Settings surface.
+- The SPA itself never opens the SQLite file: all state lives in `localStorage` under the key `homenest.v4` (bumped with the seed each time the persisted shape or catalog changes — the pairing is enforced by `tests/catalog-hash.test.ts`). The env contract exists for tooling parity with the reference architecture and for the admin Settings surface.
 
 ## Architecture rules
 
@@ -36,6 +36,7 @@ There is no ESLint config — `tsc --noEmit` with `noUnusedLocals`/`noUnusedPara
 6. **Totals are always re-derived, never trusted from a caller.** `cartTotals(lines, products, code)` is the single source of truth for subtotal → discount → shipping → total.
 7. **Cart mutations are delta-based with stock clamps** (`mergeCartLine`, `clampQuantity`) — no absolute-quantity writes, so rapid stepper clicks cannot lose updates.
 8. **Deliberate divergences from the reference site are registered** in `Project_Architecture_Document.md` §5.6. Do not "fix" them: promo codes (collapsed in cart), card payment option (second radio), wishlist, admin console, delivery-window estimates, chat FAB → `/contact`, 24-product catalog.
+9. **Passwords are never stored as plaintext.** `User.passwordHash` holds `s1$<salt>$<sha256(salt:password)>` (`src/lib/password.ts`, WebCrypto + CSPRNG salt). `login`/`register`/`changePassword` are async; `verifyPassword` still accepts legacy plaintext records and upgrade-on-login re-hashes them. The demo seed ships pre-hashed (static salts — a static seed cannot carry random ones); do not revert it to plaintext, and never log or dump passwords. SHA-256 is not a KDF — the server-backed workstream (PAD §6.3) remains the real fix.
 
 ## Tailwind v4 trap log (violations here silently break visual parity)
 
@@ -61,10 +62,13 @@ Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from
 - **The mobile menu is a modal dialog** (`role="dialog" aria-modal="true" aria-label="Site menu"`) with a focus trap: focus enters at the search pill (or the input once expanded), Tab cycles among the panel's 7 focusables (search control + 6 links), Escape restores focus to the trigger. The inner `<nav aria-label="Mobile">` keeps its landmark role — specs may keep using it. The panel does NOT dim the page and is translucent white/80 with no shadow (matches the live reference; re-measure before "fixing").
 - **The cart drawer is the same modal contract** (`aria-modal`, focus in on open, Tab trap, focus restore on close) — pinned by `tests/e2e/cart-drawer.spec.ts`.
 - **The menu's search is a compact muted pill at rest**; tapping it expands the input and focuses it (the reference's pill is inert — registered divergence, PAD §5.6 #13). Specs that need the input must tap the pill first.
+- **The menu trigger is a bare dark icon in BOTH states** (transparent button, foreground glyph, no inner span). Session-3/4 measured a green close disc; the session-5 re-measurement caught the reference dropping it — follow the latest measurement (remediation plan §11.1).
+- **The desktop search overlay is an APG combobox** (listbox-popup): ArrowDown/ArrowUp wrap, Home/End jump, Enter navigates the active option (default submit when none), Escape dismisses; activation is `aria-activedescendant` + `aria-selected`, pinned by `tests/e2e/search-keyboard.spec.ts`. Keep that pattern intact when touching the overlay.
 - **Never click a disabled control** (quantity minus at qty=1) — assert `toBeDisabled()` instead; Playwright waits for enabled state and times out otherwise.
 - **Strict-mode text collisions**: "Total" matches "Subtotal"; "Confirmed" matches "Your order has been confirmed". Use `{ exact: true }` or role-scoped locators.
 - **Computed styles are the parity gate, not screenshots.** Colors above are asserted with `toHaveCSS`. When you change a token, re-measure and update the spec in the same commit.
-- The green mobile-menu close disc is `bg-accent` on an inner `<span>`; the button itself is transparent.
+- **Passwords, sessions and persistence interplay in E2E:** `login()` is async now — after a UI logout, wait for the logged-out chrome (header "Sign in" link) before a full-reload `goto`, or the persist effect races the navigation and the session restores (bit the password round-trip spec on mobile).
+- **Reference-side carousel auto-rotates** and the active slide title becomes the page `h1` — read slide 1 on load (or reload) before comparing hero content in sweeps.
 
 ## Conventions
 

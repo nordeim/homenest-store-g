@@ -4,7 +4,7 @@ This file is read fresh for every conversation. Be brief and practical. The exha
 
 ## 1. Core Identity
 
-HomeNest Kitchen is a production-grade e-commerce storefront + admin console — a visual and functional clone of `nest-culinary-hub.base44.app` (reference measured live 2026-10-12) implemented as a **client-only SPA**: Vite 7, React 19, TypeScript strict, Tailwind CSS v4 (CSS-first `@theme`), shipped as a single HTML file via `vite-plugin-singlefile`. There is no server: commerce state (cart, wishlist, orders, sessions) persists in browser `localStorage` (`homenest.v2`), with `DATABASE_URL="file:../db/custom.db"` pinned for the repo-root `db/` tooling contract.
+HomeNest Kitchen is a production-grade e-commerce storefront + admin console — a visual and functional clone of `nest-culinary-hub.base44.app` (reference measured live 2026-10-12) implemented as a **client-only SPA**: Vite 7, React 19, TypeScript strict, Tailwind CSS v4 (CSS-first `@theme`), shipped as a single HTML file via `vite-plugin-singlefile`. There is no server: commerce state (cart, wishlist, orders, sessions) persists in browser `localStorage` (`homenest.v4`), with `DATABASE_URL="file:../db/custom.db"` pinned for the repo-root `db/` tooling contract.
 
 ## 2. Foundational Principles — The Meticulous Six-Phase Workflow
 
@@ -67,12 +67,12 @@ npm run dev            # http://localhost:5173
 | Customer | `john@example.com` | `Demo1234!` |
 | Admin | `admin@homenest.kitchen` | `Admin1234!` |
 
-Demo passwords are stored in plain text inside localStorage by design (client-only demo). Never copy this pattern into a server-backed deployment — see PAD §6.4.
+Passwords are hashed at rest (session 5, R5-01): `User.passwordHash` = `s1$<salt>$<sha256(salt:password)>` via WebCrypto with a CSPRNG salt (`src/lib/password.ts`); `login`/`register`/`changePassword` are async and legacy plaintext records upgrade in place on the next successful login. The demo seed ships pre-hashed. This is defense-in-depth, not a KDF — never copy the pattern into a server-backed deployment; see PAD §6.2/§6.3.
 
 ## 5. Testing Strategy
 
-- **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 25 tests.
-- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, a11y smoke (axe structural gate on six surfaces incl. authenticated account/admin), visual parity. 60 specs = 120 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
+- **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry, password-at-rest contract. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 33 tests.
+- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, search-combobox keyboard plan, account-header layout, password-at-rest, a11y smoke (axe structural gate on eight surfaces incl. checkout/contact and authenticated account/admin), visual parity. 72 specs = 144 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
 - **Visual parity gate**: `tests/e2e/visual-parity.spec.ts` asserts computed colors/fonts from the reference measurement. Treat it as a build-breaker.
 - Bugs get a failing regression test at the same seam before the fix.
 

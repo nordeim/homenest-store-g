@@ -1,10 +1,10 @@
 # HomeNest Store G — Codebase Audit & Remediation Plan
 
-> **Status:** EXECUTED & VALIDATED (100% of remediation items complete; session-4 addendum in §10)
-> **Session:** 1 (see `docs/session_1.md`), 2 (see `docs/session_2.md`), 3 (§9 below), 4 (§10 below)
+> **Status:** EXECUTED & VALIDATED (100% of remediation items complete; session-5 addendum in §11)
+> **Session:** 1 (see `docs/session_1.md`), 2 (see `docs/session_2.md`), 3 (§9 below), 4 (§10 below), 5 (§11 below)
 > **Reference site:** https://nest-culinary-hub.base44.app/ (visual + functional parity target)
 > **Tech-stack pattern source:** https://github.com/nordeim/ecommerce-store.git (AGENTS.md / CLAUDE.md / PAD / SKILL.md)
-> **Verification gate at time of writing:** typecheck ✓ · 25/25 unit ✓ · build ✓ · 120/120 E2E ✓
+> **Verification gate at time of writing:** typecheck ✓ · 33/33 unit ✓ · build ✓ · 144/144 E2E ✓
 
 ---
 
@@ -448,3 +448,118 @@ found one real a11y gap (cart drawer) and six stale SKILL claims.
    measurement each time.
 3. Desktop search overlay: consider ArrowDown/ArrowUp navigation for the
    combobox listbox (nice-to-have; axe-clean today).
+
+---
+
+## 11. Session-5 Addendum (2026-10-12) — Password-At-Rest Hardening, Search Combobox Keyboard Plan, Reference Re-Sweep, Account Layout Fix
+
+Session 5 executed the §10.5 candidates: the auth hardening downgrades F-10
+(without the server workstream), the combobox keyboard plan promotes §10.5.3,
+and the mandated re-sweep caught the reference's third resting-visual change.
+The audit also surfaced a real mobile layout bug and stale user-facing copy.
+
+### 11.1 Live parity re-sweep (§10.5.2 mandate)
+
+agent-browser sweep at 390×844 + 1440×900 against the live reference
+(2026-10-12). Findings:
+
+1. **Carousel auto-rotation explained.** The reference's carousel
+   auto-rotates and each slide's title becomes the page `h1` ("Elevate Your
+   Kitchen" → "New Arrivals" → "Sale Up to 40% Off"). Earlier sweeps'
+   transient readings were mid-rotation captures; slide 1 on load is still
+   "Elevate Your Kitchen" — the existing pin holds.
+2. **Re-confirmed all session-4 menu pins**: white/80 shadowless panel with
+   `1px solid rgba(229,224,220,0.5)` bottom border; compact muted search pill
+   `rgb(242,240,237)`; rows 14px/500 muted-foreground; active row 12px radius
+   on the primary orange; no page dim. (A false-positive 9999px row reading
+   came from the reference's hidden desktop nav — display:inline, zero-size —
+   still present in the DOM at mobile widths.)
+3. **DRIFT — the green close disc is gone.** The session-3/4 measurement
+   (trigger swaps to a green circle `rgb(69,161,130)` with a white X) no
+   longer holds: BOTH trigger states now render a bare dark icon
+   (transparent 36×36 button, foreground-colored glyph, no inner span).
+   Fixed as **R5-03** below.
+
+### 11.2 Follow-ups executed (TDD: red → green)
+
+- ✅ **R5-01 (§10.5.1, downgrades F-10) — Password-at-rest hardening.** New
+  `src/lib/password.ts`: records store `passwordHash: "s1$<32-hex-salt>$<64-hex-sha256(salt:password)>"`
+  (16-byte CSPRNG salt per record, WebCrypto — no dependency). `login`,
+  `register`, `changePassword` are now async; `verifyPassword` accepts legacy
+  plaintext records and **upgrade-on-login** migrates them in place. The demo
+  seed ships pre-hashed (static salts, a documented consequence of a static
+  seed); `User.password` → `User.passwordHash` (rehydrate normalizes the
+  legacy shape); `STORAGE_KEY` bumped `homenest.v3 → homenest.v4` (registry
+  gate forced and verified) so stale clients re-seed cleanly. Honest scope:
+  SHA-256 is not a KDF — this is defense-in-depth; §10.5.1's server workstream
+  stays open (PAD §6.2/§6.3 updated).
+  *TDD:* `tests/password.test.ts` (8 unit pins: format, salted determinism,
+  round-trip, legacy path) + `tests/e2e/password-hash.spec.ts` (4 specs × 2
+  projects: hashed seed w/ plaintext dump rejection, register-then-dump,
+  sign-back-in round-trip, legacy-record upgrade).
+- ✅ **R5-02 (§10.5.3) — Search combobox keyboard plan.** The desktop overlay
+  had the static ARIA skeleton but zero keyboard support. Now the WAI-ARIA
+  1.2 combobox (listbox-popup) pattern: ArrowDown/ArrowUp wrap through
+  suggestions, Home/End jump, Enter navigates to the active option (default
+  submit preserved when nothing is active), Escape dismisses; the active
+  option is exposed via `aria-activedescendant` + `aria-selected` with a
+  `bg-muted` highlight; the no-results row moved OUT of the `role=listbox`.
+  *TDD:* `tests/e2e/search-keyboard.spec.ts` (5 specs, fixed 1280 viewport).
+- ✅ **R5-03 (sweep drift) — Menu trigger parity re-pin.** The green close
+  disc (session-3 pin) is removed; both trigger states render the bare dark
+  icon exactly as the reference now does. `bg-accent` remains used elsewhere.
+  *TDD:* the "green close circle" spec rewritten as "menu trigger renders a
+  bare dark icon in both states (no colored disc)" (transparent bg, no inner
+  span, foreground color) — RED against the old build, GREEN after.
+- ✅ **R5-04 — axe structural gate extended to `/checkout` and `/contact`.**
+  Checkout (with items in cart) and contact join the smoke gate: 8 surfaces
+  total, zero critical/serious structural violations, contrast findings
+  logged per the documented exclusion.
+- ✅ **R5-05 — Stale storage-key copy.** `/privacy` (×2) and the admin
+  Settings surface hardcoded `homenest.v1` in user-visible text; all three
+  now render the real `STORAGE_KEY` import. AGENTS.md/CLAUDE.md also still
+  said `homenest.v2` — corrected to v4 in this session's docs pass.
+- ✅ **R5-06 — Account header overflow on phones (real bug, caught by the
+  R5-01 round-trip spec on the mobile project).** The header card's identity
+  block had no min-width floor: long names/emails pushed the Log out control
+  past the right viewport edge (un-tappable; the spec timed out mid-click).
+  Fix: wrapping header row (`flex-wrap` + `gap-4`), `min-w-0` floors,
+  `break-words` name, `break-all` email, `shrink-0` avatar/mail glyph.
+  *TDD:* `tests/e2e/account-layout.spec.ts` — long-identity registration,
+  bounding box inside the 390px viewport, click resolves, logged-out chrome
+  appears.
+
+### 11.3 Verification gate (post session-5)
+
+| Gate | Command | Result |
+|---|---|---|
+| Types | `npm run typecheck` | ✅ clean |
+| Unit | `npm run test` (vitest) | ✅ 33/33 (25 + 8 password) |
+| Build | `npm run build` | ✅ single-file bundle (499 KB) |
+| E2E | `npm run e2e` (chromium + mobile) | ✅ 144/144 (72 specs × 2 projects) |
+| a11y | axe structural gate on 8 surfaces (home, products, PDP, cart, account, admin, checkout, contact) | ✅ 0 critical/serious (contrast documented) |
+| Search keyboard | 5 combobox specs @ 1280px | ✅ |
+| Password at rest | 4 specs × 2 projects | ✅ |
+
+### 11.4 Residual risks (updated)
+
+1. npm advisories (`braces`/`micromatch`) — unchanged, build-time only.
+2. WebKit host libs unavailable in this sandbox — chromium-engine pin stays.
+3. Client-only demo auth — passwords now hashed at rest (R5-01) but SHA-256
+   is not a KDF and there is no rate-limiting/revocation: the server-backed
+   workstream remains the real fix (PAD §6.3, "reduced but accepted").
+4. Color-contrast pairs on parity surfaces — documented exclusion (§9.2
+   R3-04); logged on all 8 gated surfaces.
+5. Reference-side quirk, not actionable: its carousel auto-rotates and the
+   active slide title becomes the page h1; sweeps must read slide 1 on load
+   (or reload) before comparing.
+
+### 11.5 Follow-up recommendations (next candidates)
+
+1. Server-backed auth workstream — unchanged; R5-01 narrowed F-10 to
+   "client-hashed, no KDF/rate-limit/revocation".
+2. Reference re-sweep — the resting visuals have now changed in THREE
+   consecutive sweeps; keep re-measuring before every menu-touching change.
+3. `aria-live` result announcements for the search combobox (cosmetic; the
+   APG keyboard plan is shipped).
+4. ESLint flat config wired into `npm run verify` (PAD §10 known issue).

@@ -8,7 +8,7 @@ description: >
   containing block, hsl() literals, oklab gradients), the parity contract with
   the reference site, the two-layer test architecture, and every lesson from
   the Session 1 remediation.
-version: 1.1.0
+version: 1.2.0
 last_updated: 2026-10-12
 tags:
   - react
@@ -18,7 +18,7 @@ tags:
   - visual-parity
   - testing
   - skill
-project_state: "typecheck clean · 25/25 unit · build green · 120/120 E2E (chromium + mobile)"
+project_state: "typecheck clean · 33/33 unit · build green · 144/144 E2E (chromium + mobile)"
 ---
 
 # HomeNest Store G — Project Skill
@@ -296,7 +296,7 @@ Signature: `function useStore(): StoreValue`. Returns the whole store value
 they need. The provider:
 
 - Hydrates once on mount from `localStorage[STORAGE_KEY]` (currently
-  `homenest.v3`, owned by `src/lib/storage-key.ts`; the catalog↔key pairing is
+  `homenest.v4`, owned by `src/lib/storage-key.ts`; the catalog↔key pairing is
   **contract-enforced** by `tests/catalog-hash.test.ts` — see trap T-7),
   merging with seed data and setting `ready: true` **synchronously after rehydration**
   so route guards can wait on it.
@@ -396,7 +396,10 @@ Verified behaviors (kept honest by E2E):
   aria-label="Mobile">` (E2E depends on this accessible name — `tests/e2e/
   mobile-navigation.spec.ts`); search inputs all have `htmlFor`-linked sr-only
   labels; the desktop search input uses `role="combobox"` with
-  `aria-expanded` + `aria-autocomplete="list"` and a `role="listbox"` popup.
+  `aria-expanded` + `aria-autocomplete="list"` and a `role="listbox"` popup —
+  and the full APG keyboard plan (ArrowDown/ArrowUp wrap, Home/End,
+  Enter selects, Escape dismisses, `aria-activedescendant` + `aria-selected`;
+  `tests/e2e/search-keyboard.spec.ts`).
 - **Mobile menu:** a true modal — `role="dialog" aria-modal="true"
   aria-label="Site menu"` with a focus trap (focus enters at the search
   pill/input, Tab cycles within the panel, Escape restores focus to the
@@ -492,7 +495,7 @@ testing, and compilation. If a new vendored folder appears, extend the pin.
 **Root cause:** persisted `products` under a version-less storage key
 override the re-seeded catalog.
 **Fix:** `STORAGE_KEY` lives in `src/lib/storage-key.ts` (currently
-`homenest.v3`) and is **contract-pinned**: `tests/catalog-hash.test.ts`
+`homenest.v4`) and is **contract-pinned**: `tests/catalog-hash.test.ts`
 sha-256-hashes `src/data/catalog.ts` and requires a matching hash → key row
 in `tests/catalog-registry.json`. A seed edit without the bump fails the
 gate with repair instructions (this caught the session-3 carousel reorder).
@@ -608,9 +611,9 @@ every push):
 
 ```bash
 npm run typecheck   # tsc --noEmit — zero errors
-npm run test        # vitest — 25/25 (3 files)
+npm run test        # vitest — 33/33 (4 files)
 npm run build       # vite build — single-file dist/index.html
-npm run e2e         # playwright — 120/120 (60 specs × chromium+mobile)
+npm run e2e         # playwright — 144/144 (72 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
@@ -704,9 +707,11 @@ and navigates, checkout places an order, track-order finds it.
 - Don't restyle the green accent into decorative use (§1 rule 1).
 
 **Security (demo-grade, documented)**
-- Don't store anything real (passwords/payments) in the client store — the
-  current plaintext `localStorage` users are demo fixtures only; the
-  production path is server-side auth (see PAD threat model).
+- Passwords are hashed at rest since session 5 (`s1$<salt>$<sha256>` records
+  in `src/lib/password.ts`; upgrade-on-login migrates legacy plaintext). Don't
+  revert the seed to plaintext, don't log credentials, and don't present this
+  as real auth — SHA-256 is not a KDF; the production path is server-side
+  auth (see PAD threat model).
 - Guest tokens are crypto-grade since session 3 (`generateGuestToken()` in
   `lib/commerce.ts`); don't regress them to `Math.random`.
 
@@ -924,7 +929,7 @@ neither):
 | `secondary-foreground` | `hsl(20 15% 20%)` = `#3B302B` | text on secondary |
 | `muted` | `hsl(30 15% 94%)` = `#F2F0ED` | input fills, hover rows |
 | `muted-foreground` | `hsl(20 10% 45%)` = `#7E6F67` | secondary text, subtitles |
-| `accent` | `hsl(160 40% 45%)` = `#45A182` | green: In Stock, Free shipping, logged-in dot, mobile close disc |
+| `accent` | `hsl(160 40% 45%)` = `#45A182` | green: In Stock, Free shipping, logged-in dot |
 | `accent-soft` | `hsl(160 40% 95%)` | green-tinted backgrounds |
 | `destructive` | `hsl(0 72% 51%)` = `#DC2828` | discount pills, destructive actions |
 | `border` | `hsl(30 15% 88%)` = `#E5E0DC` | all borders/dividers |
@@ -1032,11 +1037,13 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
 ## Appendix B: Verification & Test Ledger
 
 - Unit (vitest, node env): `src/lib/commerce.test.ts` + `tests/db-path.test.ts`
-  + `tests/catalog-hash.test.ts` = **25 tests, 3 files, all green**.
-- E2E (playwright, production build via preview server): **60 specs** —
+  + `tests/catalog-hash.test.ts` + `tests/password.test.ts` = **33 tests, 4
+  files, all green**.
+- E2E (playwright, production build via preview server): **72 specs** —
   smoke 5, mobile-navigation 14, mobile-header-parity 4, cart-drawer 3,
-  catalog 6, cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 6 —
-  × 2 projects (chromium, mobile) = **120 executions, all green**.
+  catalog 6, cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 8,
+  search-keyboard 5, password-hash 4, account-layout 1 —
+  × 2 projects (chromium, mobile) = **144 executions, all green**.
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site
@@ -1047,14 +1054,16 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 1. Primary orange computed `rgb(217, 110, 38)` on CTA/active-nav surfaces.
 2. Active nav is a filled pill (radius ≥ half height), white text.
 3. Mobile menu: inline dropdown panel below the header (not a side drawer);
-   hamburger is the TRAILING header icon (right of the cart) and toggles to a
-   green circular close button; no page dim (session-3 re-measurement);
-   closes on navigation and Escape; modal focus trap keeps Tab inside the
-   panel. Session-4 re-measurement: the panel is translucent white/80
-   (`--color-panel`) with NO drop shadow; rows are 14px/500 with
-   muted-foreground inactive text and a 12px active-row radius; the search
-   control is a compact muted pill at rest (the reference's pill is inert —
-   the clone expands it into a working input, registered divergence #13).
+   hamburger is the TRAILING header icon (right of the cart); no page dim
+   (session-3 re-measurement); closes on navigation and Escape; modal focus
+   trap keeps Tab inside the panel. Session-4 re-measurement: the panel is
+   translucent white/80 (`--color-panel`) with NO drop shadow; rows are
+   14px/500 with muted-foreground inactive text and a 12px active-row radius;
+   the search control is a compact muted pill at rest (the reference's pill
+   is inert — the clone expands it into a working input, registered
+   divergence #13). Session-5 re-measurement: the reference DROPPED the
+   green close disc — the trigger is a bare dark icon in BOTH states
+   (transparent 36×36 button, foreground glyph, no inner span).
 4. Cart summary shows Subtotal / Shipping (Free ≥ $50) / Total — **no tax
    line**.
 5. Checkout defaults to Cash on Delivery; card is the registered superset.
@@ -1073,6 +1082,7 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 | 2 | 2026-10-12 | Session-1 transcript validation → remediation plan → SKILL distillation | Ledger validated against code; `docs/remediation-plan.md` + this SKILL created per both distill skills; 18 screenshots; gate re-verified 22/22 unit + 82/82 E2E; see `docs/session_2.md` |
 | 3 | 2026-10-12 | Ledger validation → follow-ups (TDD) → live parity re-measurement | R-05 over-claim corrected; `isExpiryValid` rolling window, 128-bit crypto guest tokens, mobile-menu modal dialog + focus trap, axe structural gate, catalog↔key registry contract; 5 mobile parity gaps fixed (hamburger trailing, no header search button, 2×2 feature bar, carousel order, no page dim); STORAGE_KEY → homenest.v3; gate 25/25 unit + 104/104 E2E |
 | 4 | 2026-10-12 | Session-3 transcript validation → audit → live parity re-sweep → TDD follow-ups | SKILL drift corrected (§7 order numbers, §8 stale a11y gap, §13, §15, §19); cart drawer became a full modal (aria-modal + focus trap + focus restore); axe gate extended to authenticated surfaces (account, admin); 5 more menu parity gaps fixed (translucent shadowless panel, compact search pill + expand-on-tap superset, 14px/500 rows, muted inactive text, 12px active radius); traps T-13 (oklab opacity-mix, calc(infinity) radius); gate 25/25 unit + 120/120 E2E; see `docs/session_4.md` |
+| 5 | 2026-10-12 | §10.5 candidates → audit → re-sweep → TDD follow-ups | Password-at-rest hardened (R5-01: `src/lib/password.ts` salted WebCrypto digests, async auth, upgrade-on-login, hashed demo seed, STORAGE_KEY → homenest.v4 — downgrades F-10); desktop search became a full APG combobox (R5-02); reference re-sweep caught the green close disc removed (R5-03) and carousel auto-rotation explained; axe gate extended to checkout + contact (R5-04); stale `homenest.v1` copy fixed (R5-05); account-header phone overflow fixed (R5-06); gate 33/33 unit + 144/144 E2E; see `docs/session_6.md` |
 
 *End of skill. Maintain per the meta-skill: bump minor version on sprints,
 major on stack upgrades; re-verify §2 versions, §11 counts, and §19 hexes

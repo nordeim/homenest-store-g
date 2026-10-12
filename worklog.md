@@ -229,3 +229,30 @@ Stage Summary:
 - Verification ledger: typecheck ✓ 25/25 unit ✓ build ✓ 120/120 E2E ✓ — all observed this session
 - Parity posture: menu resting visuals now match the reference to the computed-string level; clone remains a functional superset (search expands and works where the reference's pill is inert)
 - Next-session candidates: server-backed auth workstream (F-10), future menu re-sweeps (reference resting visuals changed twice in three sweeps), desktop combobox arrow-key navigation
+
+---
+Task ID: 10
+Agent: main (Super Z)
+Task: Session 5 — §10.5 candidates (auth hardening, combobox keyboard), reference re-sweep, mobile layout fix, docs, push
+
+Work Log:
+- git pull: fast-forwarded 3ce3933..ab7830c (docs/session_5.md — the session-4 continuation transcript)
+- Re-read full doc suite and validated against code; baseline gate green (typecheck ✓ 25/25 unit ✓ build ✓)
+- AUDIT: §10.5.3 combobox keyboard gap confirmed (static ARIA skeleton, zero key handling); stale homenest.v1 copy in /privacy ×2 + admin Settings; AGENTS/CLAUDE still on homenest.v2; F-10 plaintext fixable in-architecture
+- Live re-sweep (agent-browser @390×844 + 1440×900): carousel auto-rotation explained (slide title becomes page h1 — read slide 1 on load); all session-4 menu pins re-confirmed (false-positive 9999px rows = reference's hidden desktop nav); DRIFT: green close disc GONE — bare dark icon both states
+- R5-01 (TDD, red→green): src/lib/password.ts — s1$<salt>$<sha256(salt:password)> with 16-byte CSPRNG salt (WebCrypto); login/register/changePassword async; verifyPassword legacy fallback + upgrade-on-login; demo seed pre-hashed (static salts, documented); User.password → passwordHash + rehydrate normalization; STORAGE_KEY v3→v4 (registry gate verified)
+- R5-02 (TDD, red→green): APG combobox keyboard plan — arrows wrap, Home/End, Enter selects (default submit when none), Escape dismisses; aria-activedescendant + aria-selected + bg-muted highlight; no-results out of listbox; tests/e2e/search-keyboard.spec.ts (5)
+- R5-03 (TDD): trigger re-pinned to bare dark icon both states; "green close circle" spec rewritten (RED against old build)
+- R5-04: axe gate extended to /checkout (with items) + /contact — 8 surfaces, zero critical/serious structural
+- R5-05: /privacy + admin Settings render STORAGE_KEY import (was hardcoded homenest.v1)
+- R5-06 (TDD, red→green): account header card overflowed on phones (long identity pushed Log out off-viewport — caught by the R5-01 round-trip spec on mobile); flex-wrap + min-w-0 + break-words/break-all fix; tests/e2e/account-layout.spec.ts
+- Test-infra lesson: UI logout + immediate full-reload goto races the persist effect (session restores, /login bounces to /account) — wait for logged-out chrome first; recorded in AGENTS.md
+- Full gate: typecheck ✓ · 33/33 unit ✓ · build 499 KB ✓ · 144/144 E2E (72 specs × 2) ✓ · axe clean on 8 surfaces ✓
+- Session-5 captures (5) against the production preview: session5-home-desktop, session5-search-combobox, session5-mobile-home, session5-mobile-menu-open, session5-account-mobile → docs/screenshots/
+- Docs aligned same-change: remediation plan §11 addendum, PAD (§4.1 v4, §6.2 password-at-rest, §6.3 reduced-but-accepted, §7.1/§7.4, §10, §11), AGENTS.md (rule 9 + quirks), CLAUDE.md, README, SKILL v1.2.0 (state, T-7, combobox, Appendix B/C/D), docs/session_6.md, worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ 33/33 unit ✓ build ✓ 144/144 E2E ✓ — all observed this session
+- F-10 downgraded: passwords hashed at rest (SHA-256 not a KDF — server workstream stays open, honestly scoped)
+- Parity posture: trigger re-pinned to the reference's third resting-visual change; re-sweep doctrine revalidated
+- Next-session candidates: server-backed auth (unchanged), another reference re-sweep (visuals changed 3 sweeps running), aria-live combobox announcements, ESLint flat config

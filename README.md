@@ -118,9 +118,9 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 
 ```bash
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
-npm run test            # Vitest unit tests (25)
+npm run test            # Vitest unit tests (33)
 npm run build           # production single-file build
-npm run e2e             # Playwright E2E (60 specs / 120 runs) — requires npm run build first
+npm run e2e             # Playwright E2E (72 specs / 144 runs) — requires npm run build first
 npm run verify          # typecheck + unit + build in one command
 ```
 
@@ -159,10 +159,12 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`CLAUDE.md`](CLAUDE.md) — six-phase workflow and per-tech standards
 - [`Project_Architecture_Document.md`](Project_Architecture_Document.md) — ADRs, layer model, data & security architecture, testing strategy
 - [`homenest-store-g_SKILL.md`](homenest-store-g_SKILL.md) — distilled engineering skill: 20-section reference (stack, design system, trap log, patterns, debugging) for any agent working on this repo
-- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24, R3-01…R3-06, R4-01…R4-04), residual risks, session-3/4 addenda
+- [`docs/remediation-plan.md`](docs/remediation-plan.md) — audit findings (F-01…F-17), executed remediation ToDo with TDD evidence (R-01…R-24, R3-01…R3-06, R4-01…R4-04, R5-01…R5-06), residual risks, session-3/4/5 addenda
 - [`docs/session_1.md`](docs/session_1.md) — Session 1 execution transcript (audit → parity → tests → docs → push)
 - [`docs/session_2.md`](docs/session_2.md) — Session 2 execution transcript (validation → remediation plan → SKILL distillation → push)
 - [`docs/session_3.md`](docs/session_3.md) — Session 3 execution transcript (ledger validation → TDD follow-ups → mobile parity → push)
 - [`docs/session_4.md`](docs/session_4.md) — Session 4 execution transcript (doc-drift audit → cart-drawer modal → authenticated axe gate → menu re-sweep → push)
+- [`docs/session_5.md`](docs/session_5.md) — Session 4 continuation transcript (context-reset session that executed the R4 work)
+- [`docs/session_6.md`](docs/session_6.md) — Session 5 execution transcript (password hardening → combobox keyboard → re-sweep → account layout fix → push)
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)
