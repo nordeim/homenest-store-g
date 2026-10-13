@@ -450,3 +450,26 @@ Stage Summary:
 - Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — observed on 2c9450b pre-change; docs-only remainder outside every gate's file set
 - Parity posture: eighth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, manifest superset, and R14-01 live region all hold
 - Validation track is the standing default: ADR-001 (server-backed auth) remains an owner decision; no agent-actionable remediation items exist
+
+---
+Task ID: 19
+Agent: main (Super Z)
+Task: Session 24 — ninth no-drift sweep, validation track held, docs, push
+
+Work Log:
+- git pull fast-forwarded aa17bed..bea2c64 (remote added only docs/session_23.md, the raw session-22 transcript, and docs/prompt-to-validate-5.md, this session's validation prompt); targeted diff across 168d2ec..HEAD proves zero changes to source/tests/config/SEO artifacts/root docs — doc-suite review carries over verbatim
+- Environment re-provisioned after recurring sandbox reset: node 24.21.0 + node_modules intact; paramiko 5.0.0 re-installed into the ACTIVE interpreter (python3 -m pip); 12 persisted sweep/capture scripts; no stale key material
+- Session-22 record re-validated against the tree: remediation §19, session_22.md, README rows, worklog Task 18, four session22-* captures all present; session_23.md matches the pushed session-22 summary line for line
+- Skills consulted (catalog byte-identical to session 18): tdd-workflow, webapp-testing, agent-browser (DNS quirk persists — Playwright + host-resolver-rules, CDN IP re-resolved 216.24.57.16), code-review-and-audit, tailwindcss-v4
+- Baseline gate on bea2c64: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ SEO determinism (clean tree after build, sitemap 36, robots 5) ✓ 194/194 E2E (3.6 min) ✓ — ledger reproduced exactly
+- npm audit --omit=dev: 0 vulnerabilities (prod clean); dev-chain braces advisory unchanged (3 high, --force required) — registered accepted risk; zero TODO/FIXME in src/; worktree clean
+- Reference re-sweep (@390×844): NO drift — ninth consecutive (bare 36×36 trigger; NAV.bg-card/80 white/80 shadowless 1px border; active 14px/500 white on rgb(217,110,38) 12px; inactive muted rgb(126,111,103); no dialog semantics; robots allows all; sitemap 22 statics, 0 product URLs)
+- Clone sweep (sweep20-clone.js reused unchanged): dialog contract live-verified (portal, initial focus search pill, 7×Tab trap + wrap, Escape restore); row pins exact + superset Sign in (6 rows); R14-01 live region announcing (polite; no-results + empty branches); served PDP head (title=h1, canonical, Product JSON-LD USD $54.99); robots 5 disallows; sitemap 36 URLs; R18-01 manifest green (200 application/manifest+json, icons 192+512, root-absolute deep-route link)
+- Decision: validation track held — candidate list retired (§18.4, re-confirmed §19.4), ninth no-drift, no agent-actionable items; no new candidates opened; ADR-001 (server-backed auth) remains an owner decision
+- R24-01: 4 captures visually verified post-capture (session24-home-desktop, session24-pdp-desktop, session24-mobile-home, session24-mobile-menu-open; byte-sizes identical to session-14/16/18/20/22 sets) → docs/screenshots/
+- Docs updated: remediation plan §20 (incl. §20.4 decision record), docs/session_24.md, README rows, worklog (this entry); DEPLOYMENT/AGENTS/CLAUDE/PAD §10 required no edits (no code change)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — observed on bea2c64 pre-change; docs-only remainder outside every gate's file set
+- Parity posture: ninth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, manifest superset, and R14-01 live region all hold
+- Validation track is the standing default: ADR-001 (server-backed auth) remains an owner decision; no agent-actionable remediation items exist
