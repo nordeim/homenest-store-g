@@ -1224,3 +1224,75 @@ registered. This session adds no new candidates.
 typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
 — all observed this session on the `2c9450b` tree before any change;
 the docs-only remainder sits outside every gate's file set.
+
+## 20. Session-24 Addendum (2026-10-13) — Ninth No-Drift Sweep, Validation Track Held
+
+Session 24 ran on the persisted checkout: `git pull` fast-forwarded
+`aa17bed..bea2c64` — the remote advanced by one commit (`bea2c64
+"update session log"`) adding `docs/session_23.md` (the raw session-22
+transcript, per the established relationship) and
+`docs/prompt-to-validate-5.md` (this session's validation prompt, SSH
+key redacted). `git diff` proves no source, test, config, or root-doc
+bytes changed across the delta — the full doc-suite review carried over
+verbatim, and the session-22 claims needed no re-derivation (its
+artifacts — remediation §19, session record, README rows, worklog Task
+18, four session22-* captures — are all present and consistent).
+
+### 20.1 Validation (ledger reproduced, no code change)
+
+- typecheck ✓ · lint ✓ · **95/95 unit** ✓ · build **506.92 KB** ✓ ·
+  SEO determinism held (worktree clean after `npm run build`;
+  sitemap 36 URLs; robots 5 disallows) · **194/194 E2E** (97 specs ×
+  2 projects, 3.6 min).
+- `npm audit --omit=dev`: **0 vulnerabilities** (production tree clean).
+  The dev-chain `braces` advisory stands unchanged at 3 high — the
+  registered accepted risk.
+- Zero TODO/FIXME markers in `src/`; worktree clean throughout.
+
+### 20.2 Live sweeps (both sides, no drift — ninth consecutive)
+
+- Reference (Playwright Chromium @390×844 + host-resolver-rules; CDN IP
+  re-resolved 216.24.57.16 — the agent-browser Chromium DNS quirk
+  persists): bare 36×36 trigger (`rgba(0,0,0,0)`, 0px border, no
+  shadow); `NAV.bg-card/80` panel = `rgba(255,255,255,0.8)`, shadowless,
+  `1px solid rgba(229,224,220,0.5)`; rows 14px/500 — active white on
+  `rgb(217,110,38)` at 12px radius, inactive muted `rgb(126,111,103)`;
+  no dialog semantics, focus stays on BODY; robots allows everything;
+  sitemap 22 statics (8 admin + 4 private listed), 0 product URLs.
+- Clone (production preview :4177, `sweep20-clone.js` reused unchanged):
+  dialog contract live-verified (`role="dialog"` + `aria-modal="true"` +
+  `aria-label="Site menu"`, portal-to-body, initial focus at the search
+  pill, 7×Tab trap with wrap, Escape restores the "Open menu" trigger);
+  row pins exact + superset `Sign in` row (6 rows); R14-01 live region
+  announcing (polite; no-results and empty branches correct); served PDP
+  head (title = h1, canonical, Product JSON-LD USD $54.99); robots 5
+  disallows; sitemap 36 URLs; R18-01 manifest green (200
+  `application/manifest+json`, members correct, icons 192×192 +
+  512×512, head link root-absolute on a deep route).
+- **Conclusion: no functional or visual gaps on either side.**
+
+### 20.3 Follow-ups executed
+
+- ✅ **R24-01 — session captures** (4, visually verified post-capture;
+  **byte-sizes identical to the session-14/16/18/20/22 sets** —
+  pixel-parity evidence): `session24-home-desktop`,
+  `session24-pdp-desktop`, `session24-mobile-home`,
+  `session24-mobile-menu-open` → `docs/screenshots/`; README
+  Documentation rows extended.
+
+### 20.4 Decision record (validation track held)
+
+The candidate list remains retired (§18.4): no agent-actionable
+remediation items exist. Server-backed auth stays the registered owner
+decision (ADR-001); npm dev-chain advisories stay a registered accepted
+risk; all other PAD §10 rows remain accepted or registered. The
+validation track — full ledger, bidirectional sweeps, captures, docs —
+remains the standing default for future sessions until the owner
+green-lights ADR-001 or the reference drifts. This session opened no new
+candidates.
+
+### 20.5 Verification gate (post session-24)
+
+typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
+— all observed this session on the `bea2c64` tree before any change;
+the docs-only remainder sits outside every gate's file set.
