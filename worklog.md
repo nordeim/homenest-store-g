@@ -473,3 +473,30 @@ Stage Summary:
 - Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — observed on bea2c64 pre-change; docs-only remainder outside every gate's file set
 - Parity posture: ninth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, manifest superset, and R14-01 live region all hold
 - Validation track is the standing default: ADR-001 (server-backed auth) remains an owner decision; no agent-actionable remediation items exist
+
+---
+Task ID: 20
+Agent: main (Super Z)
+Task: Session 26 — tenth sweep found reference drift (trigger green disc + plain account icon), TDD remediation, db scripts workstream, docs, push
+
+Work Log:
+- Fresh clone after sandbox reset (ea4edca — session-24 push d29eb0f + transcript c44b79f, merged); root docs + session_24/session_23 + remediation §1–§20 + worklog Tasks 1–19 reviewed; session-24 artifacts re-validated against the tree
+- Environment re-provisioned: node 24.21.0 + npm install, .env recreated with the pinned contract (DATABASE_URL="file:../db/custom.db", repo-root db/), Playwright chromium re-fetched
+- Skills consulted: tdd-workflow, webapp-testing, agent-browser (DNS quirk did NOT reproduce — reference resolved directly), code-review-and-audit, tailwind-patterns
+- Baseline gate on ea4edca reproduced: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓; npm audit --omit=dev 0 vulnerabilities; zero TODO/FIXME; worktree clean
+- Tenth bidirectional sweep (agent-browser, logged in with owner-supplied credentials): REFERENCE DRIFT FOUND — (F26-01) mobile menu trigger is a green disc (rgb(69,161,130), 36×36, 9999px radius, white glyph) in BOTH states, replacing the session-5 bare-dark-icon measurement; (F26-02) header account button renders a plain dark lucide-user glyph while logged in — no green avatar disc; all other pins held both sides (panel/rows/body/footer/headings/catalog/robots/sitemap/manifest)
+- Validation track exited per §20.4 doctrine ("unless the reference drifts"); candidate list un-retired for F26-01, F26-02, and F26-03 (the standing db-scripts mandate, unimplemented across sessions 1–24)
+- R26-01 (TDD): RED — rewrote the trigger spec in tests/e2e/mobile-navigation.spec.ts (green-disc pins, both states, 36px disc geometry, rounded-[9999px] per trap #8); GREEN — chrome.tsx renders the glyph inside an h-9 w-9 rounded-[9999px] bg-accent text-white span within the 44px touch-target button; icons normalized h-5 w-5 stroke 2
+- R26-02 (TDD): RED — new account-icon spec in tests/e2e/mobile-header-parity.spec.ts (plain glyph both auth states, header-scoped locators); GREEN — removed the logged-in bg-accent disc from chrome.tsx
+- R26-03 (TDD): RED — tests/db-scripts.test.ts (9 tests: materialization at the URL-resolved path, row counts cross-checked against the catalog import, field fidelity, digest format, idempotency, --init/--seed modes, package wiring); GREEN — scripts/db-setup.mjs (node:sqlite, zero deps, ADR-002-mirroring resolution, flat-object catalog extraction + brace-matched DEMO_USERS scan, INSERT OR REPLACE) + db:init/db:seed/db:setup scripts in package.json (ecommerce-store naming, Prisma-free per ADR-001)
+- Environment quirk handled: the sandbox shell exports DATABASE_URL (parent-workspace scope) which overrides the repo default — repo-root materialization ran with env -u DATABASE_URL (documented in AGENTS.md + DEPLOYMENT.md)
+- Repo db materialized and verified: db/custom.db — 24 products / 8 categories / 2 users (node:sqlite)
+- Post-change gate observed: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.93 KB ✓ 196/196 E2E (98 specs × 2 projects) ✓; post-change re-sweep green (trigger disc + account icon parity, dialog contract intact, SEO/manifest supersets green)
+- R26-04: 4 captures (session26-home-desktop, session26-pdp-desktop, session26-mobile-home, session26-mobile-menu-open) + drift evidence _ref-sweep26-mobile-menu-open.png → docs/screenshots/
+- Docs updated: remediation plan §21, docs/session_26.md, README (badges/features/env table/Documentation rows), AGENTS.md (commands/environment/testing quirks), PAD (tokens §5.5 usage, §7.1 distribution, §7.4 checklist, §10 rows, ADR-002 consequences), DEPLOYMENT.md §4.1, .env.example, worklog (this entry)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.93 KB ✓ 196/196 E2E ✓ — observed post-change on ea4edca before the docs-only remainder
+- Parity posture: tenth sweep found and fixed two reference drifts (trigger green disc both states; plain account icon both auth states); all other pins hold; the Tailwind v4 portal trap stays defeated (dialog contract re-verified live)
+- db scripts workstream closed (R26-03): the DATABASE_URL contract now has a real SQLite referent — tooling parity only, ADR-001 untouched, Prisma stays rejected
+- Candidate list re-retired after remediation: validation track resumes as the standing default unless the reference drifts again; ADR-001 (server-backed auth) remains an owner decision

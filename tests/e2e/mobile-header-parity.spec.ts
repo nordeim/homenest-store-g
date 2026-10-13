@@ -70,3 +70,33 @@ test("hero carousel opens on the reference's first slide", async ({ page }) => {
   const region = page.getByRole("region", { name: "Featured collections" });
   await expect(region.getByRole("heading", { level: 1 })).toHaveText("Elevate Your Kitchen");
 });
+
+test("header account button renders a plain icon in both auth states (session-26)", async ({ page }) => {
+  // Session-26 re-measurement (2026-10-14, logged in on the reference with
+  // the owner-supplied User-role account): the header account button is a
+  // transparent round button with a plain dark lucide-user glyph — NO green
+  // avatar disc. The logged-out state was already a plain icon; the clone
+  // previously wrapped the logged-in glyph in a bg-accent disc (the
+  // session-2 measurement) — both states now match the latest measurement.
+  await page.goto("/");
+  const accountLoggedOut = page
+    .locator("header")
+    .getByRole("link", { name: "Sign in" });
+  await expect(accountLoggedOut).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(accountLoggedOut.locator("span")).toHaveCount(0);
+
+  await page.goto("/login");
+  await page.getByLabel("Email").fill("john@example.com");
+  await page.getByLabel("Password").fill("Demo1234!");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL(/\/account$/);
+  const accountLoggedIn = page
+    .locator("header")
+    .getByRole("link", { name: "Account" });
+  await expect(accountLoggedIn).toBeVisible();
+  await expect(accountLoggedIn).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  // No green disc span in the logged-in state either — the glyph renders
+  // directly in the button, matching the reference measurement.
+  await expect(accountLoggedIn.locator("span")).toHaveCount(0);
+  await expect(accountLoggedIn).toHaveCSS("color", "rgb(29, 24, 22)");
+});

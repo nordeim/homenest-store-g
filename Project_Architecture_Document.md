@@ -68,7 +68,7 @@ This PAD is the single source of truth for the HomeNest Kitchen storefront. It d
 - **Context:** The repo pins `DATABASE_URL="file:../db/custom.db"`; the `db/` folder must sit at the repo root; a future Prisma schema would live in `prisma/`.
 - **Decision:** `src/lib/db-path.ts` resolves `file:` URLs the way the Prisma CLI does — relative to a `prisma/` schema anchor, with normalization — and exposes `dbPathFromRepoRoot()` (`db/custom.db`). Pinned by `tests/db-path.test.ts` (8 tests).
 - **Rationale:** One URL resolves to one physical file from any working directory; the contract is executable documentation instead of a comment.
-- **Consequences:** ➕ Tooling can compute the real DB location; ➖ the resolution rules are load-bearing ("do not simplify").
+- **Consequences:** ➕ Tooling can compute the real DB location; ➖ the resolution rules are load-bearing ("do not simplify"). Session 26 (R26-03) added `npm run db:setup` — the contract now also has a real referent: a materialized SQLite file (schema + catalog + demo-user digests) at the resolved path, zero dependencies (`node:sqlite`), still tooling-only (the SPA never reads it).
 - **Alternatives rejected:** Naive string stripping (the v1 implementation) — it documented the URL without honoring its semantics.
 
 **ADR-003: Custom history-API router with centralized `matchPath`.**
@@ -366,7 +366,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `primary-dark` | `hsl(24 70% 43%)` | — | Hover state | — |
 | `muted` | `hsl(30 15% 94%)` | — | Search fields, placeholders surfaces | — |
 | `muted-foreground` | `hsl(20 10% 45%)` | — | Secondary text | ≈ 7:1 on background |
-| `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping, logged-in avatar, menu close disc | white text used only on the disc (decorative) |
+| `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping, mobile menu trigger disc (session-26 re-measurement — green in BOTH states) | white text used only on the disc (decorative) |
 | `destructive` | `hsl(0 72% 51%)` | `rgb(220,40,40)` | Discount pills, form errors | white text 4.6:1 |
 | `badge` | — | `rgb(245,159,10)` | "Featured" pill, filled stars | white bold text on amber is decorative/large |
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
@@ -453,9 +453,10 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Password-at-rest contract | 1 | 8 | `tests/password.test.ts` | Vitest (node) |
 | Route-head seam (R8-05) | 1 | 29 | `tests/seo.test.ts` | Vitest (node) |
 | Robots/sitemap artifacts (R8-01/02/03) | 1 | 33 | `tests/sitemap.test.ts` | Vitest (node) |
+| db scripts contract (R26-03) | 1 | 9 | `tests/db-scripts.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
-| Mobile navigation | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
-| Mobile header parity | 1 | 4 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
+| Mobile navigation (incl. session-26 trigger disc pins) | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| Mobile header parity (incl. session-26 account-icon pins) | 1 | 5 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
 | Cart drawer modal | 1 | 3 | `tests/e2e/cart-drawer.spec.ts` | Playwright |
 | Catalog | 1 | 6 | `tests/e2e/catalog.spec.ts` | Playwright |
 | Cart & checkout | 1 | 9 | `tests/e2e/cart-checkout.spec.ts` | Playwright |
@@ -466,7 +467,7 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Password at rest E2E (R5-01) | 1 | 4 | `tests/e2e/password-hash.spec.ts` | Playwright |
 | Account header layout (R5-06) | 1 | 1 | `tests/e2e/account-layout.spec.ts` | Playwright |
 | SEO head gate (R8-06) | 1 | 19 | `tests/e2e/seo-head.spec.ts` | Playwright |
-| **Total** | **19** | **95 unit tests + 91 E2E specs → 277 runs** (95 × 1 + 91 × 2 projects) | | |
+| **Total** | **20** | **104 unit tests + 98 E2E specs → 300 runs** (104 × 1 + 98 × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -483,9 +484,9 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 ### 7.4 Pre-Push Checklist
 
 1. `npm run typecheck` — exit 0
-2. `npm run test` — 33/33
-3. `npm run build` — succeeds (~499 KB single file)
-4. `npm run e2e` — 144/144 across chromium + mobile
+2. `npm run test` — 104/104
+3. `npm run build` — succeeds (~507 KB single file)
+4. `npm run e2e` — 196/196 across chromium + mobile
 5. Docs updated in the same commit when contracts/visuals changed
 6. `AGENTS.md` trap log grown (not worked around) if a new trap was discovered
 7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same change
@@ -570,6 +571,8 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | LOW | Carousel kicker field is stored but not rendered | Reference hero shows no kicker; kept for admin-editing future | Registered divergence |
 | ~~LOW~~ | ~~Desktop search combobox options are not announced with result counts~~ | — | **Closed (session 14, R14-01):** sr-only `role="status" aria-live="polite"` region inside the search form announces result counts / no-results politely on query change; pinned by `tests/e2e/search-keyboard.spec.ts` R14-01 specs and re-verified live each session |
 | LOW | Static SEO fallbacks hardcode the default origin (`http://localhost:4173`) | Deploying elsewhere needs `VITE_SITE_URL` + `node scripts/generate-sitemap.mjs`; the committed artifacts are test-gated against the catalog | Accepted — documented in `.env.example` (session 8) |
+| ~~MEDIUM~~ | ~~`package.json` ships no db scripts (standing mandate item)~~ | — | **Closed (session 26, R26-03):** `db:init` / `db:seed` / `db:setup` materialize the ADR-002 contract as a real SQLite `db/custom.db` via `scripts/db-setup.mjs` (node:sqlite, zero deps, idempotent, Prisma-free per ADR-001 — tooling parity only). Pinned by `tests/db-scripts.test.ts` (9 tests) |
+| LOW | Reference visual state is not frozen | The reference site drifts (menu trigger disc: green → bare → green across sessions 3→5→26; account avatar disc → plain icon by session 26) | Accepted — the follow-the-latest-measurement doctrine + computed-style E2E pins re-verify every session; remediation plan §21.1 records the session-26 drift remediation |
 
 ---
 

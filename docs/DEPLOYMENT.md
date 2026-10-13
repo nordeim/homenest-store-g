@@ -73,6 +73,27 @@ config). Every fresh clone recreates whatever the tooling needs from the
 pinned contract. The storefront's runtime state stays in `localStorage`
 — see §2.
 
+### 4.1 Materializing the contract db (session 26, R26-03)
+
+```bash
+npm run db:setup     # → db/custom.db — schema + catalog + demo-user digests
+npm run db:init      # schema only
+npm run db:seed      # catalog seed only (needs db:init)
+```
+
+The scripts (`scripts/db-setup.mjs`) use Node's built-in `node:sqlite`
+(Node ≥ 22.5) — zero dependencies, idempotent (`INSERT OR REPLACE`), and
+deliberately Prisma-free per ADR-001: the deployed SPA still never reads
+the file. They exist so the `DATABASE_URL` contract has a real referent
+for tooling parity and so a future server workstream (PAD §6.3) starts
+from a live, seeded database. The behavior is pinned by
+`tests/db-scripts.test.ts` (row counts cross-checked against the catalog
+import, idempotency, modes, package wiring).
+
+One caveat: a shell-level `DATABASE_URL` overrides the repo default, so
+`env -u DATABASE_URL npm run db:setup` is the safe invocation when the
+file must land inside the repo root.
+
 ## 5. Deploying to a different origin (SEO sync)
 
 The committed SEO artifacts and the static head fallbacks in `index.html`

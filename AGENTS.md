@@ -17,6 +17,9 @@ Production e-commerce storefront + admin console: Vite 7 · React 19 · TypeScri
 | E2E (**requires build first**) | `npm run e2e` (Playwright against `vite preview` on :4173) |
 | Single E2E spec | `npx playwright test tests/e2e/cart-checkout.spec.ts` |
 | Regenerate SEO artifacts | `npm run seo:generate` (also runs via the `prebuild` hook) |
+| Initialize the SQLite contract db | `npm run db:init` (schema only) |
+| Seed the contract db | `npm run db:seed` (catalog + demo users; needs `db:init`) |
+| Init + seed in one step | `npm run db:setup` (`node:sqlite`, zero deps — tooling parity only; the SPA still persists to localStorage) |
 | Full pre-push gate | `npm run verify && npm run e2e` |
 
 ESLint flat config (`eslint.config.js`, R16-01) runs as the `lint` stage inside `npm run verify` — eslint 9 + typescript-eslint recommended + react-hooks + react-refresh, non-type-aware (tsc covers types). Provider+hook co-location is carved out only for `store.tsx`/`router.tsx`/`chrome.tsx`; keep the rule on for new files. `skills/` is never linted.
@@ -26,6 +29,7 @@ ESLint flat config (`eslint.config.js`, R16-01) runs as the `lint` stage inside 
 - `.env` pins `DATABASE_URL="file:../db/custom.db"`. `db/` sits at the **repo root** and is git-ignored.
 - The URL is **schema-relative** (resolves the way the Prisma CLI would: against a `prisma/` anchor), so `file:../db/custom.db` lands in `<repoRoot>/db/custom.db` regardless of CWD. The resolution rules live in `src/lib/db-path.ts` and are pinned by `tests/db-path.test.ts` — do not simplify them.
 - The SPA itself never opens the SQLite file: all state lives in `localStorage` under the key `homenest.v4` (bumped with the seed each time the persisted shape or catalog changes — the pairing is enforced by `tests/catalog-hash.test.ts`). The env contract exists for tooling parity with the reference architecture and for the admin Settings surface.
+- `npm run db:setup` (session 26, R26-03) materializes the contract as a REAL SQLite `db/custom.db` — schema + catalog + demo-user digests, idempotent, zero dependencies (`node:sqlite`, Node ≥ 22.5). Tooling parity only: ADR-001 still holds, Prisma stays rejected, and a shell-level `DATABASE_URL` overrides the repo default (unset it if the file lands outside the repo root).
 
 ## Architecture rules
 
@@ -65,13 +69,15 @@ Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from
 - **The mobile menu is a modal dialog** (`role="dialog" aria-modal="true" aria-label="Site menu"`) with a focus trap: focus enters at the search pill (or the input once expanded), Tab cycles among the panel's 7 focusables (search control + 6 links), Escape restores focus to the trigger. The inner `<nav aria-label="Mobile">` keeps its landmark role — specs may keep using it. The panel does NOT dim the page and is translucent white/80 with no shadow (matches the live reference; re-measure before "fixing").
 - **The cart drawer is the same modal contract** (`aria-modal`, focus in on open, Tab trap, focus restore on close) — pinned by `tests/e2e/cart-drawer.spec.ts`.
 - **The menu's search is a compact muted pill at rest**; tapping it expands the input and focuses it (the reference's pill is inert — registered divergence, PAD §5.6 #13). Specs that need the input must tap the pill first.
-- **The menu trigger is a bare dark icon in BOTH states** (transparent button, foreground glyph, no inner span). Session-3/4 measured a green close disc; the session-5 re-measurement caught the reference dropping it — follow the latest measurement (remediation plan §11.1).
+- **The menu trigger is a GREEN DISC in BOTH states** (session-26 re-measurement, 2026-10-14: `bg-accent` disc `rgb(69,161,130)`, white glyph, `rounded-[9999px]`, 36px inner span inside the 44px touch-target button). Session-3/4 measured the same green disc; session-5 caught the reference dropping it (bare dark icon); session-26 caught it BACK — follow the latest measurement (remediation plan §21.1, pinned by `tests/e2e/mobile-navigation.spec.ts`). The session-5-style inner-span-free trigger must not be reintroduced without a fresh reference measurement.
 - **The desktop search overlay is an APG combobox** (listbox-popup): ArrowDown/ArrowUp wrap, Home/End jump, Enter navigates the active option (default submit when none), Escape dismisses; activation is `aria-activedescendant` + `aria-selected`, pinned by `tests/e2e/search-keyboard.spec.ts`. Keep that pattern intact when touching the overlay.
 - **Never click a disabled control** (quantity minus at qty=1) — assert `toBeDisabled()` instead; Playwright waits for enabled state and times out otherwise.
 - **Strict-mode text collisions**: "Total" matches "Subtotal"; "Confirmed" matches "Your order has been confirmed". Use `{ exact: true }` or role-scoped locators.
 - **Computed styles are the parity gate, not screenshots.** Colors above are asserted with `toHaveCSS`. When you change a token, re-measure and update the spec in the same commit.
 - **Passwords, sessions and persistence interplay in E2E:** `login()` is async now — after a UI logout, wait for the logged-out chrome (header "Sign in" link) before a full-reload `goto`, or the persist effect races the navigation and the session restores (bit the password round-trip spec on mobile).
 - **Reference-side carousel auto-rotates** and the active slide title becomes the page `h1` — read slide 1 on load (or reload) before comparing hero content in sweeps.
+- **The header account button renders a PLAIN dark user glyph in BOTH auth states** (session-26 re-measurement — no green avatar disc; the session-2 green-avatar measurement no longer holds). Pinned by `tests/e2e/mobile-header-parity.spec.ts`.
+- **Environment & database contract (session 26, R26-03):** `npm run db:init` / `db:seed` / `db:setup` materialize the ADR-002 contract as a real SQLite file via `scripts/db-setup.mjs` (node:sqlite, zero dependencies, Node ≥ 22.5). Tooling parity only — ADR-001 still holds (the SPA persists to localStorage; Prisma stays rejected). The contract is pinned by `tests/db-scripts.test.ts` (9 tests: row counts cross-checked against the catalog import, idempotency, modes, package wiring). NOTE: a shell-level `DATABASE_URL` overrides the repo default — unset it (`env -u DATABASE_URL`) if the db lands outside the repo root.
 - **Playwright error logs render CSS attribute selectors lossily** — a locator that displays mangled in a call log may be correct; verify against the DOM before "fixing" the selector (bit the SEO head spec twice).
 - **Product cards link `/product/{id}`** (the reference URL shape); `/products/{slug}` exists as deep-link + sitemap URLs only — href-based locators on `/products` must target `/product/`.
 

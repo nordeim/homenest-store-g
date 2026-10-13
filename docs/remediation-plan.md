@@ -1296,3 +1296,118 @@ candidates.
 typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
 — all observed this session on the `bea2c64` tree before any change;
 the docs-only remainder sits outside every gate's file set.
+
+## 21. Session-26 Addendum (2026-10-14) — Reference Drift Found: Menu Trigger Green Disc, Plain Account Icon; db Scripts Workstream
+
+Session 26 reviewed `docs/session_24.md` + `session_23.md` on the
+`ea4edca` tree (the merge of the session-24 push and its transcript
+commit). The baseline ledger reproduced exactly — typecheck ✓ · lint ✓ ·
+95/95 unit ✓ · build 506.92 KB ✓ · **194/194 E2E** — and
+`npm audit --omit=dev` reported 0 production vulnerabilities before any
+change. The session then ran the tenth bidirectional live sweep
+(agent-browser, which now resolves the reference host directly — the
+session-14 DNS quirk did not reproduce this session; logged in with the
+owner-supplied credentials per the mandate).
+
+### 21.1 Findings — the reference drifted (validation track exited)
+
+- **F26-01 (HIGH, visual parity): the mobile menu trigger is a GREEN
+  disc in BOTH states.** Closed: `bg rgb(69,161,130)` (accent green),
+  36×36, `radius 9999px`, white `lucide-menu` glyph (`w-5 h-5`).
+  Open: same green disc with a white `lucide X` glyph. This is the
+  session-3/4 measurement come back — the session-5 re-measurement
+  ("bare dark icon in BOTH states") no longer describes the reference.
+  The clone still ships the bare dark icon → resting-visual mismatch on
+  the parity-critical mobile header. Per the follow-the-latest-
+  measurement doctrine (§10.5.2), the clone follows the reference.
+- **F26-02 (MEDIUM, visual parity): the header account button renders a
+  plain dark user icon while logged in.** The reference (logged in as
+  the owner-supplied User-role account) shows a transparent 36×36
+  round button with a dark `lucide-user` glyph — no green avatar disc.
+  The clone renders a green `bg-accent` disc with a white glyph in the
+  logged-in state → resting-visual mismatch.
+- **F26-03 (standing mandate item, unimplemented across sessions 1–24):
+  `package.json` carries no db scripts.** The standing instruction asks
+  for database initialization + seeding scripts referencing the
+  `ecommerce-store` package.json pattern. ADR-001 rejected the
+  Prisma/Next stack (correct for this zero-server SPA), but a
+  zero-dependency implementation satisfies the mandate without touching
+  the runtime: Node ≥ 22.5 ships `node:sqlite`, so `scripts/db-setup.mjs`
+  can materialize a real SQLite `db/custom.db` at the ADR-002-resolved
+  path, seeded from `db/catalog.json` + the catalog seed, idempotently.
+  The SPA keeps persisting to localStorage; the scripts are tooling-only
+  parity that makes the `DATABASE_URL` contract non-vacuous and leaves
+  the PAD §6.3 server workstream a live database to adopt.
+- All other pins held on both sides (tenth sweep): body
+  `rgb(251,250,249)`, footer `rgb(29,24,22)`, headings Playfair Display
+  700, panel `rgba(255,255,255,0.8)` shadowless, active row 14px/500
+  white on `rgb(217,110,38)` at 12px, inactive muted `rgb(126,111,103)`,
+  reference catalog 8 products, reference robots allows-all, reference
+  sitemap 22 statics / 0 product URLs; clone robots 5 disallows, clone
+  sitemap 36 URLs, PDP head superset, manifest superset all live-green.
+
+### 21.2 Remediation ToDo (executed this session, TDD)
+
+- [x] **R26-01 — mobile menu trigger green disc (both states).**
+  RED: rewrite the `menu trigger renders a bare dark icon` spec in
+  `tests/e2e/mobile-navigation.spec.ts` to pin the re-measured disc
+  (closed + open states: `rgb(69,161,130)` bg, white glyph, no shadow;
+  inner-span geometry). GREEN: `src/components/chrome.tsx` renders the
+  glyph inside an `h-9 w-9 rounded-full bg-accent text-white` span
+  within the unchanged `h-11 w-11` trigger — visual disc parity
+  (36×36) while the 44px touch-target posture (README a11y) is kept,
+  mirroring the search-pill precedent. Icons normalized to
+  `h-5 w-5` + stroke 2 to match the reference glyph metrics.
+- [x] **R26-02 — header account icon parity.** RED: new pins in
+  `tests/e2e/mobile-header-parity.spec.ts` (logged-in header account
+  button: transparent bg, dark glyph, no disc span — matching the
+  live reference measurement). GREEN: remove the logged-in
+  `bg-accent` disc from `src/components/chrome.tsx`; both auth states
+  render the plain `UserRound` glyph.
+- [x] **R26-03 — db scripts workstream (zero-dependency).** RED:
+  `tests/db-scripts.test.ts` executes the script against a temp
+  `DATABASE_URL` and asserts the SQLite file materializes with the
+  catalog row counts (24 products, 2 demo users), that re-running is
+  idempotent, and that the resolved path honors the ADR-002 contract.
+  GREEN: `scripts/db-setup.mjs` (node:sqlite) + `db:init`, `db:seed`,
+  `db:setup` scripts in `package.json` (naming follows the
+  ecommerce-store reference; implementation deliberately Prisma-free
+  per ADR-001). Docs: AGENTS.md command table, README testing section,
+  DEPLOYMENT.md env contract note.
+- [x] **R26-04 — session artifacts.** Four captures
+  (`session26-home-desktop`, `session26-pdp-desktop`,
+  `session26-mobile-home`, `session26-mobile-menu-open`) →
+  `docs/screenshots/`; docs aligned (this addendum,
+  `docs/session_26.md`, README rows, worklog Task 20, AGENTS.md trap
+  log + testing quirks, PAD §5.6 divergence rows where affected).
+
+### 21.3 Decision records
+
+- The candidate list **un-retires** for exactly the three items above
+  (two reference drifts + the standing db-scripts mandate); everything
+  else stays retired per §18.4/§19.4/§20.4. ADR-001 (server-backed
+  auth) remains an owner decision — untouched by this session.
+- db scripts are **tooling parity, not an architecture change**: the
+  runtime seam (`src/lib/db-path.ts`, 8 contract tests) is unchanged;
+  the seed script consumes the same catalog seed the SPA uses. Prisma
+  stays rejected (ADR-001); `node:sqlite` adds no dependency.
+- Trigger geometry: reference disc 36×36 within a 44px touch target —
+  same "visual parity + a11y superset" posture as the menu search pill
+  (§10, session-4 note). The full-size-green-44px alternative was
+  rejected: it would read as visual drift on the measured surface.
+
+### 21.4 Verification gate (post session-26)
+
+typecheck ✓ · lint ✓ · **104/104 unit** (95 + a 9-test db-scripts contract
+file) ✓ · build 506.93 KB ✓ · **196/196 E2E** (98 specs × 2 projects — the
+rewritten trigger spec + the new account-icon spec) ✓ — all observed on the
+`ea4edca` tree after the changes, before the docs-only remainder. The repo's
+db was materialized with `npm run db:setup` (git-ignored `db/custom.db`,
+24 products / 8 categories / 2 users — verified with node:sqlite).
+
+### 21.5 Post-change sweep (clone side)
+
+Post-remediation preview re-sweep: trigger disc green both states
+(`rgb(69,161,130)`, white glyph), account icon plain in both auth
+states, dialog contract intact (portal, focus trap, Escape restore),
+panel/row pins unchanged, served SEO + manifest supersets green.

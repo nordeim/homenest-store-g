@@ -10,12 +10,6 @@ import { expect, test } from "@playwright/test";
  * navigating closes the menu, and the page below stays UNDIMMED (matching the
  * current reference; session-3 measurement).
  *
- * Session-5 re-measurement (same reference, same day): the trigger no longer
- * swaps to the session-3 green disc — BOTH states render a bare dark icon
- * (transparent button, foreground-colored glyph, no inner span). The clone
- * follows the latest measurement, per the follow-the-latest-measurement
- * doctrine (remediation plan §10.5.2).
- *
  * Session-4 re-measurement (same reference, same day): the panel is a
  * translucent white/80 surface with NO drop shadow; menu rows render at
  * 14px/500 with muted-foreground inactive text and a 12px radius on the
@@ -24,6 +18,25 @@ import { expect, test } from "@playwright/test";
  * pill is functionally inert (and even unclickable: its own toast viewport
  * covers it); the clone expands it into a working search input on tap, a
  * registered functional superset (PAD §5.6).
+ *
+ * Session-5 re-measurement (same reference, same day): the trigger no longer
+ * swapped to the session-3 green disc — BOTH states rendered a bare dark
+ * icon (transparent button, foreground-colored glyph, no inner span). The
+ * clone followed that measurement per the follow-the-latest-measurement
+ * doctrine (remediation plan §10.5.2).
+ *
+ * Session-26 re-measurement (2026-10-14, agent-browser @390×844, logged in
+ * with the owner-supplied account): the green disc is BACK on the reference
+ * in BOTH states — closed trigger = `bg rgb(69,161,130)`, 36×36 disc,
+ * `radius 9999px`, white lucide-menu glyph; open trigger = the same green
+ * disc with a white X glyph. The clone follows the latest measurement: the
+ * glyph renders inside an h-9 w-9 (36px) `rounded-[9999px]` accent-green
+ * span within the unchanged h-11 w-11 (44px) touch-target button — visual
+ * disc parity plus the documented large-touch-target posture, the same
+ * "width parity, height deliberately larger" pattern the search pill uses.
+ * `rounded-[9999px]` (not `rounded-full`) is deliberate: v4's
+ * `rounded-full` computes to calc(infinity*1px) and cannot be pinned
+ * against the reference's literal 9999px (AGENTS.md trap #8).
  *
  * Touch-target note: the reference pill measures 40x28; the clone ships a
  * 40x40 disc to honor the repo's documented large-touch-target posture
@@ -115,20 +128,32 @@ test("active route renders as the orange pill row", async ({ page }) => {
   await expect(activeLink).toHaveAttribute("aria-current", "page");
 });
 
-test("menu trigger renders a bare dark icon in both states (no colored disc)", async ({ page }) => {
+test("menu trigger renders the green disc in both states (session-26 re-measurement)", async ({ page }) => {
   await page.goto("/");
   const open = page.getByRole("button", { name: "Open menu" });
-  // Closed state: transparent button, foreground glyph, no inner span disc.
+  // Closed state: transparent 44px touch button wrapping the 36px green disc
+  // (reference: rgb(69,161,130), radius 9999px, white menu glyph).
   await expect(open).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await expect(open.locator("span")).toHaveCount(0);
+  const openDisc = open.locator("span");
+  await expect(openDisc).toHaveCount(1);
+  await expect(openDisc).toHaveCSS("background-color", "rgb(69, 161, 130)");
+  await expect(openDisc).toHaveCSS("border-radius", "9999px");
+  await expect(openDisc).toHaveCSS("color", "rgb(255, 255, 255)");
+  const openDiscBox = await openDisc.boundingBox();
+  expect(Math.round(openDiscBox?.width ?? 0)).toBe(36);
+  expect(Math.round(openDiscBox?.height ?? 0)).toBe(36);
+
   await open.click();
   const close = page.getByRole("button", { name: "Close menu", exact: true });
   await expect(close).toBeVisible();
-  // Open state: SAME treatment — the reference dropped its green disc in the
-  // session-5 re-measurement; the X renders directly in the trigger.
-  await expect(close).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await expect(close.locator("span")).toHaveCount(0);
-  await expect(close).toHaveCSS("color", "rgb(29, 24, 22)");
+  // Open state: the SAME green disc carries the white X glyph.
+  const closeDisc = close.locator("span");
+  await expect(closeDisc).toHaveCount(1);
+  await expect(closeDisc).toHaveCSS("background-color", "rgb(69, 161, 130)");
+  await expect(closeDisc).toHaveCSS("border-radius", "9999px");
+  await expect(closeDisc).toHaveCSS("color", "rgb(255, 255, 255)");
+  const closeDiscBox = await closeDisc.boundingBox();
+  expect(Math.round(closeDiscBox?.width ?? 0)).toBe(36);
 });
 
 test("body scroll locks while the menu is open and unlocks after navigation", async ({ page }) => {

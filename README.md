@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-95%20unit%20%2B%20182%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20196%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -30,7 +30,7 @@ SEO is a registered superset: per-route titles/canonicals/OG-Twitter tags, a gen
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
 | ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on eight surfaces |
 | 🔍 SEO-ready | Per-route titles/canonical/OG-Twitter via a pure head seam, generated robots.txt + sitemap.xml (24 product URLs), schema.org JSON-LD (Organization, WebSite, per-PDP Product nodes) |
-| 🧪 Tested | 95 Vitest unit tests on pure seams + 91 Playwright E2E specs (182 runs) including computed-style visual-parity, mobile header parity, modal semantics, a11y smoke gates, and the served SEO artifacts |
+| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 98 Playwright E2E specs (196 runs) including computed-style visual-parity, mobile header parity, modal semantics, a11y smoke gates, and the served SEO artifacts |
 
 ## Architecture
 
@@ -113,7 +113,7 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 
 | Variable | Required | Value | Notes |
 |---|---|---|---|
-| `DATABASE_URL` | Yes | `file:../db/custom.db` | Schema-relative URL; resolves to the repo-root `db/` folder (contract-tested in `tests/db-path.test.ts`). The SPA keeps runtime state in localStorage — this pins the reference architecture's storage layout. |
+| `DATABASE_URL` | Yes | `file:../db/custom.db` | Schema-relative URL; resolves to the repo-root `db/` folder (contract-tested in `tests/db-path.test.ts`). The SPA keeps runtime state in localStorage — this pins the reference architecture's storage layout. `npm run db:setup` materializes it as a real SQLite file (session 26, R26-03). |
 | `E2E_PORT` | No | `4173` | Port for the Playwright preview server. |
 | `E2E_BASE_URL` | No | `http://127.0.0.1:4173` | Override to run E2E against an already-running server. |
 | `VITE_SITE_URL` | No | `http://localhost:4173` | Absolute origin for the SEO layer (canonical/og:url fallbacks, sitemap generation). Override + `npm run seo:generate` when deploying elsewhere. |
@@ -122,10 +122,11 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 
 ```bash
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
-npm run test            # Vitest unit tests (95)
+npm run test            # Vitest unit tests (104)
 npm run build           # production single-file build (prebuild regenerates SEO artifacts)
-npm run e2e             # Playwright E2E (91 specs / 182 runs) — requires npm run build first
-npm run verify          # typecheck + unit + build in one command
+npm run e2e             # Playwright E2E (98 specs / 196 runs) — requires npm run build first
+npm run verify          # typecheck + lint + unit + build in one command
+npm run db:setup        # materialize the SQLite contract db (repo-root db/custom.db)
 ```
 
 - E2E boots `vite preview` on port 4173 automatically; each test runs in a fresh browser context (fresh localStorage).
@@ -180,6 +181,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_20.md`](docs/session_20.md) — Session 20 execution record (seventh no-drift sweep → full re-validation → candidate-list retirement)
 - [`docs/session_22.md`](docs/session_22.md) — Session 22 execution record (eighth no-drift sweep → retired-list validation track → push)
 - [`docs/session_24.md`](docs/session_24.md) — Session 24 execution record (ninth no-drift sweep → validation track held → push)
+- [`docs/session_26.md`](docs/session_26.md) — Session 26 execution record (tenth sweep → reference drift found: menu trigger green disc + plain account icon → TDD remediation + db scripts → push)
+- [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
 - [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) / [`docs/session_21.md`](docs/session_21.md) / [`docs/session_23.md`](docs/session_23.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, session-18, session-20, and session-22 records
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)

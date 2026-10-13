@@ -248,14 +248,10 @@ export function Header() {
             className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
             aria-label={user ? "Account" : "Sign in"}
           >
-            <span
-              className={cn(
-                "inline-flex h-9 w-9 items-center justify-center rounded-full",
-                user ? "bg-accent text-white" : "",
-              )}
-            >
-              <UserRound className="h-5 w-5" strokeWidth={2} />
-            </span>
+            {/* Session-26 re-measurement: the reference renders a plain dark
+                lucide-user glyph in BOTH auth states (logged in as the
+                owner-supplied User-role account) — no green avatar disc. */}
+            <UserRound className="h-5 w-5" strokeWidth={2} />
           </Link>
           <button
             type="button"
@@ -278,9 +274,18 @@ export function Header() {
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            {/* Session-5 re-measurement: the reference dropped the green close
-                disc — BOTH states are a bare dark icon in the trigger. */}
-            {menuOpen ? <X className="h-5 w-5" strokeWidth={2.2} /> : <Menu strokeWidth={2} />}
+            {/* Session-26 re-measurement: the reference's trigger is a green
+                disc (rgb(69,161,130), white glyph) in BOTH states — the
+                session-5 "bare dark icon" measurement no longer holds. The
+                36px disc renders as an inner span so the resting visual
+                matches the reference while the button keeps the 44px
+                touch-target posture (the search-pill precedent).
+                rounded-[9999px] (not rounded-full): v4's rounded-full
+                computes to calc(infinity*1px) and cannot be pinned against
+                the reference's literal 9999px (AGENTS.md trap #8). */}
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-[9999px] bg-accent text-white">
+              {menuOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
+            </span>
           </button>
         </div>
       </div>
