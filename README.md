@@ -178,6 +178,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_16.md`](docs/session_16.md) — Session 16 execution record (fifth no-drift sweep → R16-01 ESLint flat config wired into `verify` → push)
 - [`docs/session_18.md`](docs/session_18.md) — Session 18 execution record (sixth no-drift sweep → R18-01 PWA manifest superset via TDD → push)
 - [`docs/session_20.md`](docs/session_20.md) — Session 20 execution record (seventh no-drift sweep → full re-validation → candidate-list retirement)
-- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, and session-18 records
+- [`docs/session_22.md`](docs/session_22.md) — Session 22 execution record (eighth no-drift sweep → retired-list validation track → push)
+- [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) / [`docs/session_21.md`](docs/session_21.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, session-18, and session-20 records
 - [`worklog.md`](worklog.md) — running multi-agent work log
 - [`docs/screenshots/`](docs/screenshots) — dev-server screen captures (desktop + mobile)

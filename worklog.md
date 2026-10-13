@@ -426,3 +426,27 @@ Stage Summary:
 - Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — observed on 6e17492 pre-change; docs-only remainder outside every gate's file set
 - Parity posture: seventh consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, manifest superset, and R14-01 live region all hold
 - Candidate list formally retired: validation track is the default until the owner green-lights ADR-001 (server-backed auth) or the reference drifts
+
+---
+Task ID: 18
+Agent: main (Super Z)
+Task: Session 22 — eighth no-drift sweep, retired-list validation track, docs, push
+
+Work Log:
+- git pull fast-forwarded 6e17492..2c9450b (remote advanced by the session-20 docs commit baaf4f8 + 2c9450b adding docs/session_21.md, the raw session-20 transcript); git diff proves the only root-doc change across both commits is README Documentation rows — doc-suite review carries over verbatim from the byte-identical session-18 review
+- Environment re-provisioned after sandbox reset: node 24.21.0 + node_modules intact; paramiko 5.0.0 re-installed into the ACTIVE interpreter (python3 3.12 via python3 -m pip — the 3.13 pip default does not serve it); 11 persisted sweep/capture scripts; no stale key material
+- session_20.md claims re-validated against the codebase: manifest file + head link + absoluteManifestLink hook + 3 manifest tests × 2 projects + §18 addendum + README rows + worklog Task 17 + four session20-* captures all present; session_21.md matches the pushed session-20 summary
+- Skills consulted (catalog byte-identical to session 18): tdd-workflow, webapp-testing, agent-browser (DNS quirk persists — Playwright + host-resolver-rules, IP re-resolved 216.24.57.16), code-review-and-audit, tailwindcss-v4
+- Baseline gate on 2c9450b: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ SEO determinism (dist byte-identical, sitemap 36, robots 5) ✓ 194/194 E2E (3.6 min) ✓ — ledger reproduced exactly
+- npm audit --omit=dev: 0 vulnerabilities (prod clean); dev-chain braces advisory unchanged (3 high, --force required) — registered accepted risk; zero TODO/FIXME in src/; worktree clean
+- Reference re-sweep (@390×844): NO drift — eighth consecutive (bare 36×36 trigger; NAV.bg-card/80 white/80 shadowless 1px border; active 14px/500 white on rgb(217,110,38) 12px; inactive muted rgb(126,111,103); no dialog semantics; robots allows all; sitemap 22 statics, 0 product URLs)
+- Clone sweep (sweep20-clone.js reused unchanged): dialog contract live-verified (portal, initial focus search pill, 7×Tab trap + wrap, Escape restore); row pins exact + superset Sign in (6 rows); R14-01 live region announcing (polite; no-results + empty branches); served PDP head (title=h1, canonical, Product JSON-LD USD $54.99); robots 5 disallows; sitemap 36 URLs; R18-01 manifest green (200 application/manifest+json, icons 192+512, root-absolute deep-route link)
+- Standing contracts re-verified: .env pinned DATABASE_URL + repo-root db/; .env.example in sync; ADR-002 db-path resolution (8 contract tests); db: npm scripts correctly absent per ADR-001 (zero-server SPA — db:push/db:seed belong to the rejected Prisma reference stack)
+- Decision: validation track re-confirmed — candidate list retired in §18.4, eighth no-drift, no agent-actionable items; no new candidates opened
+- R22-01: 4 captures visually verified post-capture (session22-home-desktop, session22-pdp-desktop, session22-mobile-home, session22-mobile-menu-open; byte-sizes identical to session-14/16/18/20 sets) → docs/screenshots/
+- Docs updated: remediation plan §19 (incl. §19.4 decision record), docs/session_22.md, README rows, worklog (this entry); DEPLOYMENT/AGENTS/CLAUDE/PAD §10 required no edits (no code change)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 95/95 unit ✓ build 506.92 KB ✓ 194/194 E2E ✓ — observed on 2c9450b pre-change; docs-only remainder outside every gate's file set
+- Parity posture: eighth consecutive no-drift sweep on both sides; menu pins, dialog superset, SEO superset, manifest superset, and R14-01 live region all hold
+- Validation track is the standing default: ADR-001 (server-backed auth) remains an owner decision; no agent-actionable remediation items exist

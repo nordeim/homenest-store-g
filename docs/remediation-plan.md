@@ -1148,3 +1148,79 @@ the reference site drifts.
 typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
 — all observed this session on the `6e17492` tree before any change;
 the docs-only remainder sits outside every gate's file set.
+
+## 19. Session-22 Addendum (2026-10-13) — Eighth No-Drift Sweep, Retired-List Validation Track
+
+Session 22 ran on the persisted checkout: `git pull` fast-forwarded
+`6e17492..2c9450b` — the remote advanced by the session-20 docs commit
+(`baaf4f8`: remediation §18, session record, README rows, worklog Task
+17, four captures) plus `2c9450b "update session log"` adding
+`docs/session_21.md`, the raw session-20 transcript. `git diff` against
+the reviewed tree proves no code changed between sessions: the doc-suite
+review carried over verbatim, and every session-20 claim was re-validated
+against the codebase (manifest file, head link, `absoluteManifestLink`
+transform hook, 3 manifest tests × 2 projects, README rows, §18 text).
+
+### 19.1 Validation (ledger reproduced, no code change)
+
+- typecheck ✓ · lint ✓ · **95/95 unit** ✓ · build **506.92 KB** ✓ ·
+  SEO determinism held (prebuild vs postbuild `dist/index.html`
+  byte-identical; sitemap 36 URLs; robots 5 disallows) ·
+  **194/194 E2E** (97 specs × 2 projects, 3.6 min).
+- `npm audit --omit=dev`: **0 vulnerabilities** (production tree clean).
+  The dev-chain `braces` advisory stands unchanged at 3 high — the
+  registered accepted risk (fix requires `--force` breaking changes on
+  build tooling; dev-only, no runtime surface in the single-file build).
+- Zero TODO/FIXME markers in `src/`; worktree clean before and after the
+  docs-only change set.
+
+### 19.2 Live sweeps (both sides, no drift — eighth consecutive)
+
+- Reference (Playwright Chromium @390×844 + host-resolver-rules; the
+  agent-browser Chromium DNS quirk persists, IP re-resolved to
+  216.24.57.16): bare 36×36 trigger (`rgba(0,0,0,0)`, 0px border, no
+  shadow); `NAV.bg-card/80` panel = `rgba(255,255,255,0.8)`, shadowless,
+  `1px solid rgba(229,224,220,0.5)`; rows 14px/500 — active white on
+  `rgb(217,110,38)` at 12px radius, inactive muted `rgb(126,111,103)`;
+  no dialog semantics, focus stays on BODY; robots allows everything;
+  sitemap 22 statics (8 admin + 4 private listed), 0 product URLs.
+- Clone (production preview :4177, `sweep20-clone.js` reused unchanged):
+  dialog contract live-verified (`role="dialog"` + `aria-modal="true"` +
+  `aria-label="Site menu"`, portal-to-body, initial focus at the search
+  pill, 7×Tab trap with wrap, Escape restores the "Open menu" trigger);
+  row pins exact + superset `Sign in` row (6 rows); R14-01 live region
+  announcing (polite; no-results and empty branches correct); served PDP
+  head (title = h1, canonical, Product JSON-LD USD $54.99); robots 5
+  disallows; sitemap 36 URLs; R18-01 manifest green (200
+  `application/manifest+json`, members correct, icons 192×192 +
+  512×512, head link root-absolute on a deep route).
+- **Conclusion: no functional or visual gaps on either side.** The
+  standing contracts re-verified: `.env` pinned `DATABASE_URL`, repo-root
+  `db/` layout, `.env.example` in sync (VITE_SITE_URL guidance), ADR-002
+  schema-relative resolution (`src/lib/db-path.ts` + 8 contract tests),
+  `db:push`/`db:seed` correctly absent per ADR-001 (zero-server SPA; the
+  Prisma seeding scripts belong to the rejected reference-stack pattern,
+  preserved as a future-workstream contract).
+
+### 19.3 Follow-ups executed
+
+- ✅ **R22-01 — session captures** (4, visually verified post-capture;
+  **byte-sizes identical to the session-14/16/18/20 sets** — pixel-parity
+  evidence): `session22-home-desktop`, `session22-pdp-desktop`,
+  `session22-mobile-home`, `session22-mobile-menu-open` →
+  `docs/screenshots/`; README Documentation rows extended.
+
+### 19.4 Decision record (validation track re-confirmed)
+
+With the candidate list retired in §18.4 and the eighth consecutive
+no-drift sweep on both sides, the validation track remains the default:
+no agent-actionable remediation items exist. Server-backed auth stays a
+registered **owner decision (ADR-001)**; npm dev-chain advisories stay a
+registered accepted risk; all other PAD §10 rows remain accepted or
+registered. This session adds no new candidates.
+
+### 19.5 Verification gate (post session-22)
+
+typecheck ✓ · lint ✓ · 95/95 unit ✓ · build 506.92 KB ✓ · 194/194 E2E ✓
+— all observed this session on the `2c9450b` tree before any change;
+the docs-only remainder sits outside every gate's file set.
