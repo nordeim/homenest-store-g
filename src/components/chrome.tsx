@@ -274,18 +274,22 @@ export function Header() {
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            {/* Session-26 re-measurement: the reference's trigger is a green
-                disc (rgb(69,161,130), white glyph) in BOTH states — the
-                session-5 "bare dark icon" measurement no longer holds. The
-                36px disc renders as an inner span so the resting visual
-                matches the reference while the button keeps the 44px
-                touch-target posture (the search-pill precedent).
-                rounded-[9999px] (not rounded-full): v4's rounded-full
-                computes to calc(infinity*1px) and cannot be pinned against
-                the reference's literal 9999px (AGENTS.md trap #8). */}
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-[9999px] bg-accent text-white">
-              {menuOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
-            </span>
+            {/* Session-27 re-measurement (2026-10-14, agent-browser @390×844,
+                logged in with the owner-supplied account): the reference's
+                trigger flipped BACK to a bare dark icon in BOTH states —
+                36×36 transparent button, rgb(29,24,22) glyph, 16px
+                lucide-menu / X, no inner span (verified on /, /products,
+                /product/1, closed and open). This surface has now measured
+                green (s3/4) → bare (s5) → green (s26) → bare (s27) — an
+                oscillating reference; the clone follows the latest
+                measurement per the follow-the-latest-measurement doctrine.
+                The button keeps the 44px touch-target posture (registered
+                a11y superset): the reference's mobile row shrinks to 36px
+                buttons with 16px glyphs, while the clone's row keeps the
+                desktop-geometry 44px buttons uniformly (account 20px glyph,
+                cart 24px), so the trigger glyph stays 20px to keep the row's
+                proportional language coherent. */}
+            {menuOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
           </button>
         </div>
       </div>

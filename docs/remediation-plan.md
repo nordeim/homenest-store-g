@@ -1411,3 +1411,89 @@ Post-remediation preview re-sweep: trigger disc green both states
 (`rgb(69,161,130)`, white glyph), account icon plain in both auth
 states, dialog contract intact (portal, focus trap, Escape restore),
 panel/row pins unchanged, served SEO + manifest supersets green.
+
+## 22. Session-27 addendum — eleventh sweep: trigger drift AGAIN (oscillation), TDD revert, doc-count refresh
+
+> Date: 2026-10-14 · Base: `ef6789b` (session-26 push `31504bb` + the
+> owner's `docs/session_27.md` transcript commit) · Result: pushed to `main`
+
+### 22.1 Findings (eleventh bidirectional sweep, agent-browser @390×844 + 1440×900, logged in with the owner-supplied credentials)
+
+- **F27-01 — the mobile menu trigger flipped BACK to a bare dark icon in
+  BOTH states.** Fresh measurement: 36×36 transparent button,
+  `rgb(29,24,22)` glyph, 16px lucide-menu / X svg, no inner span, stroke 2
+  — verified on `/`, `/products` and `/product/1`, in both the closed and
+  open states. The session-26 green-disc measurement
+  (`rgb(69,161,130)` disc, white glyph, 9999px radius) no longer holds.
+  This surface has now measured **green (s3/4) → bare (s5) → green (s26) →
+  bare (s27)** — the reference is oscillating on it (plausibly A/B testing
+  or owner indecision on the Base44 side). Per the
+  follow-the-latest-measurement doctrine, the clone reverts to the bare
+  dark icon.
+- All other reference pins held: account button a plain dark lucide-user
+  glyph in the logged-in state (the session-26 fix remains correct);
+  desktop header row = account 44×44 with 20px glyph, cart 44×44 with 24px
+  glyph, search pill 185×28 muted `rgb(242,240,237)` with a 16px glyph;
+  body `rgb(251,250,249)`, footer `rgb(29,24,22)`, headings Playfair
+  Display 700; mobile menu panel `rgba(255,255,255,0.8)` with active row
+  14px/500 white on `rgb(217,110,38)` (radius 12px, 358×44 full-width) and
+  inactive rows muted `rgb(126,111,103)`; catalog 8 products; robots
+  allows-all; sitemap 22 statics.
+- Clone side (production preview :4173): dialog contract, panel/row pins,
+  account icon both auth states, PDP head + JSON-LD superset, robots
+  5 disallows, sitemap 36 URLs, manifest 200 — all green. The trigger's
+  green disc (session-26 implementation) was the only mismatch.
+
+### 22.2 Remediation ToDo (executed this session, TDD)
+
+- [x] **R27-01 — trigger bare dark icon, both states.** RED: rewrote the
+  `menu trigger renders the green disc in both states (session-26
+  re-measurement)` spec in `tests/e2e/mobile-navigation.spec.ts` back to
+  the bare-icon pins (transparent bg, `rgb(29,24,22)` color, zero spans —
+  both states; observed failing on the pre-change build, 1 failed).
+  GREEN: removed the `h-9 w-9 rounded-[9999px] bg-accent text-white` span
+  from `src/components/chrome.tsx` — the X/Menu glyph renders directly in
+  the unchanged `h-11 w-11` (44px) touch-target button at `h-5 w-5`
+  (20px), keeping the header row's proportional language coherent (account
+  20px, cart 24px — the clone's row uses the reference's desktop geometry
+  uniformly, a registered superset).
+- [x] **R27-02 — session captures.** Four captures
+  (`session27-home-desktop`, `session27-pdp-desktop`,
+  `session27-mobile-home`, `session27-mobile-menu-open`) →
+  `docs/screenshots/`; plus the drift evidence capture
+  `_ref-sweep27-mobile-menu-open.png` (the reference's bare-icon menu
+  state). Pixel-sampled both trigger zones: identical visual signature
+  (white panel, dark `rgb(29,24,22)` glyph, zero green pixels).
+- [x] **R27-03 — doc-count refresh (drift noticed during review).**
+  `CLAUDE.md` §5 still carried the pre-session-26 counts (95 unit tests,
+  91 specs / 182 runs) — refreshed to 104 unit / 98 specs = 196 runs and
+  the db-scripts + PWA-manifest rows.
+
+### 22.3 Decision records
+
+- **The oscillation is the signal, not the surface.** Four measurements
+  now bracket this control; the doctrine stays mechanical (follow the
+  latest measurement, pin it in the spec, document the history) rather
+  than guessing at the reference's intent. The AGENTS.md trap-log line and
+  PAD §10 risk register both record the full green→bare→green→bare
+  sequence so future sessions can recognize the pattern in one read.
+- **Glyph sizing stays at the row's proportion language (20px), not the
+  reference mobile's 16px.** The clone's header row applies the reference's
+  DESKTOP geometry uniformly (44px buttons; account 20px / cart 24px
+  glyphs) — a registered superset posture. Matching the reference mobile's
+  16px trigger glyph would render the trigger visibly smaller than its
+  account/cart neighbors inside the clone's own row, breaking row-internal
+  coherence to chase a breakpoint-specific reference value the row itself
+  already diverges from (36px vs 44px buttons).
+- The candidate list re-retires after this remediation: validation track
+  resumes as the standing default unless the reference drifts again.
+  ADR-001 (server-backed auth) remains an owner decision.
+
+### 22.4 Verification gate (post session-27)
+
+typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **506.80 KB** ✓ ·
+**196/196 E2E** (98 specs × 2 projects, 3.6 min) ✓ — all observed after
+the change. Post-change re-sweep: closed trigger transparent + dark glyph
++ zero spans, open trigger same, dialog contract intact
+(`role=dialog`, `aria-modal=true`, scroll lock), served SEO + manifest
+supersets green.

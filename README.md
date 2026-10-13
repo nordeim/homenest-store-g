@@ -182,6 +182,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_22.md`](docs/session_22.md) — Session 22 execution record (eighth no-drift sweep → retired-list validation track → push)
 - [`docs/session_24.md`](docs/session_24.md) — Session 24 execution record (ninth no-drift sweep → validation track held → push)
 - [`docs/session_26.md`](docs/session_26.md) — Session 26 execution record (tenth sweep → reference drift found: menu trigger green disc + plain account icon → TDD remediation + db scripts → push)
+- [`docs/session_28.md`](docs/session_28.md) — Session 28 execution record (eleventh sweep → trigger drift AGAIN (green → bare → green → bare oscillation) → TDD revert to bare icon → CLAUDE.md count refresh → push)
+- [`docs/session_27.md`](docs/session_27.md) — raw session transcript for the session-26 record
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
 - [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) / [`docs/session_21.md`](docs/session_21.md) / [`docs/session_23.md`](docs/session_23.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, session-18, session-20, and session-22 records
 - [`worklog.md`](worklog.md) — running multi-agent work log

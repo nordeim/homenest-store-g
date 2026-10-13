@@ -366,7 +366,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `primary-dark` | `hsl(24 70% 43%)` | — | Hover state | — |
 | `muted` | `hsl(30 15% 94%)` | — | Search fields, placeholders surfaces | — |
 | `muted-foreground` | `hsl(20 10% 45%)` | — | Secondary text | ≈ 7:1 on background |
-| `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping, mobile menu trigger disc (session-26 re-measurement — green in BOTH states) | white text used only on the disc (decorative) |
+| `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping (the mobile menu trigger flipped back to a bare dark icon in session 27 — no longer an accent-disc surface) | white text used only on accent badges (decorative) |
 | `destructive` | `hsl(0 72% 51%)` | `rgb(220,40,40)` | Discount pills, form errors | white text 4.6:1 |
 | `badge` | — | `rgb(245,159,10)` | "Featured" pill, filled stars | white bold text on amber is decorative/large |
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
@@ -455,7 +455,7 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Robots/sitemap artifacts (R8-01/02/03) | 1 | 33 | `tests/sitemap.test.ts` | Vitest (node) |
 | db scripts contract (R26-03) | 1 | 9 | `tests/db-scripts.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
-| Mobile navigation (incl. session-26 trigger disc pins) | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| Mobile navigation (incl. session-27 bare-icon trigger pins) | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
 | Mobile header parity (incl. session-26 account-icon pins) | 1 | 5 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
 | Cart drawer modal | 1 | 3 | `tests/e2e/cart-drawer.spec.ts` | Playwright |
 | Catalog | 1 | 6 | `tests/e2e/catalog.spec.ts` | Playwright |
@@ -572,7 +572,7 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | ~~LOW~~ | ~~Desktop search combobox options are not announced with result counts~~ | — | **Closed (session 14, R14-01):** sr-only `role="status" aria-live="polite"` region inside the search form announces result counts / no-results politely on query change; pinned by `tests/e2e/search-keyboard.spec.ts` R14-01 specs and re-verified live each session |
 | LOW | Static SEO fallbacks hardcode the default origin (`http://localhost:4173`) | Deploying elsewhere needs `VITE_SITE_URL` + `node scripts/generate-sitemap.mjs`; the committed artifacts are test-gated against the catalog | Accepted — documented in `.env.example` (session 8) |
 | ~~MEDIUM~~ | ~~`package.json` ships no db scripts (standing mandate item)~~ | — | **Closed (session 26, R26-03):** `db:init` / `db:seed` / `db:setup` materialize the ADR-002 contract as a real SQLite `db/custom.db` via `scripts/db-setup.mjs` (node:sqlite, zero deps, idempotent, Prisma-free per ADR-001 — tooling parity only). Pinned by `tests/db-scripts.test.ts` (9 tests) |
-| LOW | Reference visual state is not frozen | The reference site drifts (menu trigger disc: green → bare → green across sessions 3→5→26; account avatar disc → plain icon by session 26) | Accepted — the follow-the-latest-measurement doctrine + computed-style E2E pins re-verify every session; remediation plan §21.1 records the session-26 drift remediation |
+| LOW | Reference visual state is not frozen | The reference site drifts (menu trigger disc: green → bare → green → bare across sessions 3→5→26→27 — an oscillating surface; account avatar disc → plain icon by session 26) | Accepted — the follow-the-latest-measurement doctrine + computed-style E2E pins re-verify every session; remediation plan §22.1 records the session-27 drift remediation |
 
 ---
 
@@ -595,7 +595,7 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | `src/lib/router.tsx` | ~130 | History router + matchPath (27 routes) |
 | `src/index.css` | ~104 | `@theme` tokens (+ `--color-panel`) + base styles |
 | `src/lib/db-path.ts` | ~60 | DATABASE_URL resolution contract |
-| `tests/e2e/mobile-navigation.spec.ts` | ~223 | The parity-critical menu behaviors (incl. session-5 bare-icon trigger pins) |
+| `tests/e2e/mobile-navigation.spec.ts` | ~223 | The parity-critical menu behaviors (incl. session-27 bare-icon trigger pins) |
 | `tests/e2e/cart-drawer.spec.ts` | ~70 | Cart drawer modal semantics (focus trap, restore) |
 | `tests/e2e/search-keyboard.spec.ts` | ~106 | APG combobox keyboard plan (arrows/Home/End/Enter/Escape) |
 | `tests/e2e/password-hash.spec.ts` | ~121 | Password-at-rest E2E: hashed seed, register, round-trip, legacy upgrade |

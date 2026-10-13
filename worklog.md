@@ -500,3 +500,26 @@ Stage Summary:
 - Parity posture: tenth sweep found and fixed two reference drifts (trigger green disc both states; plain account icon both auth states); all other pins hold; the Tailwind v4 portal trap stays defeated (dialog contract re-verified live)
 - db scripts workstream closed (R26-03): the DATABASE_URL contract now has a real SQLite referent — tooling parity only, ADR-001 untouched, Prisma stays rejected
 - Candidate list re-retired after remediation: validation track resumes as the standing default unless the reference drifts again; ADR-001 (server-backed auth) remains an owner decision
+
+---
+Task ID: 21
+Agent: main (Super Z)
+Task: Session 27 mandate (record: session_28.md) — eleventh sweep found trigger drift AGAIN, TDD revert to bare icon, doc-count refresh, push
+
+Work Log:
+- git pull fast-forwarded 31504bb..ef6789b (remote added only docs/session_27.md, the raw session-26 narrative transcript — consistent with the pushed record); root docs + session_26/session_27 + remediation §1–§21 + worklog Tasks 1–20 reviewed; session-26 artifacts re-validated against the tree (disc span, plain account glyph, db-setup.mjs + scripts, db-scripts.test.ts, .env/.env.example contract, repo-root db/custom.db)
+- Skills consulted: tdd-workflow, webapp-testing, agent-browser (DNS quirk did NOT reproduce), code-review-and-audit, tailwind-patterns
+- Baseline gate on ef6789b reproduced the ledger exactly: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.93 KB ✓ 196/196 E2E (3.7 min) ✓; standing contracts verified (.env, .env.example, db scripts, vitest + playwright configs, served SEO superset: robots 5 disallows, sitemap 36 URLs, PDP head + JSON-LD, manifest 200)
+- Eleventh bidirectional sweep (agent-browser @390×844 + 1440×900, logged in): REFERENCE DRIFT FOUND — (F27-01) the mobile menu trigger flipped BACK to a bare dark icon in BOTH states (36×36 transparent, rgb(29,24,22) glyph, 16px lucide-menu/X, no inner span; verified on /, /products, /product/1, closed + open); the session-26 green-disc measurement no longer holds; surface history: green (s3/4) → bare (s5) → green (s26) → bare (s27) — oscillating reference; all other pins held both sides (account plain glyph, desktop row geometry, body/footer/headings, panel + row pins, catalog, robots, sitemap, manifest)
+- Validation track exited per §20.4 doctrine; candidate list un-retired for exactly F27-01
+- R27-01 (TDD): RED — rewrote the session-26 disc spec in tests/e2e/mobile-navigation.spec.ts back to bare-icon pins (transparent, rgb(29,24,22), zero spans, both states; observed 1 failed on the pre-change build); GREEN — removed the h-9 w-9 rounded-[9999px] bg-accent text-white span from chrome.tsx (glyph renders directly in the 44px touch-target at 20px; row keeps the desktop-geometry proportional language — account 20px, cart 24px)
+- R27-03 (doc drift found in review): CLAUDE.md §5 counts refreshed 95 → 104 unit / 91 specs / 182 runs → 98 specs / 196 runs + db-scripts and PWA-manifest rows
+- Post-change gate observed: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.80 KB ✓ 196/196 E2E (98 specs × 2 projects) ✓; post-change re-sweep green (trigger bare both states, dialog contract intact, SEO/manifest supersets green)
+- R27-02: 4 captures (session27-home-desktop, session27-pdp-desktop, session27-mobile-home, session27-mobile-menu-open) + drift evidence _ref-sweep27-mobile-menu-open.png → docs/screenshots/; trigger zones pixel-sampled in clone + reference captures: identical signature (white panel, dark glyph, zero green pixels)
+- Docs updated: remediation plan §22, docs/session_28.md, AGENTS.md (trigger trap-log line + oscillation history), PAD (§5.5 accent usage, §7.4 test table, §10 risk register, §11 spec map), CLAUDE.md (§5 counts), README (Documentation rows), worklog (this entry); DEPLOYMENT.md required no edits (no env/db change)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.80 KB ✓ 196/196 E2E ✓ — observed post-change
+- Parity posture: eleventh sweep caught the trigger's fourth flip (green→bare→green→bare); reverted to the bare dark icon per the follow-the-latest-measurement doctrine; all other pins hold; dialog contract + SEO/manifest supersets live-green
+- Oscillation documented as the signal: AGENTS.md + PAD §10 record the full four-measurement history so future sessions recognize the pattern in one read
+- Candidate list re-retired after remediation: validation track resumes as the standing default unless the reference drifts again; ADR-001 (server-backed auth) remains an owner decision
