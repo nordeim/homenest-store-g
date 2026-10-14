@@ -8,8 +8,9 @@ import AxeBuilder from "@axe-core/playwright";
  * with ONE documented exception — the `color-contrast` rule is excluded from
  * the gate because every failing pair is a *parity-pinned reference token*:
  *
- *   - white on primary orange `rgb(217,110,38)` (nav pill, hero/CTA buttons) ~3.2:1
- *   - white on badge amber `rgb(245,159,10)` ("Featured" pill) ~2.2:1
+ *   - white on primary orange `rgb(217,110,38)` (nav pill, hero/CTA buttons,
+ *     "Featured" card pill — session-38 re-measurement) ~3.2:1
+ *   - white on badge amber-400 `rgb(251,191,36)` (star ratings) ~1.9:1
  *   - primary orange on white (card category labels) ~3.2:1
  *   - muted-foreground grays on white/muted surfaces ~4.4:1
  *

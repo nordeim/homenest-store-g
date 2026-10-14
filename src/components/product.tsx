@@ -1,20 +1,20 @@
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Link } from "@/lib/router";
 import { useStore } from "@/lib/store";
-import { discountPercent, formatMoney, starFloor } from "@/lib/commerce";
+import { discountPercent, formatMoney } from "@/lib/commerce";
 import type { Product } from "@/types";
-import { cn } from "@/utils/cn";
 
 export function Stars({ rating, count }: { rating: number; count?: number }) {
-  const filled = starFloor(rating);
+  /* Session-38 re-measurement (reference /products + PDP): the reference
+     renders ALL five stars amber-400 (fill-badge, now #fbbf24) with a
+     2px gap — the rating nuance lives in the "(count)" text, not in
+     partial fills. The true rating stays in the aria-label (a11y
+     superset). starFloor() remains in commerce.ts (unit-pinned). */
   return (
     <span className="flex items-center gap-1.5" aria-label={`Rated ${rating} out of 5`}>
-      <span className="flex" aria-hidden="true">
+      <span className="flex items-center gap-0.5" aria-hidden="true">
         {[0, 1, 2, 3, 4].map((index) => (
-          <Star
-            key={index}
-            className={cn("h-3.5 w-3.5", index < filled ? "fill-badge text-badge" : "fill-border text-border")}
-          />
+          <Star key={index} className="h-3.5 w-3.5 fill-badge text-badge" />
         ))}
       </span>
       {typeof count === "number" && <span className="text-xs text-muted-foreground">({count})</span>}
@@ -32,8 +32,17 @@ export function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card transition-shadow duration-300 hover:shadow-pop">
-      <div className="relative bg-muted">
+    /* Session-38 (F38-04..07) — the measured reference card: 16px radius
+       (v3 rounded-2xl — the v4 rounded-xl computes 20px, trap #6), a
+       0.5-alpha hairline (border-border-soft, T-13), shadow-sm at rest
+       with hover:shadow-xl + hover:-translate-y-1 over 500ms, image
+       scale-110/700 with a black/10 hover overlay, semibold py-0.5 badge
+       pills (featured = bg-primary orange), a hover-REVEALED 36px
+       quick-add (p-2.5 + shopping-cart glyph, alpha-baked bg-quick-add,
+       4px frost — the reference's v3 backdrop-blur-sm), text-base/600
+       line-clamp-2 name, 12px/500 category label, in-flow price row. */
+    <article className="group relative overflow-hidden rounded-[16px] border border-border-soft bg-card shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl">
+      <div className="relative aspect-square overflow-hidden bg-muted/30">
         <Link href={`/product/${product.id}`} className="block" aria-label={product.name}>
           <img
             src={product.image}
@@ -41,35 +50,44 @@ export function ProductCard({ product }: { product: Product }) {
             width={640}
             height={640}
             loading="lazy"
-            className="aspect-square w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03]"
+            className="aspect-square w-full object-cover transition-transform duration-700 ease-out motion-safe:group-hover:scale-110"
           />
         </Link>
+        {/* Image hover dim — pointer-events-none so it never steals the
+            link's clicks (the reference nests it inside its single <a>). */}
+        <div className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-500 group-hover:bg-black/10" />
         <span className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {discount > 0 && (
-            <span className="rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-white">
+            <span className="rounded-[9999px] bg-destructive px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm">
               -{discount}%
             </span>
           )}
           {product.featured && (
-            <span className="rounded-full bg-badge px-2.5 py-1 text-xs font-bold text-white">Featured</span>
+            <span className="rounded-[9999px] bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground shadow-sm">
+              Featured
+            </span>
           )}
         </span>
-        <button
-          type="button"
-          className="absolute bottom-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-card/90 text-foreground shadow-lg backdrop-blur-sm transition-colors duration-200 hover:bg-primary hover:text-primary-foreground"
-          aria-label={`Add ${product.name} to cart`}
-          onClick={quickAdd}
-        >
-          <ShoppingBag className="h-4 w-4" />
-        </button>
+        <div className="absolute bottom-3 right-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus-within:opacity-100">
+          <button
+            type="button"
+            className="rounded-full bg-quick-add p-2.5 text-foreground shadow-lg backdrop-blur-[4px] transition-colors hover:bg-primary hover:text-primary-foreground"
+            aria-label={`Add ${product.name} to cart`}
+            onClick={quickAdd}
+          >
+            <ShoppingCart className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      <Link href={`/product/${product.id}`} className="flex flex-1 flex-col gap-1.5 p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+      <Link href={`/product/${product.id}`} className="block space-y-2 p-4">
+        <p className="text-xs font-medium uppercase tracking-wider text-primary">
           {product.category.replace("-", " ")}
         </p>
-        <h3 className="font-display text-lg font-bold leading-snug text-foreground">{product.name}</h3>
+        <h3 className="font-display text-base font-semibold leading-tight text-foreground line-clamp-2 transition-colors duration-300 group-hover:text-primary">
+          {product.name}
+        </h3>
         <Stars rating={product.rating} count={product.reviewCount} />
-        <p className="mt-auto flex items-baseline gap-2 pt-1">
+        <p className="flex items-baseline gap-2 pt-1">
           <span data-testid="card-price" className="text-lg font-bold text-foreground">{formatMoney(product.priceCents)}</span>
           {product.compareAtCents && product.compareAtCents > product.priceCents && (
             <span data-testid="card-compare-at" className="text-sm text-muted-foreground line-through">
@@ -85,7 +103,7 @@ export function ProductCard({ product }: { product: Product }) {
 export function ProductGrid({ products, empty }: { products: Product[]; empty: string }) {
   if (products.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card py-16 text-center">
+      <div className="rounded-[16px] border border-border-soft bg-card py-16 text-center">
         <p className="text-sm text-muted-foreground">{empty}</p>
       </div>
     );

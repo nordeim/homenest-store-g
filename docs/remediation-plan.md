@@ -1950,3 +1950,225 @@ PDP action row pixel-identical to the reference (Add 236×40 flex-1 fw
 500, Buy 110×40 content-width, same baseline); order-success buttons
 48px; dialog contract + focus trap + scroll lock + Escape/focus-restore
 all re-verified green in the 212-run suite.
+
+## 27. Session 38 — sixteenth sweep: the home-page content layer
+
+Sweep context: mandate dated 2026-10-14 (transcript: `docs/session_37.md`);
+sixteenth bidirectional sweep (agent-browser, logged in, 390×844 +
+1440×900). All standing pins held on both sides — trigger bare at rest in
+BOTH states (measurement 8, no ninth flip; hover disc pinned s36), footer
+bg + quiet text layer, brand mark, Inter body, header glass, panel body +
+pill, hero text layer, catalog 8/24, robots/sitemap/manifest, dialog
+contract, PDP action row. The sweep then took the recipe one layer deeper
+into the **home-page content layer** (the session-36 watch-list surface):
+category tiles, section headers/copy, product-row layout, the product-card
+chrome (badges/quick-add/text), the FeatureBar, the CTA banner, the hero
+container, and the page rhythm — plus the mobile-header action-row hover
+set. This is the largest unmeasured layer remaining: the v1 port had
+re-interpreted these surfaces from screenshots instead of computed
+measurements.
+
+### 27.1 Findings
+
+- **F38-01 — category section (structural).** The reference ships compact
+  ICON TILES: `grid grid-cols-4 md:grid-cols-8 gap-3`; tile = white
+  `bg-card` card, `rounded-2xl`(v3=16px), `border border-border/50`,
+  `p-5`, flex-col items-center gap-3, `hover:border-primary/30
+  hover:shadow-lg duration-400`; a 56×56 `rounded-2xl`(16px) per-category
+  GRADIENT disc (explicit `linear-gradient(to right bottom, from, to)`,
+  v3 from-*-400 → to-*-500 pairs) with a 28px white lucide glyph and v3
+  shadow-md; a `text-sm font-medium` (14px/500) label. Heading block
+  `text-center mb-8`, subtitle `mt-2` 16px, copy "Find exactly what you
+  need for your home". The clone ships full-width PHOTO cards with a
+  dark gradient overlay + name/blurb (never measured; a v1 invention).
+- **F38-02 — section headers + carousel controls.** Reference h2 =
+  `font-heading text-2xl md:text-3xl` (24→30px/700, Playfair) with a
+  16px `text-muted-foreground mt-1` subtitle; copy "Hand-picked favorites
+  for your home" / "The latest additions to our collection". The header
+  row is `flex items-end justify-between` carrying TWO carousel arrow
+  buttons (`w-10 h-10 rounded-full border border-border hover:bg-muted`,
+  20px chevrons). The clone ships 30→36px h2, 14px mt-3 subtitle,
+  different copy, and a "View All" pill the reference does not have.
+- **F38-03 — product rows (structural).** The reference renders Featured
+  (6 cards) and New Arrivals (8 cards) as horizontal scroll-snap
+  carousels: `flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x
+  snap-mandatory`, cells `min-w-[260px] max-w-[280px] snap-start
+  flex-shrink-0`, inside `section.max-w-7xl.px-4 > div.space-y-6`. The
+  clone renders responsive grids (`sm:grid-cols-2 lg:grid-cols-3
+  xl:grid-cols-4`) with 8+8 cards.
+- **F38-04 — product-card chrome.** Reference card: `rounded-2xl`(16px),
+  `border border-border/50`, `shadow-sm` at rest, `hover:shadow-xl
+  hover:-translate-y-1 duration-500`; image `group-hover:scale-110
+  duration-700` + a `bg-black/0 group-hover:bg-black/10` overlay. Clone:
+  v4 `rounded-xl` = 20px (the trap-#6 one-notch shift AGAIN), solid
+  border, `shadow-card → hover:shadow-pop` duration-300, scale-[1.03]
+  duration-500, no overlay. The reference's `/products` grid reuses the
+  same card (4×289px cells at 1440 — the clone's grid geometry already
+  matches), so the fix propagates correctly to both surfaces.
+- **F38-05 — card badges + stars.** Reference pills: `text-xs
+  font-semibold px-2.5 py-0.5 rounded-full shadow` (hover:bg-primary/80);
+  the FEATURED pill is `bg-primary` (orange rgb(217,110,38)) — the
+  session-1 "badge amber" pin no longer holds for the pill. Stars:
+  `fill-amber-400` = rgb(251,191,36) (#fbbf24), `gap-0.5` (2px) between
+  stars, count text 12px muted ✓. Clone: `px-2.5 py-1 font-bold` no
+  shadow, featured = `bg-badge` (hsl(38 92% 50%) = rgb(245,159,10) —
+  matches NEITHER reference amber), stars fill the same wrong badge
+  token, no star gap.
+- **F38-06 — quick-add button.** Reference: hover-REVEALED (`absolute
+  bottom-3 right-3 opacity-0 translate-y-2 duration-300
+  group-hover:opacity-100 group-hover:translate-y-0`), 36×36 (`p-2.5` +
+  16px lucide-shopping-CART glyph), `bg-card/90` → rgba(255,255,255,0.9),
+  `backdrop-blur-sm` (v3 = 4px), `shadow-lg`, `hover:bg-primary
+  hover:text-primary-foreground`. Clone: always-visible `h-10 w-10`
+  (40px), `bg-card/90` → oklab(…/0.9) (trap #8), `backdrop-blur-sm` =
+  v4 8px (trap #6), shopping-BAG glyph. At rest the reference card shows
+  NO quick-add — the clone's visible button is a resting-visual
+  violation of the parity surface.
+- **F38-07 — card text rows.** Reference body `p-4 space-y-2` (8px
+  rhythm, in-flow price); category label `text-xs font-medium uppercase
+  tracking-wider` (12px/500/0.05em); name `text-base font-semibold
+  leading-tight line-clamp-2 group-hover:text-primary`. Clone: flex-col
+  `gap-1.5`, 11px/600/0.14em label, 18px/700 name without clamp/hover,
+  price row `mt-auto`-pinned.
+- **F38-08 — FeatureBar.** Reference items: `p-4 gap-3 rounded-2xl`(16px)
+  `bg-card border-border/50` (no shadow); icon disc `w-11 h-11`(44px)
+  `rounded-xl`(v3=12px) `bg-primary/10` (→ rgba(217,110,38,0.1)) with a
+  20px stroke-2 glyph; title `text-sm font-semibold`; sub `text-xs`
+  (12px); grid `grid-cols-2 md:grid-cols-4 gap-4`; the section carries
+  no own vertical padding (the page rhythm owns spacing). Clone: p-5
+  gap-4 v4 `rounded-xl`(20px) + `shadow-card`; 48px disc + 24px stroke-1.8
+  glyph; `font-bold` title; 14px sub; `lg:grid-cols-4`; own py-10.
+- **F38-09 — CTA banner.** Reference: `rounded-3xl`(24px) +
+  `bg-gradient-to-r from-primary to-primary/80` (computed
+  `linear-gradient(to right, rgb(217,110,38), rgba(217,110,38,0.8))`),
+  `p-10 md:p-16 text-center`; h2 `text-3xl md:text-4xl mb-4` (matches the
+  clone ✓); p `text-lg md:text-xl text-primary-foreground/80 max-w-2xl
+  mx-auto mb-8` (18→20px /80); button = CREAM `rgb(243,238,232)` bg with
+  `rgb(44,36,33)` text, `h-10 px-8 text-sm`(14px)/600, `rounded-full`,
+  hover → rgba(243,238,232,0.8). Clone: solid bg-primary, px-6 py-16,
+  14→16px /85 p, pure-white 48px button.
+- **F38-10 — hero container.** Reference: `h-[500px] md:h-[600px]`
+  (fixed) + `rounded-3xl`(24px) + overflow-hidden; tint =
+  `linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.3),
+  rgba(0,0,0,0))` (BLACK, three stops); text column
+  `relative z-10 h-full flex items-center` > `max-w-2xl px-8 md:px-16`;
+  dots `absolute bottom-6 left-8 md:left-16 gap-3`. Clone: min-h
+  420/520, warm `rgb(28 25 23 / 0.55)→0.12 @65%` tint, `max-w-7xl px-6
+  sm:px-10 py-14` column, dots `left-6 sm:left-10 gap-2`.
+- **F38-11 — page rhythm.** Reference: one `space-y-16 pb-8` wrapper
+  owns the rhythm (64px uniform gaps; the hero section keeps pt-6; every
+  other section is unpadded). Clone: each section carries `py-10`
+  (~80px effective gaps).
+- **F38-12 — header action-row hover set.** The reference's account and
+  cart buttons share the trigger's hover spec (accent-green disc
+  rgb(69,161,130) + white glyph + 150ms, verified with the pointer
+  moved away for resting reads). The clone's account/cart buttons have
+  no hover treatment (the trigger got one in session-36).
+- **F38-13 — misc.** The reference's featured carousel shows 6 cards
+  (clone renders 8). Reference star count text ✓ matches. The reference
+  wraps its tiles in entrance-animation divs (transient, not resting
+  visuals — omitted deliberately).
+
+### 27.2 ToDo (executed, TDD)
+
+- [x] **R38-01 — tokens + utilities** (`src/index.css`): retune
+  `--color-badge` to the measured amber-400 `#fbbf24`; retune
+  `--color-secondary` to `hsl(33 31% 93%)` (= rgb(243,238,232) CTA
+  cream) and `--color-secondary-foreground` to `hsl(20 15% 15%)` (=
+  rgb(44,36,33)); add alpha-baked `--color-quick-add` (white/0.9),
+  `--color-secondary-hover` (cream/0.8), `--color-primary-film`
+  (primary/0.1 for the FB disc); add `--shadow-md` pinned to v3
+  geometry; add `@utility scrollbar-hide`.
+- [x] **R38-02 — ProductCard** (`src/components/product.tsx`): reference
+  card spec — 16px radius, border/50, shadow-sm→hover:shadow-xl +
+  hover:-translate-y-1 (duration-500), image scale-110/700 + black/10
+  hover overlay, badges (semibold py-0.5 + shadow, featured = bg-primary),
+  hover-revealed 36px quick-add (p-2.5 + ShoppingCart, alpha-baked bg,
+  4px frost, focus-within reveal as a11y superset), text rows (12px/500
+  label, 16px/600 line-clamp-2 name with group-hover, space-y-2 body,
+  in-flow price), Stars gap-0.5.
+- [x] **R38-03 — category icon tiles** (`src/pages/home.tsx`): tile grid
+  (cols-4/md:cols-8 gap-3) + component-local icon/gradient map (no
+  catalog churn — the category ids stay hyphenated; registered
+  divergence D3).
+- [x] **R38-04 — carousel rows + headers** (`src/pages/home.tsx`):
+  featured (6) + arrivals (8) as scroll-snap carousels with arrow
+  buttons, reference copy, `space-y-6` sections, View All pills removed.
+- [x] **R38-05 — hero container** (`src/pages/home.tsx`): fixed 500/600
+  heights, black 3-stop tint gradient, `max-w-2xl px-8 md:px-16`
+  centered column, dots `left-8 md:left-16 gap-3`.
+- [x] **R38-06 — CTA banner** (`src/pages/home.tsx`): gradient + cream
+  button (alpha-baked hover), p-10 md:p-16, 18→20px /80 p.
+- [x] **R38-07 — FeatureBar + header hovers** (`src/components/chrome.tsx`):
+  compact 16px/44px/12px FeatureBar cards (grid-cols-2 md:grid-cols-4,
+  no section padding, alpha-baked primary film disc); account + cart
+  buttons gain the green hover disc.
+- [x] **R38-08 — page rhythm** (`src/pages/home.tsx`): `space-y-16 pb-8`
+  wrapper, per-section py stripped (hero keeps pt-6).
+- [x] **R38-09 — specs (RED first)**: visual-parity additions pinning
+  the category tiles, section headers/copy, carousel rows, card chrome
+  (radius/border/badge/star/quick-add/labels), FeatureBar, CTA, hero
+  container, and the account/cart hover discs; existing specs reviewed
+  for collateral (quick-add stays Playwright-visible under opacity-0).
+- [x] **R38-10 — docs + captures**: remediation §27 (this section),
+  AGENTS.md pin/trap updates (badge supersedes, scale-shift instances),
+  README tokens/features, PAD §5.6 (category URL shape + quick-add
+  reveal posture), SKILL.md rows, `docs/session_38.md`, both worklogs,
+  captures under `docs/screenshots/`.
+
+### 27.3 Decision records
+
+- **D1 — quick-add goes hover-revealed (reference-exact).** The visible
+  quick-add was a resting-visual violation of a parity surface (the
+  reference shows no button at rest). With the un-gated v3-style hover
+  variant (trap #9), touch devices reproduce the reference's own
+  sticky-hover behavior (first tap reveals). Keyboard superset: the
+  wrapper adds `focus-within:opacity-100` so Tab focus reveals the
+  button (the reference leaves it invisible under focus).
+- **D2 — View All pills removed** in favor of the reference's carousel
+  arrow buttons (which scroll the rows programmatically). The header
+  row is a measured parity surface; the pills were a v1 invention.
+  Navigation to /products remains via the header nav (the reference's
+  own path).
+- **D3 — category URL shape stays hyphenated** (`kitchen-tools` vs the
+  reference's `kitchen_tools`): changing ids would churn the catalog
+  seed, STORAGE_KEY and the hash registry for a query-string nuance with
+  zero resting-visual impact. Registered in PAD §5.6.
+- **D4 — subtitle copy ported verbatim** (visible text = parity surface).
+- **D5 — the badge token retunes to amber-400 #fbbf24** and the featured
+  pill switches to bg-primary. The AGENTS "badge rgb(245,159,10)" pin is
+  superseded: that value matches neither measured amber surface. The
+  a11y-smoke exclusion comment updates accordingly (white-on-orange
+  featured pill stays excluded from contrast rules — the reference's own
+  posture).
+- **D6 — --color-secondary retunes to the measured CTA cream.** Its
+  other consumer (a content-page callout) shifts imperceptibly; both now
+  track measured reference values.
+- **D7 — the category icon/gradient map lives in home.tsx**, not the
+  catalog seed — avoids the catalog-hash/STORAGE_KEY ripple for a
+  presentation-only change.
+- **D8 — entrance animations omitted.** The reference wraps tiles in
+  framer-motion entrance divs; entrances are transient, not resting
+  visuals. Revisit only if a future sweep pins them.
+
+### 27.4 Verification gate (post session-38)
+
+typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **517.78–517.91 KB** ✓ (two builds of the same tree; a 130-byte nondeterministic micro-drift, the tolerated class — the parity gate is computed styles) ·
+**228/228 E2E** (114 specs × 2 projects, 4.4 min — up from 212/106 with
+the 8 new session-38 tests, zero collateral on the existing suite) ✓.
+Post-change re-sweep (agent-browser, 390×844 + 1440×900): category tiles
+4/8-across with 16px radius, rgba(229,224,220,0.5) hairlines, 56px
+gradient discs and 14px/500 labels — all exact; the featured carousel is
+live-scrollable with `snap-x mandatory` and 6 cells (260–280px); the
+card rests at 16px radius with the quick-add wrapper at `opacity: 0`
+(36×36, rgba(255,255,255,0.9), blur(4px)) and reveals on real hover
+(opacity 1 + name turns primary-orange — the reference's own
+group-hover contract); the hero card is 500px/24px-radius with the black
+three-stop tint; the CTA gradient + 24px radius + 40px mobile padding
+all exact; the FeatureBar cards are 16px/p-4 with 44px discs; the
+account hover reads the green disc rgb(69,161,130) at 150ms. One spec
+correction during GREEN: the CTA paragraph is `text-lg` flat — 18px at
+BOTH viewports (an early sweep reading of "20px/512px" had accidentally
+measured the hero paragraph; re-measured on the reference and pinned).
+RED was observed first: all 16 new runs (8 tests × 2 projects) failed
+against the pre-change build exactly as diagnosed.

@@ -90,7 +90,7 @@ This PAD is the single source of truth for the HomeNest Kitchen storefront. It d
 **ADR-005: Tailwind v4 CSS-first with a measured token set and computed-style parity gate.**
 
 - **Context:** The reference renders v4 output; its palette is shadcn-style HSL triplets (`--primary: 24 70% 50%`, etc.).
-- **Decision:** All tokens live in `src/index.css` `@theme` as full `hsl()` literals; no `tailwind.config.js`. `tests/e2e/visual-parity.spec.ts` pins computed colors (`rgb(217,110,38)` primary, `rgb(251,250,249)` canvas, `rgb(29,24,22)` footer (session-30 re-measurement — the reference flipped its footer to `bg-foreground`; was `rgb(32,27,24)` sessions 3/4–27), `rgb(220,40,40)` discount, `rgb(245,159,10)` badge, Playfair Display 700 headings).
+- **Decision:** All tokens live in `src/index.css` `@theme` as full `hsl()` literals (plus `#fbbf24` for the star amber — hex avoids hsl rounding drift); no `tailwind.config.js`. `tests/e2e/visual-parity.spec.ts` pins computed colors (`rgb(217,110,38)` primary, `rgb(251,250,249)` canvas, `rgb(29,24,22)` footer (session-30 re-measurement — the reference flipped its footer to `bg-foreground`; was `rgb(32,27,24)` sessions 3/4–27), `rgb(220,40,40)` discount, `rgb(251,191,36)` star amber (session-38 — the "Featured" pill is `bg-primary`), Playfair Display 700 headings).
 - **Rationale:** v4's oklch conversions make eyeballed ports drift; computed styles (not screenshots) are assertable and deterministic.
 - **Consequences:** ➕ Parity is a build-breaker, not an opinion; ➖ token changes require re-measuring specs in the same commit.
 - **Alternatives rejected:** Screenshot diffing — nondeterministic across environments, and silently tolerates structural drift.
@@ -368,7 +368,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `muted-foreground` | `hsl(20 10% 45%)` | — | Secondary text | ≈ 7:1 on background |
 | `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping, trigger HOVER disc (session-36: the resting trigger is a bare icon; the accent-green disc is its `:hover` treatment) | white text used only on accent badges (decorative) |
 | `destructive` | `hsl(0 72% 51%)` | `rgb(220,40,40)` | Discount pills, form errors | white text 4.6:1 |
-| `badge` | — | `rgb(245,159,10)` | "Featured" pill, filled stars | white bold text on amber is decorative/large |
+| `badge` | `#fbbf24` | `rgb(251,191,36)` | Star ratings (session-38: amber-400; the "Featured" pill moved to `primary`) | amber stars are decorative icons |
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
 | `card` | `hsl(0 0% 100%)` | `rgb(255,255,255)` | Card surfaces | — |
 | `panel` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Sticky-HEADER glass since session-36 (with `backdrop-blur-xl` 24px); the mobile-menu panel body is solid `bg-card` — the session-4 white/80 reading had measured the reference's header row (alpha baked into the token — v4 `/NN` modifiers color-mix in oklab; trap T-13) | — |
@@ -378,11 +378,15 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `frost` | `hsl(0 0% 100% / 0.1)` | `rgba(255,255,255,0.1)` | Hero-carousel arrow glass (session-36; with `backdrop-blur-md` 12px) | — |
 | `footer` | — | `rgb(29,24,22)` | Footer canvas (session-30: = foreground) | text-background full color, modulated by element opacity (70% links/body, 50% bottom bar — session-34) |
 | `footer-rule` | `hsl(30 25% 98% / 0.1)` | `rgba(251,250,249,0.1)` | Footer divider (session-34; alpha baked — v4 `/10` would color-mix in oklab) | — |
+| `quick-add` | `hsl(0 0% 100% / 0.9)` | `rgba(255,255,255,0.9)` | Hover-revealed card quick-add pill (session-38; the reference's `bg-card/90`, alpha baked) | — |
+| `secondary` | `hsl(33 31% 93%)` | `rgb(243,238,232)` | CTA cream button (session-38 re-measurement) | — |
+| `secondary-hover` | `hsl(33 31% 93% / 0.8)` | `rgba(243,238,232,0.8)` | CTA button hover (session-38; alpha baked) | — |
+| `primary-film` | `hsl(24 70% 50% / 0.1)` | `rgba(217,110,38,0.1)` | FeatureBar icon disc (session-38; the reference's `bg-primary/10`, alpha baked) | — |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
 
 ### 5.3 Component Primitives
 
-No headless-UI library: primitives are hand-rolled and parity-pinned — `PrimaryButton`/`OutlineButton` (h-12 rounded-full pills), `Field`+`inputClass` (h-12 rounded-lg, danger border on error), `Stars` (5-star row, `fill-badge` for filled, `(count)` suffix), `ProductCard` (red −% pill + amber Featured pill stack top-left, circular quick-add bottom-right of the image, orange category eyebrow, Playfair name, price + strikethrough), `OrderProgress` (vertical 5-step stepper with connector line and `(Current)` marker), `CodNotice` (amber info box), toasts (white card, bottom-right, 3.2s).
+No headless-UI library: primitives are hand-rolled and parity-pinned — `PrimaryButton`/`OutlineButton` (h-12 rounded-full pills), `Field`+`inputClass` (h-12 rounded-lg, danger border on error), `Stars` (session-38: five amber-400 stars + `(count)` — the reference renders no partial fills; the true rating stays in the aria-label), `ProductCard` (session-38: 16px radius / border-soft / shadow-sm→xl+lift chrome; red −% + primary-orange Featured semibold pills; hover-REVEALED 36px quick-add with the shopping-cart glyph; 12px/500 category eyebrow; 16px/600 Playfair line-clamp-2 name; all-amber stars; in-flow price row), `OrderProgress` (vertical 5-step stepper with connector line and `(Current)` marker), `CodNotice` (amber info box), toasts (white card, bottom-right, 3.2s).
 
 ### 5.4 Motion
 
@@ -412,6 +416,8 @@ These supersets are intentional; they must not change the **resting visuals** of
 14. **SEO posture superset (session 8, extended session 18).** The reference's robots.txt disallows nothing and its sitemap.xml lists `/admin/*`, `/account`, `/cart` with zero product URLs; the clone disallows private surfaces and lists every visible product as `/products/{slug}`. The reference ships no web app manifest (re-measured 2026-10-13: no `<link rel="manifest">` in its head; `/manifest.webmanifest` and `/site.webmanifest` are answered by the SPA catch-all with `text/html`). The clone ships a valid minimal manifest (`public/manifest.webmanifest`, R18-01): name/short_name, root-relative `start_url`/`scope`, `standalone` display, theme/background `#fbfaf9`, and the two install-required 192px/512px icons reusing the FAVICON-1 CDN logo; a `transformIndexHtml` post-hook in `vite.config.ts` restores the root-absolute href that viteSingleFile's `base: "./"` would otherwise relativize into a deep-route 404.
 15. **Per-route head superset (session 8).** The reference ships a static-title map for 23 paths (PDPs keep the static title, admin titles leak an `admin/` namespace artifact); the clone pins the same map (incl. the "Order Tracking" / "Terms Of Service" quirks) and extends it: PDP → "{Product} | HomeNest Kitchen", humanized unknown slugs, auth/not-found titles, admin titles cleaned. Canonical links + per-route og:url and per-PDP Product JSON-LD are additive (the reference has none).
 16. **Footer contact links + font loading mechanism (session 34).** The reference's footer contact rows are plain text with icons; the clone keeps `mailto:`/`tel:` anchors styled to identical resting visuals (function exceeds — the standing superset pattern). The reference self-hosts its fonts as bundled woff2; the clone loads Playfair Display and Inter via Google Fonts (`display=swap`) with the system stack as offline fallback — identical rendered typefaces, different delivery.
+17. **Category filter URL shape (session 38).** The reference's category deep links use underscore ids (`/products?category=kitchen_tools`); the clone's seed uses hyphens (`/products?category=kitchen-tools`). Purely a query-string shape difference — identical filtering behavior, identical rendered labels ("Kitchen Tools"), zero resting-visual impact. Left as-is deliberately: changing ids would churn the catalog seed, `STORAGE_KEY` and the hash registry for a URL nuance.
+18. **Quick-add keyboard reveal + CTA-as-link (session 38).** The reference's card quick-add is `opacity-0` until group-hover AND stays invisible under keyboard focus; the clone adds `focus-within:opacity-100` so Tab focus reveals the button (a11y superset, resting visuals identical). The reference's CTA "Browse All Products" renders as a `<button>`; the clone ships a real link to `/products` styled to the measured cream-pill spec (function exceeds, resting visuals identical). The section-header carousel arrows keep accessible names (the reference ships nameless buttons — its own a11y posture, not copied).
 
 ---
 

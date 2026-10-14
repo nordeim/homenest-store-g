@@ -194,9 +194,10 @@ stylesheet in `index.html` (weights 400–800 + italic 400).
 **Color tokens** (full hex/usage table in §19): semantic shadcn-style names —
 `background`, `foreground`, `primary`/`-dark`/`-foreground`, `secondary`/`-foreground`,
 `muted`/`-foreground`, `accent` (+`-soft`), `destructive`, `border`, `card`/`-foreground`,
-`ring`, `badge` (amber, Featured pill), `footer` (near-black warm brown).
-⚠️ Values are full `hsl()` literals — bare `H S% L%` triplets resolve to
-transparent in v4 (trap T-1).
+`ring`, `badge` (amber-400 stars, session-38 — the "Featured" pill is `primary`),
+`footer` (near-black warm brown).
+⚠️ Values are full `hsl()` literals (badge is `#fbbf24` hex — hsl rounding drifts
+a channel) — bare `H S% L%` triplets resolve to transparent in v4 (trap T-1).
 
 **Shadows (5):** `shadow-sm` (pinned to v3 geometry — v4 moved the scale one
 notch, trap T-2), `shadow-card`, `shadow-pop` (menus/drawer panels),
@@ -246,8 +247,8 @@ pinned). `lib/store.tsx` is the only stateful module.
 |---|---|---|
 | `src/App.tsx` | 106 | Route switch (`matchPath` → page), auth/admin gating, skip link |
 | `src/components/chrome.tsx` | 766 | `Header` (+ search overlay + portal mobile nav), `CartDrawer` (modal), `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
-| `src/components/product.tsx` | 100 | `ProductCard` (badges, quick-add), `Stars`, price row |
-| `src/pages/home.tsx` | 199 | Hero carousel, FeatureBar, 8 category cards, Featured + New grids, CTA banner |
+| `src/components/product.tsx` | 110 | `ProductCard` (session-38 chrome/badges/hover-revealed quick-add), `Stars`, price row |
+| `src/pages/home.tsx` | 300 | Hero carousel (fixed 500/600px card), FeatureBar, 8 category icon tiles, Featured (6) + New (8) scroll-snap carousels, gradient CTA |
 | `src/pages/shop.tsx` | 339 | Products list (URL-driven search/category/sort), PDP, 404 |
 | `src/pages/checkout-flow.tsx` | 818 | Cart page, single-page checkout, order success |
 | `src/pages/account-pages.tsx` | 858 | Auth (login/register), profile + order history + tabs, account order detail, track-order lookup |
@@ -963,7 +964,7 @@ neither):
 | `border` | `hsl(30 15% 88%)` = `#E5E0DC` | all borders/dividers |
 | `card` / `card-foreground` | `hsl(0 0% 100%)` / `hsl(20 15% 10%)` | cards, header, drawer |
 | `ring` | `hsl(24 70% 50%)` | focus ring (= primary) |
-| `badge` | `hsl(38 92% 50%)` = `#F59F0A` | amber "Featured" pill |
+| `badge` | `#fbbf24` = `rgb(251,191,36)` | star ratings (amber-400, session-38; the "Featured" pill is `bg-primary`) |
 | `footer` | `hsl(20 15% 10%)` = `#1D1816` (= foreground, session-30 re-measurement) | dark footer background |
 | `footer-rule` | `hsl(30 25% 98% / 0.1)` = `rgba(251,250,249,0.1)` | footer divider (session-34, alpha baked per T-13) |
 | `panel` | `hsl(0 0% 100% / 0.8)` = `rgba(255,255,255,0.8)` | sticky-HEADER glass + `backdrop-blur-xl` (session-36; the menu panel body is solid `bg-card`) |
@@ -1112,8 +1113,9 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 4. Cart summary shows Subtotal / Shipping (Free ≥ $50) / Total — **no tax
    line**.
 5. Checkout defaults to Cash on Delivery; card is the registered superset.
-6. PDP shows green "In Stock", red `-N%` pill, amber "Featured" pill where
-   applicable, orange category eyebrow, Playfair product name.
+6. PDP shows green "In Stock", red `-N%` pill, primary-ORANGE "Featured"
+   pill (session-38 re-measurement — no longer amber), orange category
+   eyebrow, Playfair product name, all-amber star row + `(count)`.
 7. Footer is the dark 4-column layout with the bottom legal bar.
 8. Registered supersets (allowed divergences): 24-product catalog (8
    reference-exact), promo code `NEST10` (10% off ≥ $40), card payment,

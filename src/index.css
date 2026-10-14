@@ -37,8 +37,11 @@
   --color-primary: hsl(24 70% 50%);
   --color-primary-dark: hsl(24 70% 43%);
   --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(35 30% 93%);
-  --color-secondary-foreground: hsl(20 15% 20%);
+  /* Session-38 re-measurement: the reference's CTA button paints a CREAM
+     pill — bg rgb(243,238,232) = hsl(33 31% 93%), text rgb(44,36,33) =
+     hsl(20 15% 15%) (measured live; the old v1 values were approximations). */
+  --color-secondary: hsl(33 31% 93%);
+  --color-secondary-foreground: hsl(20 15% 15%);
   --color-muted: hsl(30 15% 94%);
   --color-muted-foreground: hsl(20 10% 45%);
   --color-accent: hsl(160 40% 45%);
@@ -70,7 +73,12 @@
      rgba(255,255,255,0.1) with a 12px frost. */
   --color-frost: hsl(0 0% 100% / 0.1);
   --color-ring: hsl(24 70% 50%);
-  --color-badge: hsl(38 92% 50%);
+  /* Session-38 re-measurement: the reference's STARS fill amber-400 —
+     rgb(251,191,36) = #fbbf24 exactly (hex avoids hsl rounding drift;
+     the pin asserts the exact rgb string). The "Featured" card pill is
+     now bg-primary orange (product.tsx) — the old "badge amber pill"
+     reading is superseded; this token owns the star/rating amber only. */
+  --color-badge: #fbbf24;
   /* Session-30 re-measurement (2026-10-14): the reference footer now uses
      bg-foreground — hsl(20 15% 10%) = rgb(29,24,22) — on fresh loads of /
      and /products, both viewports (was hsl(24 14% 11%) = rgb(32,27,24),
@@ -84,8 +92,25 @@
      /10 modifier would color-mix in oklab and compute to oklab(...) instead
      of the reference's sRGB value. */
   --color-footer-rule: hsl(30 25% 98% / 0.1);
+  /* Session-38 (F38-06): the reference's hover-revealed quick-add pill —
+     bg-card/90 computes rgba(255,255,255,0.9) on the v3-era reference;
+     alpha baked (T-13) because v4 /90 color-mixes in oklab. */
+  --color-quick-add: hsl(0 0% 100% / 0.9);
+  /* Session-38 (F38-09): the CTA button's hover state — the cream at
+     0.8 alpha (measured rgba(243,238,232,0.8); alpha baked, T-13). */
+  --color-secondary-hover: hsl(33 31% 93% / 0.8);
+  /* Session-38 (F38-08): the FeatureBar icon disc — bg-primary/10
+     computes rgba(217,110,38,0.1) on the reference; alpha baked (T-13). */
+  --color-primary-film: hsl(24 70% 50% / 0.1);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  /* Session-38 (F38-01): v3 shadow-md geometry — the reference's category
+     gradient discs ship shadow-md; v4 moved the scale one notch (T-2), so
+     the v3 geometry is pinned here explicitly. */
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  /* Session-38 (F38-04): v3 shadow-xl geometry — the reference's card
+     hover shadow; v4's default xl is visibly heavier (T-2). */
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --shadow-card: 0 1px 3px 0 rgb(28 25 23 / 0.06), 0 1px 2px -1px rgb(28 25 23 / 0.06);
   --shadow-pop: 0 10px 38px -10px rgb(28 25 23 / 0.22), 0 10px 20px -15px rgb(28 25 23 / 0.2);
   --shadow-drawer: -8px 0 32px rgb(28 25 23 / 0.16);
@@ -102,6 +127,16 @@
   --z-overlay: 400;
   --z-modal: 500;
   --z-toast: 800;
+}
+
+/* Session-38 (F38-03): the reference's product-row carousels hide their
+   scrollbars (its own scrollbar-hide utility). v4 has no built-in
+   equivalent, so it is defined here as a custom utility. */
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 html {

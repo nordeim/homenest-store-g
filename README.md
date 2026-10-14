@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20212%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20228%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -20,7 +20,7 @@ SEO is a registered superset: per-route titles/canonicals/OG-Twitter tags, a gen
 
 | Feature | Description |
 |---|---|
-| 🏠 Reference-parity storefront | Home hero carousel, category grid, featured/new-arrival grids, feature bar, CTA banner, dark footer, floating chat FAB |
+| 🏠 Reference-parity storefront | Home hero carousel (fixed 500/600px card, black tint), category icon tiles with per-category gradient discs, scroll-snap product carousels, feature bar, gradient CTA banner, dark footer, floating chat FAB |
 | 🛍️ Catalog & discovery | 24 products across 8 categories, live search, category filter, four sort orders, discount/featured badges, quick-add |
 | 📄 Product detail | Reference `/product/:id` URLs (slug deep links supported), quantity stepper with stock clamps, Add-to-Cart / Buy Now, related products |
 | 🛒 Cart & drawer | Slide-out drawer + full page, delta steppers, free shipping over $50 (flat $9.99 under), collapsed promo-code entry (NEST10) |
@@ -30,7 +30,7 @@ SEO is a registered superset: per-route titles/canonicals/OG-Twitter tags, a gen
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
 | ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on eight surfaces |
 | 🔍 SEO-ready | Per-route titles/canonical/OG-Twitter via a pure head seam, generated robots.txt + sitemap.xml (24 product URLs), schema.org JSON-LD (Organization, WebSite, per-PDP Product nodes) |
-| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 106 Playwright E2E specs (212 runs) including computed-style visual-parity, mobile header parity, modal semantics, hover-state pins, a11y smoke gates, and the served SEO artifacts |
+| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 114 Playwright E2E specs (228 runs) including computed-style visual-parity (home content layer, mobile header parity, hover-state pins), modal semantics, a11y smoke gates, and the served SEO artifacts |
 
 ## Architecture
 
@@ -124,7 +124,7 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
 npm run test            # Vitest unit tests (104)
 npm run build           # production single-file build (prebuild regenerates SEO artifacts)
-npm run e2e             # Playwright E2E (106 specs / 212 runs) — requires npm run build first
+npm run e2e             # Playwright E2E (114 specs / 228 runs) — requires npm run build first
 npm run verify          # typecheck + lint + unit + build in one command
 npm run db:setup        # materialize the SQLite contract db (repo-root db/custom.db)
 ```
@@ -143,7 +143,7 @@ Tokens live in `src/index.css` under Tailwind v4's `@theme`; measured values bel
 | `--color-primary` | `hsl(24 70% 50%)` · `rgb(217,110,38)` | CTAs, active nav pill, badges |
 | `--color-accent` | `hsl(160 40% 45%)` · `rgb(69,161,130)` | In-stock labels, menu close disc |
 | `--color-destructive` | `hsl(0 72% 51%)` · `rgb(220,40,40)` | Discount pills, errors |
-| `--color-badge` | `rgb(245,159,10)` | "Featured" pill, star ratings |
+| `--color-badge` | `#fbbf24` · `rgb(251,191,36)` | Star ratings (amber-400; session-38 — the "Featured" pill is now `bg-primary`, see `--color-primary`) |
 | `--color-footer` | `rgb(29,24,22)` | Footer canvas (session-30: = foreground; was `rgb(32,27,24)`) |
 | `--color-footer-rule` | `hsl(30 25% 98% / 0.1)` · `rgba(251,250,249,0.1)` | Footer divider (session-34; alpha baked — v4 `/10` would color-mix in oklab) |
 | `--color-panel` | `hsl(0 0% 100% / 0.8)` · `rgba(255,255,255,0.8)` | Sticky-header glass (session-36; the menu panel body is solid `bg-card`) |
@@ -151,6 +151,10 @@ Tokens live in `src/index.css` under Tailwind v4's `@theme`; measured values bel
 | `--color-hero-body` | `hsl(0 0% 100% / 0.8)` · `rgba(255,255,255,0.8)` | Hero paragraph (session-36; the reference's `text-white/80`) |
 | `--color-dot-idle` | `hsl(0 0% 100% / 0.4)` | Idle carousel dots (session-36) |
 | `--color-frost` | `hsl(0 0% 100% / 0.1)` | Hero carousel arrow glass (session-36) |
+| `--color-quick-add` | `hsl(0 0% 100% / 0.9)` | Card quick-add pill, hover-revealed (session-38) |
+| `--color-secondary` | `hsl(33 31% 93%)` · `rgb(243,238,232)` | CTA cream button bg (session-38 re-measurement) |
+| `--color-secondary-hover` | `hsl(33 31% 93% / 0.8)` | CTA button hover (session-38) |
+| `--color-primary-film` | `hsl(24 70% 50% / 0.1)` | FeatureBar icon disc film (session-38) |
 
 Typography: **Playfair Display** 700 for display headings (`font-display`), **Inter** for body text (Google Fonts with system-stack fallback, session-34 parity with the reference's typeface), 12px base radius with fully-rounded pill CTAs. Cards use white surfaces on a 1px `--color-border`. The v4 `hover:*` variant is overridden to `&:hover` (v3 behavior — the reference applies hover unconditionally; see AGENTS.md trap #9).
 
@@ -193,6 +197,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), **In
 - [`docs/session_32.md`](docs/session_32.md) — Session 32 execution record (workspace reset recovery + thirteenth no-drift sweep → validation track holds → push)
 - [`docs/session_34.md`](docs/session_34.md) — Session 34 execution record (fourteenth sweep → footer text-layer + brand-mark + body-font (Inter) remediation via TDD → pixel-identical footer rects → push)
 - [`docs/session_36.md`](docs/session_36.md) — Session 36 execution record (fifteenth sweep → v4 hover-variant un-gating + header glass + solid menu panel + hero/PDP action-row remediation via TDD → push)
+- [`docs/session_38.md`](docs/session_38.md) — Session 38 execution record (sixteenth sweep → home-page content layer: category icon tiles, scroll-snap carousels, card chrome/badges/quick-add, FeatureBar, CTA, hero container, page rhythm, header action-row hovers → push)
+- [`docs/session_37.md`](docs/session_37.md) — raw session transcript for the session-36 record
 - [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) / [`docs/session_31.md`](docs/session_31.md) / [`docs/session_33.md`](docs/session_33.md) / [`docs/session_35.md`](docs/session_35.md) — raw session transcripts for the session-26, session-28, session-30, session-32 and session-34 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
 - [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) / [`docs/session_21.md`](docs/session_21.md) / [`docs/session_23.md`](docs/session_23.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, session-18, session-20, and session-22 records

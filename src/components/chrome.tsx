@@ -263,17 +263,20 @@ export function Header() {
           </button>
           <Link
             href="/account"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent hover:text-white"
             aria-label={user ? "Account" : "Sign in"}
           >
             {/* Session-26 re-measurement: the reference renders a plain dark
                 lucide-user glyph in BOTH auth states (logged in as the
-                owner-supplied User-role account) — no green avatar disc. */}
+                owner-supplied User-role account) — no green avatar disc.
+                Session-38 (F38-12): the :hover treatment is the shared
+                action-row green disc (accent bg, white glyph, 150ms —
+                measured live, same family as the trigger/cart buttons). */}
             <UserRound className="h-5 w-5" strokeWidth={2} />
           </Link>
           <button
             type="button"
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent hover:text-white"
             aria-label="Open cart"
             onClick={() => setCartOpen(true)}
           >
@@ -815,17 +818,24 @@ export function FeatureBar() {
     { icon: RotateCcw, title: "Easy Returns", body: "30-day return policy" },
     { icon: Headphones, title: "24/7 Support", body: "Dedicated customer care" },
   ];
+  /* Session-38 (F38-08) — the measured reference spec: compact p-4 gap-3
+     cards on 16px radius (v3 rounded-2xl) with a 0.5-alpha hairline and
+     NO shadow; 44px (w-11) discs with 12px radius (v3 rounded-xl — v4's
+     computes 20px, trap #6) on an alpha-baked primary film; 20px stroke-2
+     glyphs; semibold titles + 12px subs; grid-cols-2 md:grid-cols-4; the
+     section itself carries no vertical padding (the page rhythm owns
+     spacing — home wraps everything in space-y-16). */
   return (
-    <section aria-label="Store highlights">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
+    <section aria-label="Store highlights" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {items.map((item) => (
-          <div key={item.title} className="flex items-center gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
-            <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <item.icon className="h-6 w-6" strokeWidth={1.8} />
+          <div key={item.title} className="flex items-center gap-3 rounded-[16px] border border-border-soft bg-card p-4">
+            <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-primary-film text-primary">
+              <item.icon className="h-5 w-5" strokeWidth={2} />
             </span>
             <div>
-              <p className="text-sm font-bold text-foreground">{item.title}</p>
-              <p className="text-sm text-muted-foreground">{item.body}</p>
+              <p className="text-sm font-semibold text-foreground">{item.title}</p>
+              <p className="text-xs text-muted-foreground">{item.body}</p>
             </div>
           </div>
         ))}
