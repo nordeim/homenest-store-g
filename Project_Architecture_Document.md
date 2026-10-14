@@ -382,6 +382,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `secondary` | `hsl(33 31% 93%)` | `rgb(243,238,232)` | CTA cream button (session-38 re-measurement) | — |
 | `secondary-hover` | `hsl(33 31% 93% / 0.8)` | `rgba(243,238,232,0.8)` | CTA button hover (session-38; alpha baked) | — |
 | `primary-film` | `hsl(24 70% 50% / 0.1)` | `rgba(217,110,38,0.1)` | FeatureBar icon disc (session-38; the reference's `bg-primary/10`, alpha baked) | — |
+| `gallery` | `hsl(30 15% 94% / 0.3)` | `rgba(242,240,237,0.3)` | PDP gallery tile (session-39; the reference's `bg-muted/30`, alpha baked — trap T-13) | — |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
 
 ### 5.3 Component Primitives
@@ -418,6 +419,7 @@ These supersets are intentional; they must not change the **resting visuals** of
 16. **Footer contact links + font loading mechanism (session 34).** The reference's footer contact rows are plain text with icons; the clone keeps `mailto:`/`tel:` anchors styled to identical resting visuals (function exceeds — the standing superset pattern). The reference self-hosts its fonts as bundled woff2; the clone loads Playfair Display and Inter via Google Fonts (`display=swap`) with the system stack as offline fallback — identical rendered typefaces, different delivery.
 17. **Category filter URL shape (session 38).** The reference's category deep links use underscore ids (`/products?category=kitchen_tools`); the clone's seed uses hyphens (`/products?category=kitchen-tools`). Purely a query-string shape difference — identical filtering behavior, identical rendered labels ("Kitchen Tools"), zero resting-visual impact. Left as-is deliberately: changing ids would churn the catalog seed, `STORAGE_KEY` and the hash registry for a URL nuance.
 18. **Quick-add keyboard reveal + CTA-as-link (session 38).** The reference's card quick-add is `opacity-0` until group-hover AND stays invisible under keyboard focus; the clone adds `focus-within:opacity-100` so Tab focus reveals the button (a11y superset, resting visuals identical). The reference's CTA "Browse All Products" renders as a `<button>`; the clone ships a real link to `/products` styled to the measured cream-pill spec (function exceeds, resting visuals identical). The section-header carousel arrows keep accessible names (the reference ships nameless buttons — its own a11y posture, not copied).
+19. **PDP shipping/returns rows removed, not registered (session 39, remediation §28 D1).** The v1 port had added "Free shipping over $50" / "30-day returns" / per-product shippingNote rows to the PDP info column — the reference's column ends at the action row. A resting-visual addition on a measured parity surface cannot become a "resting-identical superset", so the rows were REMOVED (the shipping disclosure already lives on the cart/checkout/tracking surfaces; registered divergence #6 `deliveryWindow` covers the estimated-delivery function). `Product.shippingNote` stays in the type + catalog seed (data, no render seam) for the server-backed workstream — do not re-render it on the PDP.
 
 ---
 

@@ -66,7 +66,7 @@ const CATEGORY_TILES: Record<string, { icon: LucideIcon; gradient: string }> = {
    scroll-snap carousels on the reference: flex gap-5 overflow-x-auto pb-4
    scrollbar-hide snap-x snap-mandatory with min-w-[260px] max-w-[280px]
    snap-start flex-shrink-0 cells (not responsive grids). */
-function ProductRow({ products, rowRef }: { products: Product[]; rowRef: RefObject<HTMLDivElement | null> }) {
+export function ProductRow({ products, rowRef }: { products: Product[]; rowRef: RefObject<HTMLDivElement | null> }) {
   if (products.length === 0) return null;
   return (
     <div ref={rowRef} className="scrollbar-hide flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
@@ -79,7 +79,7 @@ function ProductRow({ products, rowRef }: { products: Product[]; rowRef: RefObje
   );
 }
 
-function CarouselArrows({ onScroll }: { onScroll: (direction: 1 | -1) => void }) {
+export function CarouselArrows({ onScroll }: { onScroll: (direction: 1 | -1) => void }) {
   return (
     <div className="flex gap-2">
       <button

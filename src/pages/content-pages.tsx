@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Award, Globe, Heart, HeartHandshake, Mail, MapPin, Phone, Send, Users } from "lucide-react";
+import { Award, Globe, Heart, Mail, MapPin, Phone, Send, Users } from "lucide-react";
 import { PrimaryButton, inputClass } from "@/components/chrome";
 import { useStore } from "@/lib/store";
 import { STORAGE_KEY } from "@/lib/storage-key";
@@ -7,11 +7,13 @@ import { BRAND } from "@/data/catalog";
 import { cn } from "@/utils/cn";
 
 export function PageHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  /* Session-39 (F39-17): the reference content-page header is
+     text-center space-y-3 (12px between h1 and subtitle). */
   return (
-    <div className="text-center">
+    <div className="space-y-3 text-center">
       <h1 className="font-display text-4xl font-bold text-foreground md:text-5xl">{title}</h1>
       {subtitle && (
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{subtitle}</p>
+        <p className="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{subtitle}</p>
       )}
     </div>
   );
@@ -41,13 +43,16 @@ const VALUES = [
 ];
 
 export function AboutPage() {
+  /* Session-39 (F39-18): the reference about wrapper is max-w-4xl with a
+     py-12 space-y-12 rhythm (48px on the non-last children). The internal
+     story/promise layers stay unmeasured (D4) — only margins are stripped. */
   return (
-    <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+    <div className="mx-auto max-w-4xl space-y-12 px-4 py-12 sm:px-6 lg:px-8">
       <PageHeading
         title="About Us"
         subtitle="We are passionate about bringing you the finest home and kitchen products that combine quality, functionality, and beautiful design. Our mission is to help you create a home you love."
       />
-      <div className="mt-12 grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         {VALUES.map((value) => (
           <div key={value.title} className="rounded-xl border border-border bg-card p-6 shadow-card">
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -58,7 +63,7 @@ export function AboutPage() {
           </div>
         ))}
       </div>
-      <div className="mt-10 rounded-2xl bg-secondary px-6 py-12 text-center sm:px-10">
+      <div className="rounded-2xl bg-secondary px-6 py-12 text-center sm:px-10">
         <h2 className="font-display text-2xl font-bold text-foreground md:text-3xl">Our Promise</h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
           We stand behind every product we offer. If you're not completely satisfied, our dedicated support team is
@@ -103,11 +108,17 @@ export function ContactPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+    /* Session-39 (F39-17): one space-y-12 wrapper owns the page rhythm
+       (48px on the non-last children), the info grid steps at md with
+       gap-6, and the page ENDS at the form — the old trailing
+       self-service row was a resting-visual superset violation. */
+    <div className="mx-auto max-w-5xl space-y-12 px-4 py-12 sm:px-6 lg:px-8">
       <PageHeading title="Contact Us" subtitle="We'd love to hear from you. Reach out anytime." />
-      <div className="mt-12 grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         {cards.map((card) => (
-          <div key={card.title} className="rounded-xl border border-border bg-card p-6 text-center shadow-card">
+          /* 16px radius + the 0.5-alpha border-soft hairline, NO shadow
+              (v4's rounded-xl computes 20px — trap #6). */
+          <div key={card.title} className="rounded-[16px] border border-border-soft bg-card p-6 text-center">
             <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <card.icon className="h-6 w-6" strokeWidth={1.7} />
             </span>
@@ -124,7 +135,7 @@ export function ContactPage() {
       </div>
 
       <form
-        className="mx-auto mt-10 max-w-2xl rounded-xl border border-border bg-card p-6 shadow-card sm:p-8"
+        className="mx-auto max-w-2xl space-y-5 rounded-[16px] border border-border bg-card p-8"
         onSubmit={onSubmit}
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -154,7 +165,7 @@ export function ContactPage() {
             />
           </div>
         </div>
-        <div className="mt-4">
+        <div>
           <label htmlFor="contact-subject" className="text-sm font-medium text-foreground">
             Subject
           </label>
@@ -166,7 +177,7 @@ export function ContactPage() {
             onChange={(e) => setForm({ ...form, subject: e.target.value })}
           />
         </div>
-        <div className="mt-4">
+        <div>
           <label htmlFor="contact-message" className="text-sm font-medium text-foreground">
             Message
           </label>
@@ -180,25 +191,20 @@ export function ContactPage() {
           />
         </div>
         {error && (
-          <p className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
+          <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
             {error}
           </p>
         )}
         {sent && (
-          <p className="mt-4 rounded-lg border border-accent/30 bg-accent-soft px-3 py-2 text-sm text-accent" role="status">
+          <p className="rounded-lg border border-accent/30 bg-accent-soft px-3 py-2 text-sm text-accent" role="status">
             Thanks — your message is in. We reply within one business day.
           </p>
         )}
-        <PrimaryButton type="submit" className="mt-6 w-full">
+        <PrimaryButton type="submit" className="w-full">
           <Send className="h-4 w-4" />
           Send Message
         </PrimaryButton>
       </form>
-
-      <p className="mt-8 flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
-        <HeartHandshake className="h-4 w-4 text-primary" />
-        Prefer self-service? Try Track Order for live status on any order.
-      </p>
     </div>
   );
 }

@@ -109,7 +109,10 @@ export function ProductGrid({ products, empty }: { products: Product[]; empty: s
     );
   }
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    /* Session-39 (F39-16): the reference /products grid is 2-up from the
+       smallest width (grid-cols-2, 169px-class cards at 390px) and steps
+       to 3 at md / 4 at lg — the clone shipped 1-up until sm. */
+    <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

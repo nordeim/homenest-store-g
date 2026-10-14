@@ -247,12 +247,12 @@ pinned). `lib/store.tsx` is the only stateful module.
 |---|---|---|
 | `src/App.tsx` | 106 | Route switch (`matchPath` → page), auth/admin gating, skip link |
 | `src/components/chrome.tsx` | 766 | `Header` (+ search overlay + portal mobile nav), `CartDrawer` (modal), `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
-| `src/components/product.tsx` | 110 | `ProductCard` (session-38 chrome/badges/hover-revealed quick-add), `Stars`, price row |
-| `src/pages/home.tsx` | 300 | Hero carousel (fixed 500/600px card), FeatureBar, 8 category icon tiles, Featured (6) + New (8) scroll-snap carousels, gradient CTA |
-| `src/pages/shop.tsx` | 339 | Products list (URL-driven search/category/sort), PDP, 404 |
+| `src/components/product.tsx` | 121 | `ProductCard` (session-38 chrome/badges/hover-revealed quick-add), `Stars`, `ProductGrid` (session-39: grid-cols-2 md:3 lg:4), price row |
+| `src/pages/home.tsx` | 315 | Hero carousel (fixed 500/600px card), FeatureBar, 8 category icon tiles, Featured (6) + New (8) scroll-snap carousels, gradient CTA; exports `ProductRow`/`CarouselArrows` (reused by the PDP related section, session-39) |
+| `src/pages/shop.tsx` | 402 | Products list (URL-driven search/category/sort, session-39 h-9 pill filters + 2-up mobile grid), PDP (session-39: space-y rhythm, md grid, gallery tile, info rows, stepper, related carousel — no shipping rows), 404 |
 | `src/pages/checkout-flow.tsx` | 818 | Cart page, single-page checkout, order success |
 | `src/pages/account-pages.tsx` | 858 | Auth (login/register), profile + order history + tabs, account order detail, track-order lookup |
-| `src/pages/content-pages.tsx` | 340 | About, Contact, 5 legal pages |
+| `src/pages/content-pages.tsx` | 347 | About, Contact (session-39 wrappers/cards/form), 5 legal pages |
 | `src/pages/admin-pages.tsx` | 349 | Admin console (dashboard, products, orders, analytics, categories, carousel, settings) |
 | `src/lib/store.tsx` | 491 | `StoreProvider` + `useStore` — cart/auth/orders/UI state, localStorage persistence |
 | `src/lib/commerce.ts` | 232 | Pure money/shipping/promo/order/validation domain functions |
@@ -613,9 +613,9 @@ every push):
 
 ```bash
 npm run typecheck   # tsc --noEmit — zero errors
-npm run test        # vitest — 95/95 (6 files)
+npm run test        # vitest — 104/104 (7 files)
 npm run build       # vite build — single-file dist/index.html (prebuild regenerates SEO artifacts)
-npm run e2e         # playwright — 182/182 (91 specs × chromium+mobile)
+npm run e2e         # playwright — 250/250 (125 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
@@ -972,6 +972,7 @@ neither):
 | `hero-body` | `hsl(0 0% 100% / 0.8)` = `rgba(255,255,255,0.8)` | hero paragraph (session-36, alpha baked) |
 | `dot-idle` | `hsl(0 0% 100% / 0.4)` = `rgba(255,255,255,0.4)` | idle carousel dots (session-36) |
 | `frost` | `hsl(0 0% 100% / 0.1)` = `rgba(255,255,255,0.1)` | carousel arrow glass (session-36) |
+| `gallery` | `hsl(30 15% 94% / 0.3)` = `rgba(242,240,237,0.3)` | PDP gallery tile (session-39; the reference's `bg-muted/30`, alpha baked per T-13) |
 
 Opacity conventions: primary at 22% for `::selection`; the sticky header is
 `--color-panel` (white/80, alpha baked) with `backdrop-blur-xl` (24px) since
@@ -1077,13 +1078,15 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
 
 - Unit (vitest, node env): `src/lib/commerce.test.ts` + `tests/db-path.test.ts`
   + `tests/catalog-hash.test.ts` + `tests/password.test.ts` +
-  `tests/seo.test.ts` + `tests/sitemap.test.ts` = **95 tests, 6 files, all
-  green**.
-- E2E (playwright, production build via preview server): **91 specs** —
-  smoke 5, mobile-navigation 14, mobile-header-parity 4, cart-drawer 3,
-  catalog 6, cart-checkout 9, auth-admin 7, visual-parity 6, a11y-smoke 8,
-  search-keyboard 5, password-hash 4, account-layout 1, seo-head 19 —
-  × 2 projects (chromium, mobile) = **182 executions, all green**.
+  `tests/seo.test.ts` + `tests/sitemap.test.ts` + `tests/db-scripts.test.ts`
+  = **104 tests, 7 files, all green**.
+- E2E (playwright, production build via preview server): **125 specs** —
+  visual-parity 32 (incl. the session-39 PDP/catalog/content-page layer),
+  seo-head 19, mobile-navigation 15, cart-checkout 9, a11y-smoke 8,
+  search-keyboard 8, auth-admin 7, catalog 6, smoke 5,
+  mobile-header-parity 5, password-hash 4, pwa-manifest 3, cart-drawer 3,
+  account-layout 1 — × 2 projects (chromium, mobile) = **250 executions,
+  all green** (session-39 gate, 4.6 min).
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site
@@ -1116,6 +1119,14 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 6. PDP shows green "In Stock", red `-N%` pill, primary-ORANGE "Featured"
    pill (session-38 re-measurement — no longer amber), orange category
    eyebrow, Playfair product name, all-amber star row + `(count)`.
+   Session-39 full spec: `py-8 space-y-16` wrapper, `md:grid-cols-2`
+   body, aspect-square 24px-radius borderless gallery tile
+   (`rgba(242,240,237,0.3)`), `space-y-6` info column (14px/500/0.7px
+   label, text-3xl→4xl h1, 20px amber stars + "4.9 (412 reviews)",
+   16px stock row with green icon, h3 Description + 16px/26px paragraph,
+   cream 2px-10px feature pills, 112×36 muted stepper), a scroll-snap
+   related carousel with 40px arrows, and NO shipping/returns rows
+   (removed, PAD §5.6 #19 — `shippingNote` stays in the seed).
 7. Footer is the dark 4-column layout with the bottom legal bar.
 8. Registered supersets (allowed divergences): 24-product catalog (8
    reference-exact), promo code `NEST10` (10% off ≥ $40), card payment,

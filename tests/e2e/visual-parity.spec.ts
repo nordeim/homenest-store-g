@@ -487,3 +487,219 @@ test("PDP action row matches the reference layout and heights", async ({ page })
   // flex-1 only on Add (Buy is content-width).
   expect(addBox!.width).toBeGreaterThan(buyBox!.width + 40);
 });
+
+/* ── Session-39 (seventeenth sweep): the PDP/catalog-page layer + content-page
+   rhythm, measured live 2026-10-14 (agent-browser @390×844 + 1440×900, logged
+   in; remediation plan §28). RED first, then GREEN. ── */
+
+test("PDP wrapper rhythm and gallery surface match the reference", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  // F39-01: one space-y-16 wrapper (64px) owns the rhythm — py-8, no mt-6/mt-16.
+  // (v4's space-y puts the space on margin-block-end of non-last children.)
+  const wrap = page.locator("main > div");
+  const back = wrap.getByRole("link", { name: "Back to Products" });
+  await expect(back).toHaveCSS("margin-bottom", "64px");
+  await expect(wrap).toHaveCSS("padding-top", "32px");
+  // F39-03: the gallery is an aspect-square 24px-radius muted/30 tile with NO
+  // border (the reference's bg-muted/30 computes rgba(242,240,237,0.3)).
+  const gallery = page.locator("main [class*='grid-cols-2'] > div").first();
+  await expect(gallery).toHaveCSS("border-radius", "24px");
+  await expect(gallery).toHaveCSS("border-width", "0px");
+  await expect(gallery).toHaveCSS("background-color", "rgba(242, 240, 237, 0.3)");
+  await expect(gallery).toHaveCSS("aspect-ratio", "1 / 1");
+});
+
+test("PDP grid splits at the reference md breakpoint", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  // F39-02: the reference goes side-by-side from 768px (md:grid-cols-2); the
+  // clone stacked through 1023px (lg). At the mobile project (390px) the
+  // grid stays 1-col on both; the desktop project (1440px) asserts 2.
+  const viewport = page.viewportSize();
+  const grid = page.locator("main [class*='grid-cols-2']");
+  const cols = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  expect(cols).toBe(viewport && viewport.width < 768 ? 1 : 2);
+  await expect(grid).toHaveCSS("column-gap", "40px");
+});
+
+test("PDP info text layer matches the reference rows", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  const viewport = page.viewportSize();
+  const isMobile = !!viewport && viewport.width < 768;
+  // F39-04: the info column is one space-y-6 column (24px on margin-block-end).
+  const info = page.locator("main [class*='grid-cols-2'] > div").nth(1);
+  await expect(info.locator("xpath=child::*[1]")).toHaveCSS("margin-bottom", "24px");
+  // F39-05: category label 14px/500, ls 0.7px, primary.
+  const label = info.locator("p").first();
+  await expect(label).toHaveCSS("font-size", "14px");
+  await expect(label).toHaveCSS("font-weight", "500");
+  await expect(label).toHaveCSS("letter-spacing", "0.7px");
+  await expect(label).toHaveCSS("color", "rgb(217, 110, 38)");
+  await expect(label).toHaveText(/Kitchen Tools/i);
+  // F39-06: h1 text-3xl (30px) at mobile, text-4xl (36px) at md+.
+  const h1 = info.getByRole("heading", { name: "Damascus Steel Chef Knife Set", exact: true });
+  await expect(h1).toHaveCSS("font-size", isMobile ? "30px" : "36px");
+  await expect(h1).toHaveCSS("font-weight", "700");
+  await expect(h1).toHaveCSS("font-family", /Playfair Display/);
+  // F39-07: rating — 20px amber stars + ONE muted "4.9 (412 reviews)" span.
+  const star = info.locator("svg").first();
+  await expect(star).toHaveCSS("width", "20px");
+  await expect(star).toHaveCSS("color", "rgb(251, 191, 36)");
+  const ratingText = info.getByText(/\(412 reviews\)/);
+  await expect(ratingText).toHaveCSS("font-size", "14px");
+  await expect(ratingText).toHaveCSS("font-weight", "400");
+  await expect(ratingText).toHaveCSS("color", "rgb(126, 111, 103)");
+  // F39-08: stock 16px/400 foreground + a green icon.
+  const stock = info.getByText("In Stock", { exact: true });
+  await expect(stock).toHaveCSS("font-size", "16px");
+  await expect(stock).toHaveCSS("color", "rgb(29, 24, 22)");
+  // F39-09: Description is an h3 16px/600 + a 16px/26px muted paragraph.
+  const descHeading = info.getByRole("heading", { name: "Description", exact: true });
+  await expect(descHeading).toHaveCSS("font-size", "16px");
+  await expect(descHeading).toHaveCSS("font-weight", "600");
+  const descP = info.getByText(/Professional 5-piece knife set/);
+  await expect(descP).toHaveCSS("font-size", "16px");
+  await expect(descP).toHaveCSS("line-height", "26px");
+  await expect(descP).toHaveCSS("color", "rgb(126, 111, 103)");
+});
+
+test("PDP tags are the reference cream pills", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  // F39-10: feature tags — bg rgb(243,238,232) (the secondary cream), text
+  // rgb(44,36,33), 12px, 2px 10px padding, 9999px radius.
+  const tag = page.getByText("gift set", { exact: true });
+  await expect(tag).toHaveCSS("background-color", "rgb(243, 238, 232)");
+  await expect(tag).toHaveCSS("color", "rgb(44, 36, 33)");
+  await expect(tag).toHaveCSS("font-size", "12px");
+  await expect(tag).toHaveCSS("padding", "2px 10px");
+  await expect(tag).toHaveCSS("border-radius", "9999px");
+});
+
+test("PDP quantity stepper matches the reference muted pill", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  // F39-11: 36px muted pill (bg rgb(242,240,237)), NO border, 16px value.
+  const stepper = page.getByLabel("Decrease quantity").locator("xpath=..");
+  await expect(stepper).toHaveCSS("height", "36px");
+  await expect(stepper).toHaveCSS("background-color", "rgb(242, 240, 237)");
+  await expect(stepper).toHaveCSS("border-width", "0px");
+  await expect(stepper).toHaveCSS("border-radius", "9999px");
+  const value = stepper.getByText("1", { exact: true });
+  await expect(value).toHaveCSS("font-size", "16px");
+});
+
+test("PDP related section is the reference carousel", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  // F39-12: space-y-6 section (24px on margin-block-end); header row (h2 +
+  // subtitle + 2×40px arrows); a scroll-snap carousel row (not a grid).
+  const section = page.locator("main section");
+  await expect(section.locator("xpath=child::*[1]")).toHaveCSS("margin-bottom", "24px");
+  const h2 = section.getByRole("heading", { name: "You May Also Like", exact: true });
+  await expect(h2).toHaveCSS("font-family", /Playfair Display/);
+  const viewport = page.viewportSize();
+  const isMobile = !!viewport && viewport.width < 768;
+  await expect(h2).toHaveCSS("font-size", isMobile ? "24px" : "30px");
+  const arrows = section.getByRole("button", { name: /Scroll products/ });
+  await expect(arrows).toHaveCount(2);
+  for (const arrow of await arrows.all()) {
+    const box = await arrow.boundingBox();
+    expect(Math.round(box?.width ?? 0)).toBe(40);
+    expect(Math.round(box?.height ?? 0)).toBe(40);
+  }
+  const row = section.locator("div.scrollbar-hide");
+  const rowStyles = await row.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { overflow: cs.overflowX, snap: cs.scrollSnapType, display: cs.display };
+  });
+  expect(rowStyles.overflow).toBe("auto");
+  expect(rowStyles.snap).toContain("x mandatory");
+  expect(rowStyles.display).toBe("flex");
+});
+
+test("PDP info column carries no shipping or returns rows", async ({ page }) => {
+  await page.goto("/product/p-knife-set");
+  // F39-13: the reference's info column ends at the qty/action rows — the
+  // clone's "Free shipping over $50" / "30-day returns" / shippingNote rows
+  // were resting-visual superset violations on a parity surface.
+  const info = page.locator("main [class*='grid-cols-2'] > div").nth(1);
+  await expect(info.getByText(/Free shipping over \$50/)).toHaveCount(0);
+  await expect(info.getByText(/30-day returns/)).toHaveCount(0);
+  await expect(info.getByText(/^Shipping:/)).toHaveCount(0);
+});
+
+test("products page header and filter row match the reference scale", async ({ page }) => {
+  await page.goto("/products");
+  const viewport = page.viewportSize();
+  const isMobile = !!viewport && viewport.width < 768;
+  const wrap = page.locator("main > div");
+  // F39-14: py-8 space-y-8 (32px rhythm on margin-block-end).
+  await expect(wrap).toHaveCSS("padding-top", "32px");
+  await expect(wrap.locator("xpath=child::*[1]")).toHaveCSS("margin-bottom", "32px");
+  // F39-15: h1 30px at mobile / 36px at md+; the count is 16px.
+  const h1 = wrap.getByRole("heading", { name: /All Products|Shop/i });
+  await expect(h1).toHaveCSS("font-size", isMobile ? "30px" : "36px");
+  const count = wrap.getByText(/products? found/);
+  await expect(count).toHaveCSS("font-size", "16px");
+  // F39-16: h-9 (36px) controls — search 16px font, selects 14px/400.
+  const search = wrap.getByLabel("Search products");
+  await expect(search).toHaveCSS("height", "36px");
+  await expect(search).toHaveCSS("font-size", "16px");
+  await expect(search).toHaveCSS("border-radius", "9999px");
+  const category = wrap.getByLabel("Filter by category");
+  await expect(category).toHaveCSS("height", "36px");
+  await expect(category).toHaveCSS("font-size", "14px");
+  await expect(category).toHaveCSS("font-weight", "400");
+});
+
+test("products grid is two-up at mobile like the reference", async ({ page }) => {
+  await page.goto("/products");
+  // F39-16: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 (2-up at 390px; the
+  // clone shipped 1-up until sm). Cards land in the 169-289px band.
+  const viewport = page.viewportSize();
+  const isMobile = !!viewport && viewport.width < 768;
+  const grid = page.locator("main [class*='grid-cols-2']");
+  const cols = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  expect(cols).toBe(isMobile ? 2 : 4);
+  const card = page.locator("main article").first();
+  const box = await card.boundingBox();
+  expect(Math.round(box?.width ?? 0)).toBeLessThan(isMobile ? 200 : 320);
+});
+
+test("contact page matches the reference rhythm and card chrome", async ({ page }) => {
+  await page.goto("/contact");
+  const viewport = page.viewportSize();
+  const isMobile = !!viewport && viewport.width < 768;
+  const wrap = page.locator("main > div");
+  // F39-17: py-12 space-y-12 (48px rhythm on margin-block-end); the page
+  // ends at the form.
+  await expect(wrap).toHaveCSS("padding-top", "48px");
+  await expect(wrap.locator("xpath=child::*[1]")).toHaveCSS("margin-bottom", "48px");
+  // Info cards: 16px radius, the 0.5-alpha hairline, no shadow. The grid
+  // is the wrapper's second child (header, info grid, form).
+  const grid = wrap.locator("div.grid").first();
+  const card = grid.locator("div").first();
+  await expect(card).toHaveCSS("border-radius", "16px");
+  await expect(card).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(card).toHaveCSS("box-shadow", "none");
+  // Grid: md:grid-cols-3 (stacked at mobile, 3-up at md+), gap-6 (24px).
+  const cols = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  expect(cols).toBe(isMobile ? 1 : 3);
+  await expect(grid).toHaveCSS("gap", "24px");
+  // Form: p-8 (32px), 16px radius, bg-card, no shadow.
+  const form = wrap.locator("form");
+  await expect(form).toHaveCSS("padding", "32px");
+  await expect(form).toHaveCSS("border-radius", "16px");
+  await expect(form).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  // The trailing self-service row is gone (the reference ends at the form).
+  await expect(wrap.getByText(/Prefer self-service/)).toHaveCount(0);
+});
+
+test("about page wrapper matches the reference measure", async ({ page }) => {
+  await page.goto("/about");
+  const viewport = page.viewportSize();
+  // F39-18: max-w-4xl (896px) at desktop, py-12 space-y-12 rhythm.
+  const wrap = page.locator("main > div");
+  await expect(wrap).toHaveCSS("padding-top", "48px");
+  await expect(wrap.locator("xpath=child::*[1]")).toHaveCSS("margin-bottom", "48px");
+  if (viewport && viewport.width >= 1024) {
+    await expect(wrap).toHaveCSS("max-width", "896px");
+  }
+});

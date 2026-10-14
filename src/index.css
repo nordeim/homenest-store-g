@@ -102,6 +102,12 @@
   /* Session-38 (F38-08): the FeatureBar icon disc — bg-primary/10
      computes rgba(217,110,38,0.1) on the reference; alpha baked (T-13). */
   --color-primary-film: hsl(24 70% 50% / 0.1);
+  /* Session-39 (F39-03): the reference PDP gallery tile — its bg-muted/30
+     computes rgba(242,240,237,0.3) on the v3-era reference; alpha baked
+     (T-13 pattern) because v4's /30 modifier color-mixes in oklab and
+     would serialize as oklab(...) instead of the reference's sRGB value.
+     The card image tiles keep bg-muted/30 (invisible under the photo). */
+  --color-gallery: hsl(30 15% 94% / 0.3);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   /* Session-38 (F38-01): v3 shadow-md geometry — the reference's category

@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20228%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20250%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -30,7 +30,7 @@ SEO is a registered superset: per-route titles/canonicals/OG-Twitter tags, a gen
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
 | ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on eight surfaces |
 | 🔍 SEO-ready | Per-route titles/canonical/OG-Twitter via a pure head seam, generated robots.txt + sitemap.xml (24 product URLs), schema.org JSON-LD (Organization, WebSite, per-PDP Product nodes) |
-| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 114 Playwright E2E specs (228 runs) including computed-style visual-parity (home content layer, mobile header parity, hover-state pins), modal semantics, a11y smoke gates, and the served SEO artifacts |
+| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 125 Playwright E2E specs (250 runs) including computed-style visual-parity (home content layer, PDP/catalog/content-page layer, mobile header parity, hover-state pins), modal semantics, a11y smoke gates, and the served SEO artifacts |
 
 ## Architecture
 
@@ -124,7 +124,7 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
 npm run test            # Vitest unit tests (104)
 npm run build           # production single-file build (prebuild regenerates SEO artifacts)
-npm run e2e             # Playwright E2E (114 specs / 228 runs) — requires npm run build first
+npm run e2e             # Playwright E2E (125 specs / 250 runs) — requires npm run build first
 npm run verify          # typecheck + lint + unit + build in one command
 npm run db:setup        # materialize the SQLite contract db (repo-root db/custom.db)
 ```
@@ -198,6 +198,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), **In
 - [`docs/session_34.md`](docs/session_34.md) — Session 34 execution record (fourteenth sweep → footer text-layer + brand-mark + body-font (Inter) remediation via TDD → pixel-identical footer rects → push)
 - [`docs/session_36.md`](docs/session_36.md) — Session 36 execution record (fifteenth sweep → v4 hover-variant un-gating + header glass + solid menu panel + hero/PDP action-row remediation via TDD → push)
 - [`docs/session_38.md`](docs/session_38.md) — Session 38 execution record (sixteenth sweep → home-page content layer: category icon tiles, scroll-snap carousels, card chrome/badges/quick-add, FeatureBar, CTA, hero container, page rhythm, header action-row hovers → push)
+- [`docs/session_39.md`](docs/session_39.md) — Session 39 execution record (seventeenth sweep → PDP/catalog/content-page layer: wrapper rhythms, md grid breakpoint, gallery tile, info rows, cream pills, stepper, related carousel, /products filters + 2-up mobile grid, contact/about wrappers, PDP shipping rows removed → push; the file's prior session-38 transcript content is preserved in git at `c1d162b`)
 - [`docs/session_37.md`](docs/session_37.md) — raw session transcript for the session-36 record
 - [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) / [`docs/session_31.md`](docs/session_31.md) / [`docs/session_33.md`](docs/session_33.md) / [`docs/session_35.md`](docs/session_35.md) — raw session transcripts for the session-26, session-28, session-30, session-32 and session-34 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record

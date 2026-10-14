@@ -2172,3 +2172,168 @@ BOTH viewports (an early sweep reading of "20px/512px" had accidentally
 measured the hero paragraph; re-measured on the reference and pinned).
 RED was observed first: all 16 new runs (8 tests × 2 projects) failed
 against the pre-change build exactly as diagnosed.
+
+## 28. Session-39 — seventeenth sweep: the PDP/catalog-page layer + content-page rhythm (2026-10-14)
+
+Task 27. Baseline gate reproduced first (typecheck/lint/104-unit/517.91 KB/228 E2E —
+exact session-38 ledger). Sweep: all standing pins held (trigger bare, measurement 9
+— no tenth flip; footer/brand/Inter/header glass/panel/hero/home content/SEO superset),
+then the session-38 watch-list surfaces — the PDP gallery/info/related layer, the
+/products catalog page, and the content-page wrappers — none measured before.
+
+### 28.1 Findings (measured live, agent-browser @390×844 + 1440×900, logged in)
+
+PDP `/product/:id` (reference `69d42b98…f474` — Damascus knife set):
+
+- **F39-01 — wrapper rhythm.** Reference: `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8
+  py-8 space-y-16` (one uniform 64px rhythm). Clone: py-8 + `mt-6` grid + `mt-16`
+  related (24px after the back link).
+- **F39-02 — grid breakpoint.** Reference: `grid md:grid-cols-2 gap-10` (side-by-side
+  from 768px). Clone: `lg:grid-cols-2` (stacks through 1023px — a whole tablet band
+  diverges).
+- **F39-03 — gallery surface.** Reference: `aspect-square rounded-3xl` (24px)
+  `overflow-hidden bg-muted` with computed **rgba(242,240,237,0.3)** (bg-muted/30) and
+  NO border. Clone: `rounded-2xl border border-border bg-muted` — a visible hairline
+  and a solid (alpha-1) tile.
+- **F39-04 — info column rhythm.** Reference: one `space-y-6` column (24px). Clone:
+  unclassed with per-row `mt-2/3/5/6` margins (irregular: 8/12/20/24px).
+- **F39-05 — category label.** Reference: 14px/500, ls 0.7px, uppercase, primary —
+  proper-case source text. Clone: 12px/700 tracking-[0.16em] (≈2.56px).
+- **F39-06 — h1 scale.** Reference: text-3xl→text-4xl (30px mobile / 36px ≥768),
+  Playfair 700, lh 36px (v3 text-3xl default). Clone: text-4xl flat (36px at mobile).
+- **F39-07 — rating row.** Reference: 5×20px amber stars + ONE muted span
+  "4.9 (412 reviews)" (14px/400). Clone: 14px stars + "(412)" only (12px) — the
+  rating value and "reviews" word are missing.
+- **F39-08 — stock row.** Reference: 16px/400 text-foreground + green icon
+  rgb(69,161,130). Clone: 14px all-green (text-accent + icon).
+- **F39-09 — description block.** Reference: `<h3>` 16px/600 Inter + p 16px/26px
+  muted. Clone: `<h2>` 16px/700 + p 14px/22.75px.
+- **F39-10 — feature tags.** Reference: CREAM pills — bg rgb(243,238,232) (the
+  session-38 secondary), text rgb(44,36,33), 12px, padding 2px 10px, h 22, 9999px.
+  Clone: bg-muted + text-foreground, px-3 py-1.5, h 28.
+- **F39-11 — quantity stepper.** Reference: 112×36, bg rgb(242,240,237) (muted),
+  NO border, 9999px, 16px glyph buttons, 16px value. Clone: 46px, bg-card + 1px
+  border, h-11 w-11 (44px) buttons, 14px value.
+- **F39-12 — related section.** Reference: `space-y-6` section with header
+  `flex items-end justify-between` (h2 "You May Also Like" 24px→30px + 16px muted
+  subtitle + 2×40px carousel arrows) + a scroll-snap carousel row
+  (`flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory`,
+  min-w-260/max-280 cells) — the home-page carousel pattern. Clone: `mt-16` + a
+  `grid gap-5 sm:grid-cols-2 lg:grid-cols-4` of 4 cards, no arrows.
+- **F39-13 — extra info rows.** Clone renders "Free shipping over $50" /
+  "30-day returns" / the per-product shippingNote — none exist in the reference's
+  info column (a resting-visual superset violation on a parity surface; the
+  shipping disclosure already lives in checkout/cart surfaces).
+
+/products:
+
+- **F39-14 — wrapper.** Reference: `… py-8 space-y-8` (32px rhythm). Clone: py-10 +
+  mt-2/mt-8/mt-8 margins.
+- **F39-15 — header.** Reference: h1 text-3xl→text-4xl (30px mobile), count
+  "8 products found" 16px. Clone: h1 text-4xl flat, count text-sm (14px).
+- **F39-16 — filter row + grid.** Reference: `flex flex-col sm:flex-row gap-3`;
+  search h-9 pill (1px border rgb(229,224,220), 9999px, 16px font, 16px muted icon
+  at left-3) ; category/sort h-9 pills (14px/400, 8px 12px padding, caret right);
+  grid `grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5` (2-up at 390px, 169px
+  cards). Clone: h-12 (48px) controls with 14px/500 text, grid
+  `sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` (1-up at mobile, 356px cards).
+
+Content pages:
+
+- **F39-17 — contact.** Reference: wrapper `max-w-5xl … py-12 space-y-12`; header
+  `text-center space-y-3` (108px); info grid `grid md:grid-cols-3 gap-6` with 16px
+  radius cards (p-6, border-soft hairline rgba(229,224,220,0.5)); form
+  `space-y-5 p-8 rounded-2xl(16px) bg-card border`; the page ends at the form.
+  Clone: py-14 + mt-12/mt-10 margins, header without space-y-3, grid
+  `gap-5 sm:grid-cols-3`, cards/form rounded-xl (v4 20px), form p-6, plus a
+  trailing "Prefer self-service? Try Track Order" row the reference does not ship.
+- **F39-18 — about.** Reference wrapper: `max-w-4xl … py-12 space-y-12`. Clone:
+  `max-w-5xl py-14` (the whole measure differs).
+
+### 28.2 ToDo (TDD — RED first, then GREEN)
+
+- [x] **R39-01 — PDP layout** (`src/pages/shop.tsx` ProductPage): wrapper →
+  `py-8 space-y-16`; grid → `md:grid-cols-2` (mt-6 removed); gallery →
+  `aspect-square rounded-[24px] overflow-hidden bg-muted/30` (no border; explicit
+  alpha per trap #8 — v4's muted/30 color-mixes oklab; implemented as the
+  alpha-baked `--color-gallery` token, T-13 pattern); info column → `space-y-6`
+  with per-row margins stripped.
+- [x] **R39-02 — PDP info rows**: label 14px/500 tracking-[0.7px] proper-case
+  source; h1 `text-3xl md:text-4xl`; rating row 20px stars + "4.9 (412 reviews)"
+  14px/400 muted; stock 16px/400 foreground text + green icon; h3 16px/600
+  Description + p 16px/26px; tags → secondary/secondary-foreground pills
+  (px-[10px] py-[2px]); price row `items-baseline gap-3` (pill 600 weight).
+- [x] **R39-03 — quantity stepper**: 36px muted pill (bg-muted, no border, h-4 w-4
+  glyphs, 16px value).
+- [x] **R39-04 — related section**: `space-y-6` + header row with 2×40px
+  CarouselArrows + scroll-snap ProductRow (the home carousel pattern,
+  exported from home.tsx or duplicated minimally).
+- [x] **R39-05 — remove the shipping/returns rows** from the PDP info column
+  (F39-13; shippingNote stays in the type/seed — the field remains available for
+  the server-backed workstream).
+- [x] **R39-06 — /products page**: wrapper `py-8 space-y-8`; h1
+  `text-3xl md:text-4xl`; count text-base; filter row
+  `flex flex-col sm:flex-row gap-3` with h-9 controls (search 16px font, cat/sort
+  14px/400); grid `grid-cols-2 md:grid-cols-3 lg:grid-cols-4`.
+- [x] **R39-07 — contact page**: wrapper `py-12 space-y-12` (rhythm via space-y,
+  margins stripped); header `text-center space-y-3`; grid `md:grid-cols-3 gap-6`
+  with 16px-radius border-soft cards; form `space-y-5 p-8` + rounded-[16px];
+  trailing self-service row removed.
+- [x] **R39-08 — about page**: wrapper → `max-w-4xl … py-12 space-y-12`.
+- [x] **R39-09 — specs (RED first)**: visual-parity additions pinning the PDP
+  layer (wrapper rhythm, grid breakpoint, gallery surface, label/h1/rating/stock/
+  description/tag rows, stepper, related carousel + arrows, no-shipping-rows),
+  the /products layer (h1 scale, count, filter heights, mobile 2-col grid), and
+  the content-page wrappers (contact/about rhythm + card radius).
+- [x] **R39-10 — docs + captures**: remediation §28 (this section), AGENTS pin
+  line + quirks, CLAUDE counts, PAD §5.2/§5.6 (shippingNote relocation note +
+  removed-rows note), README rows, SKILL rows, session_39 record, both worklogs,
+  captures under `docs/screenshots/`.
+
+### 28.3 Decision records
+
+- **D1 — the PDP shipping/returns rows are removed, not registered.** The PDP info
+  column is a measured parity surface; a resting-visual addition cannot become a
+  "resting-identical superset". The feature value (shipping thresholds, delivery
+  windows) is already disclosed at cart/checkout/tracking — the registered
+  divergence #6 (deliveryWindow) covers that. `Product.shippingNote` stays in the
+  type + seed (data, no render seam) for the server-backed workstream.
+- **D2 — related count stays clone-chosen (8 candidates → carousel shows all).**
+  The reference's related algorithm produced 1 card for the measured product —
+  a data-behavior nuance, not a resting-visual contract (the row is scrollable;
+  surplus cards live off-viewport exactly like the home carousels over a longer
+  catalog). The LAYOUT (carousel + arrows + snap) is the pin.
+- **D3 — the /products grid goes 2-up at mobile** (169px-class cards). The
+  24-product superset renders 2-up exactly like the reference's 8 — the card
+  primitive is already reference-exact, so only the grid classes change.
+- **D4 — contact/about fixes are wrapper-level.** Their internal content layers
+  (about story cards, form field styling) remain unmeasured — only the measured
+  wrapper rhythm, grid geometry, card chrome, and the trailing-row removal are
+  in scope; the rest joins the watch list.
+- **D5 — the search input keeps 16px** (reference) though its siblings are 14px —
+  measured values win over visual symmetry.
+- **D6 — the PDP h1 gets v3-default line-height** (36px at text-3xl) via
+  leading-[36px] to avoid v4's taller 2.4rem default for 30px text — the computed
+  lh is the pin.
+
+### 28.4 Verification gate (post session-39)
+
+Executed 2026-10-15, all stages green:
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | 517.87 KB ✓ (ledger class) |
+| E2E (Playwright, 2 projects) | **250/250 ✓ (125 specs, 4.6 min)** — 228 baseline + 11 new spec pairs, zero collateral |
+| RED observation | 19 failing runs / 1 conditional pass on the pre-change build |
+| post-change re-sweep | PDP geometry (64px rhythm / md-grid / 24px gallery tile rgba(242,240,237,0.3) / info 24px / label-h1-stars-rating-stock-desc-tags-stepper all exact), /products (32px rhythm / 30px h1 / 36px controls / 169px 2-up cards), contact (48px rhythm / 16px-radius border-soft cards / 32px form / no trailing row), about (896px wrapper) — all matching the live reference measurements ✓ |
+| mobile menu | opens with all links; the active-pill + panel pins hold via the passing mobile-navigation/mobile-header-parity spec pairs ✓ |
+| db contract | unchanged (24 products / 8 categories / 2 users — re-verified via suite) |
+
+GREEN-side fix beyond the plan text: three of the new pins exposed the
+`rounded-full` serialization one more time — v4 computes it to
+`3.35544e+07px` (`calc(infinity * 1px)`), not `9999px`; the tag pills, the
+stepper container, and the /products search pill now use explicit
+`rounded-[9999px]` (the established convention on every pinned pill surface).
