@@ -523,3 +523,24 @@ Stage Summary:
 - Parity posture: eleventh sweep caught the trigger's fourth flip (green→bare→green→bare); reverted to the bare dark icon per the follow-the-latest-measurement doctrine; all other pins hold; dialog contract + SEO/manifest supersets live-green
 - Oscillation documented as the signal: AGENTS.md + PAD §10 record the full four-measurement history so future sessions recognize the pattern in one read
 - Candidate list re-retired after remediation: validation track resumes as the standing default unless the reference drifts again; ADR-001 (server-backed auth) remains an owner decision
+
+---
+Task ID: 22
+Agent: main (Super Z)
+Task: Session 30 mandate (record: session_30.md) — twelfth sweep found footer token drift, TDD fix to bg-foreground value, docs, push
+
+Work Log:
+- git pull fast-forwarded 9ab3d84..9c6dcb5 (remote added only docs/session_29.md, the raw session-28 narrative transcript — consistent with the pushed record); root docs + session_26–29 + remediation §1–§22 + worklog Tasks 1–21 reviewed; session-28 artifacts re-validated against the tree (bare-icon trigger, db scripts, .env contract)
+- Skills consulted: tdd-workflow, webapp-testing, agent-browser, code-review-and-audit, tailwind-patterns
+- Baseline gate on 9c6dcb5 reproduced the ledger exactly: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.80 KB ✓ 196/196 E2E (3.6 min) ✓; db:setup re-verified with env -u DATABASE_URL (24 products, 8 categories, 2 users → repo-root db/custom.db); served SEO superset green (robots 5 disallows, sitemap 36 URLs, manifest 200)
+- Twelfth bidirectional sweep (agent-browser @390×844 + 1440×900, logged in): REFERENCE DRIFT FOUND — (F30-01) the footer is now bg-foreground → rgb(29,24,22) on fresh loads of / and /products, both viewports (was rgb(32,27,24) sessions 3/4–27); clone still rendered rgb(32,27,24). ALL other pins held both sides — trigger bare dark icon both states on /, /products, /product/1 (no fifth flip: green s3/4 → bare s5 → green s26 → bare s27 → bare s30), dialog contract, account plain glyph, body/primary/headings/catalog/robots/sitemap/manifest
+- R30-01 (TDD): RED — footer pin in visual-parity.spec.ts updated to rgb(29, 24, 22) (1 failed observed); GREEN — --color-footer: hsl(24 14% 11%) → hsl(20 15% 10%) in src/index.css (= --color-foreground; semantic token kept so the footer stays an independently re-measurable surface). Footer text audited: both sides rgb(251,250,249), zero dark-on-dark leaves
+- Post-change gate observed: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.80 KB ✓ 196/196 E2E (98 specs × 2 projects) ✓; post-change re-sweep green (clone footer rgb(29,24,22) exact match, trigger bare, dialog intact)
+- R30-02: 5 session captures + 2 drift-evidence captures → docs/screenshots/; footer bands pixel-sampled in clone + reference: identical (29,24,22) signature
+- Docs updated: remediation plan §23, docs/session_30.md, AGENTS.md parity-pin line, PAD (ADR-005 + §5.2 token table), README token row, homenest-store-g_SKILL.md token row, worklog (this entry); CLAUDE.md/DEPLOYMENT.md needed no edits (counts unchanged at 104/196, no env/db change)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.80 KB ✓ 196/196 E2E ✓ — observed post-change
+- Parity posture: twelfth sweep caught the footer's flip to bg-foreground (rgb(32,27,24) → rgb(29,24,22)); fixed via TDD; the trigger held (no fifth flip); all other pins green
+- Footer joins the trigger as the second restyled-without-notice reference surface; doctrine stays mechanical — follow the latest measurement, pin it, document the history
+- Candidate list re-retired after remediation: validation track resumes as the standing default unless the reference drifts again; ADR-001 (server-backed auth) remains an owner decision

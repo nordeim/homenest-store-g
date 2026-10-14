@@ -42,7 +42,13 @@
   --color-panel: hsl(0 0% 100% / 0.8);
   --color-ring: hsl(24 70% 50%);
   --color-badge: hsl(38 92% 50%);
-  --color-footer: hsl(24 14% 11%);
+  /* Session-30 re-measurement (2026-10-14): the reference footer now uses
+     bg-foreground — hsl(20 15% 10%) = rgb(29,24,22) — on fresh loads of /
+     and /products, both viewports (was hsl(24 14% 11%) = rgb(32,27,24),
+     measured sessions 3/4–27). The semantic token stays so the footer
+     remains an independently re-measurable surface; the value tracks
+     --color-foreground exactly. */
+  --color-footer: hsl(20 15% 10%);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-card: 0 1px 3px 0 rgb(28 25 23 / 0.06), 0 1px 2px -1px rgb(28 25 23 / 0.06);

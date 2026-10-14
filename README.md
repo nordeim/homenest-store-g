@@ -144,7 +144,7 @@ Tokens live in `src/index.css` under Tailwind v4's `@theme`; measured values bel
 | `--color-accent` | `hsl(160 40% 45%)` · `rgb(69,161,130)` | In-stock labels, menu close disc |
 | `--color-destructive` | `hsl(0 72% 51%)` · `rgb(220,40,40)` | Discount pills, errors |
 | `--color-badge` | `rgb(245,159,10)` | "Featured" pill, star ratings |
-| `--color-footer` | `rgb(32,27,24)` | Footer canvas |
+| `--color-footer` | `rgb(29,24,22)` | Footer canvas (session-30: = foreground; was `rgb(32,27,24)`) |
 
 Typography: **Playfair Display** 700 for display headings (`font-display`), system sans stack for body, 12px base radius with fully-rounded pill CTAs. Cards use white surfaces on a 1px `--color-border`.
 
@@ -183,7 +183,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_24.md`](docs/session_24.md) — Session 24 execution record (ninth no-drift sweep → validation track held → push)
 - [`docs/session_26.md`](docs/session_26.md) — Session 26 execution record (tenth sweep → reference drift found: menu trigger green disc + plain account icon → TDD remediation + db scripts → push)
 - [`docs/session_28.md`](docs/session_28.md) — Session 28 execution record (eleventh sweep → trigger drift AGAIN (green → bare → green → bare oscillation) → TDD revert to bare icon → CLAUDE.md count refresh → push)
-- [`docs/session_27.md`](docs/session_27.md) — raw session transcript for the session-26 record
+- [`docs/session_30.md`](docs/session_30.md) — Session 30 execution record (twelfth sweep → footer token drift rgb(32,27,24) → rgb(29,24,22) (= bg-foreground) → TDD fix + docs → push; trigger held, no fifth flip)
+- [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) — raw session transcripts for the session-26 and session-28 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
 - [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) / [`docs/session_21.md`](docs/session_21.md) / [`docs/session_23.md`](docs/session_23.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, session-18, session-20, and session-22 records
 - [`worklog.md`](worklog.md) — running multi-agent work log

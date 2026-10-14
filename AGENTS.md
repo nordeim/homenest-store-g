@@ -58,7 +58,7 @@ All tokens live in `src/index.css` under `@theme`. Measured against the referenc
 7. The mobile project in Playwright pins `browserName: "chromium"` on the iPhone 14 profile — WebKit needs host libs most CI images lack.
 8. **v4 computed values differ from v3-era references even when the class name matches.** `/NN` opacity modifiers color-mix in oklab (`bg-card/80` computes to `oklab(... / 0.8)`, not the reference's `rgba(255,255,255,0.8)`) and `rounded-full` computes to `calc(infinity * 1px)` (≈`3.35544e+07px`), not v3's `9999px`. Where a parity pin asserts an exact computed string: bake the alpha into a token (`--color-panel`) and use `rounded-[9999px]`. Found matching the reference's menu panel (session 4).
 
-Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from the production build): body `rgb(251,250,249)`, primary `rgb(217,110,38)`, footer `rgb(32,27,24)`, destructive pill `rgb(220,40,40)`, badge `rgb(245,159,10)`, accent `rgb(69,161,130)`, headings Playfair Display 700.
+Parity pins (asserted by `tests/e2e/visual-parity.spec.ts`, computed values from the production build): body `rgb(251,250,249)`, primary `rgb(217,110,38)`, footer `rgb(29,24,22)` (session-30 re-measurement — the reference flipped its footer to `bg-foreground`; was `rgb(32,27,24)` sessions 3/4–27), destructive pill `rgb(220,40,40)`, badge `rgb(245,159,10)`, accent `rgb(69,161,130)`, headings Playfair Display 700.
 
 ## Testing quirks
 

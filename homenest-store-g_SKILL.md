@@ -963,7 +963,7 @@ neither):
 | `card` / `card-foreground` | `hsl(0 0% 100%)` / `hsl(20 15% 10%)` | cards, header, drawer |
 | `ring` | `hsl(24 70% 50%)` | focus ring (= primary) |
 | `badge` | `hsl(38 92% 50%)` = `#F59F0A` | amber "Featured" pill |
-| `footer` | `hsl(24 14% 11%)` = `#201B18` | dark footer background |
+| `footer` | `hsl(20 15% 10%)` = `#1D1816` (= foreground, session-30 re-measurement) | dark footer background |
 
 Opacity conventions: primary at 22% for `::selection`; the mobile-menu panel
 is `--color-panel` = `hsl(0 0% 100% / 0.8)` (alpha baked into the token —

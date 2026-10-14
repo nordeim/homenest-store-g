@@ -90,7 +90,7 @@ This PAD is the single source of truth for the HomeNest Kitchen storefront. It d
 **ADR-005: Tailwind v4 CSS-first with a measured token set and computed-style parity gate.**
 
 - **Context:** The reference renders v4 output; its palette is shadcn-style HSL triplets (`--primary: 24 70% 50%`, etc.).
-- **Decision:** All tokens live in `src/index.css` `@theme` as full `hsl()` literals; no `tailwind.config.js`. `tests/e2e/visual-parity.spec.ts` pins computed colors (`rgb(217,110,38)` primary, `rgb(251,250,249)` canvas, `rgb(32,27,24)` footer, `rgb(220,40,40)` discount, `rgb(245,159,10)` badge, Playfair Display 700 headings).
+- **Decision:** All tokens live in `src/index.css` `@theme` as full `hsl()` literals; no `tailwind.config.js`. `tests/e2e/visual-parity.spec.ts` pins computed colors (`rgb(217,110,38)` primary, `rgb(251,250,249)` canvas, `rgb(29,24,22)` footer (session-30 re-measurement — the reference flipped its footer to `bg-foreground`; was `rgb(32,27,24)` sessions 3/4–27), `rgb(220,40,40)` discount, `rgb(245,159,10)` badge, Playfair Display 700 headings).
 - **Rationale:** v4's oklch conversions make eyeballed ports drift; computed styles (not screenshots) are assertable and deterministic.
 - **Consequences:** ➕ Parity is a build-breaker, not an opinion; ➖ token changes require re-measuring specs in the same commit.
 - **Alternatives rejected:** Screenshot diffing — nondeterministic across environments, and silently tolerates structural drift.
@@ -372,7 +372,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
 | `card` | `hsl(0 0% 100%)` | `rgb(255,255,255)` | Card surfaces | — |
 | `panel` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Mobile menu panel (alpha baked into the token — v4 `/NN` modifiers color-mix in oklab; trap T-13) | — |
-| `footer` | — | `rgb(32,27,24)` | Footer canvas | white/60 body text |
+| `footer` | — | `rgb(29,24,22)` | Footer canvas (session-30: = foreground) | white/60 body text |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
 
 ### 5.3 Component Primitives

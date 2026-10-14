@@ -28,7 +28,11 @@ test("headings render the reference display serif", async ({ page }) => {
 
 test("footer uses the reference dark charcoal", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("footer")).toHaveCSS("background-color", "rgb(32, 27, 24)");
+  // Session-30 re-measurement (2026-10-14, agent-browser @390×844 + 1440×900,
+  // logged in): the reference footer flipped from its dedicated charcoal
+  // rgb(32,27,24) to bg-foreground — rgb(29,24,22) on fresh loads of / and
+  // /products, both viewports. The clone follows the latest measurement.
+  await expect(page.locator("footer")).toHaveCSS("background-color", "rgb(29, 24, 22)");
 });
 
 test("product cards show discount and featured pills with round geometry", async ({ page }) => {

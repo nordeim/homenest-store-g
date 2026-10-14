@@ -1497,3 +1497,84 @@ the change. Post-change re-sweep: closed trigger transparent + dark glyph
 + zero spans, open trigger same, dialog contract intact
 (`role=dialog`, `aria-modal=true`, scroll lock), served SEO + manifest
 supersets green.
+
+## 23. Session 30 — twelfth sweep: footer token drift (F30-01)
+
+Sweep context: mandate dated 2026-10-14 (transcript: `docs/session_29.md`);
+twelfth bidirectional sweep; baseline gate reproduced exactly
+(typecheck ✓ lint ✓ 104/104 unit ✓ build 506.80 KB ✓ 196/196 E2E in
+3.6 min) before any change.
+
+### 23.1 Findings (F30-01) — the reference footer flipped to bg-foreground
+
+- Reference (agent-browser, logged in with the owner-supplied account,
+  fresh loads of `/` and `/products`, 390×844 AND 1440×900):
+  `<footer>` class is now `bg-foreground text-background` and computes
+  `rgb(29,24,22)` — identical in both viewports and on both pages.
+  The dedicated charcoal `rgb(32,27,24)` (measured sessions 3/4 and
+  re-verified through session 27) no longer holds.
+- Everything else held on the reference: body `rgb(251,250,249)`,
+  primary `rgb(217,110,38)`, h1 Playfair Display 700, catalog 8
+  products, robots allow-all, sitemap 22 statics, account icon plain
+  dark glyph, **mobile menu trigger BARE dark icon in both states on
+  /, /products and /product/1 (36×36 transparent, `rgb(29,24,22)`
+  glyph, 16px lucide-menu/X, no inner span) — no fifth flip**.
+- Clone side: trigger bare (44px superset posture), dialog contract
+  intact (`role=dialog`, `aria-modal=true`, scroll lock, panel
+  `rgba(255,255,255,0.8)`), account plain glyph, served SEO superset
+  (robots 5 disallows, sitemap 36 URLs, manifest 200). The footer's
+  `bg-footer` → `rgb(32,27,24)` was the only mismatch.
+
+### 23.2 Remediation ToDo (executed this session, TDD)
+
+- [x] **R30-01 — footer token follows the latest measurement.** RED:
+  updated the footer pin in `tests/e2e/visual-parity.spec.ts` to
+  `rgb(29, 24, 22)` (observed failing on the pre-change build, 1
+  failed / 5 passed). GREEN: `--color-footer` in `src/index.css`:
+  `hsl(24 14% 11%)` → `hsl(20 15% 10%)` (= foreground, =
+  `rgb(29,24,22)`). The semantic token is kept (the footer remains an
+  independently re-measurable surface); its value now tracks
+  `--color-foreground` exactly. Footer text verified: both sides
+  render `rgb(251,250,249)`; zero dark-on-dark leaf nodes in the
+  clone footer.
+- [x] **R30-02 — session captures.** Five captures →
+  `docs/screenshots/`: `session30-home-desktop`,
+  `session30-pdp-desktop`, `session30-mobile-home`,
+  `session30-mobile-menu-open`, `session30-footer-clone`, plus drift
+  evidence `_ref-sweep30-mobile-menu-open.png` and
+  `_ref-sweep30-footer.png`. Pixel-sampled both footer bands: the
+  reference and the clone render the identical `(29,24,22)` signature.
+- [x] **R30-03 — docs alignment.** AGENTS.md parity-pin line, PAD
+  ADR-005 + §5.2 token table, README token table, SKILL.md token row,
+  this §23, `docs/session_30.md`, repo worklog Task 22.
+  CLAUDE.md/DEPLOYMENT.md required no edits (counts unchanged at
+  104 unit / 196 runs; no env/db change).
+
+### 23.3 Decision records
+
+- **Two oscillating-class surfaces are now on record.** The footer
+  joins the trigger as a surface the reference restyles without
+  notice — but where the trigger oscillates A/B, the footer's move
+  looks directional: the reference now reuses `bg-foreground`
+  (rgb(29,24,22)) instead of a dedicated footer value, which is also
+  the value its own foreground token resolves to. The doctrine stays
+  mechanical either way: follow the latest measurement, pin it in the
+  spec, document the history.
+- **The clone keeps the semantic `--color-footer` token** rather than
+  switching the class to `bg-foreground`: the computed value is the
+  parity contract, and a dedicated token keeps the footer an
+  independently re-measurable surface if the reference diverges its
+  footer from its foreground again (exactly what this session
+  proves can happen).
+- The candidate list re-retires after this remediation: validation
+  track resumes as the standing default unless the reference drifts
+  again. ADR-001 (server-backed auth) remains an owner decision.
+
+### 23.4 Verification gate (post session-30)
+
+typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **506.80 KB** ✓ ·
+**196/196 E2E** (98 specs × 2 projects, 3.7 min) ✓ — all observed
+after the change. Post-change re-sweep: clone footer
+`rgb(29,24,22)` (matches the reference exactly), trigger bare icon
+both states (44px superset posture), dialog contract intact, served
+SEO + manifest supersets green.
