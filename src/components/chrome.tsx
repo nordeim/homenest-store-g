@@ -12,8 +12,11 @@ import {
 import { createPortal } from "react-dom";
 import {
   House,
+  Mail,
+  MapPin,
   Menu,
   MessageCircle,
+  Phone,
   Search,
   ShoppingBag,
   UserRound,
@@ -30,12 +33,20 @@ import { useStore } from "@/lib/store";
 import { cn } from "@/utils/cn";
 
 export function BrandMark({ compact }: { compact?: boolean }) {
+  // Session-34 re-measurement: the reference's header brand mark is a 36px
+  // rounded-xl (12px) primary square, 20px stroke-2 house glyph,
+  // shadow-sm → shadow-md on group hover, beside a 20px/700 Playfair
+  // wordmark with default letter-spacing (no tracking-tight).
   return (
-    <span className="flex items-center gap-2.5">
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <House className="h-5 w-5" strokeWidth={2.2} />
+    <span className="flex items-center gap-2.5 group">
+      {/* rounded-[12px] not rounded-xl: the reference's v3-era rounded-xl
+          computes 0.75rem=12px, while this build's v4 --radius-xl is
+          1.25rem=20px — a one-notch scale shift (trap-log class §6/§8;
+          measure computed styles, never eyeball class names). */}
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-[12px] bg-primary text-primary-foreground shadow-sm transition-shadow group-hover:shadow-md">
+        <House className="h-5 w-5" strokeWidth={2} />
       </span>
-      <span className="font-display text-[1.4rem] font-bold tracking-tight text-foreground">
+      <span className="font-display text-xl font-bold text-foreground">
         {compact ? BRAND.name : BRAND.name}
       </span>
     </span>
@@ -665,70 +676,101 @@ export function ChatButton() {
 }
 
 export function Footer() {
+  // Session-34 re-measurement (2026-10-14, agent-browser, logged in,
+  // 390×844 + 1440×900): the reference footer is a "quiet" variant on the
+  // session-30 bg-foreground canvas — full text-background color modulated
+  // by ELEMENT opacity (70% links/tagline/contact, 50% bottom bar), Playfair
+  // 16px/600 h4 column headings, a 20px brand wordmark beside a BARE 24px
+  // primary house glyph (no orange square — that treatment is header-only),
+  // orange 16px Mail/Phone/MapPin contact icons, a contained 1px
+  // background/10 divider and a text-xs/50% bottom bar. The contact email
+  // and phone stay mailto:/tel: links — a functional superset with identical
+  // resting visuals (registered divergence).
   return (
-    <footer className="mt-20 bg-footer text-card-foreground">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-8">
-        <div>
-          <p className="flex items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <House className="h-5 w-5" strokeWidth={2.2} />
-            </span>
-            <span className="font-display text-2xl font-bold text-white">{BRAND.name}</span>
+    <footer className="mt-16 bg-footer text-background">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <House className="h-6 w-6 text-primary" strokeWidth={2} />
+              <span className="font-display text-xl font-bold">{BRAND.name}</span>
+            </div>
+            <p className="text-sm leading-relaxed opacity-70">{BRAND.tagline}</p>
+          </div>
+          <div className="space-y-4">
+            <h4 className="font-display text-base font-semibold">Quick Links</h4>
+            <ul className="space-y-2.5">
+              {FOOTER_QUICK_LINKS.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm opacity-70 transition-all hover:opacity-100 hover:text-primary"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h4 className="font-display text-base font-semibold">Policies</h4>
+            <ul className="space-y-2.5">
+              {FOOTER_LEGAL.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="text-sm opacity-70 transition-all hover:opacity-100 hover:text-primary"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h4 className="font-display text-base font-semibold">Contact Us</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-2 text-sm opacity-70">
+                <Mail className="h-4 w-4 shrink-0 text-primary" strokeWidth={2} />
+                <a href={`mailto:${BRAND.email}`} className="transition-colors hover:text-primary">
+                  {BRAND.email}
+                </a>
+              </li>
+              <li className="flex items-center gap-2 text-sm opacity-70">
+                <Phone className="h-4 w-4 shrink-0 text-primary" strokeWidth={2} />
+                <a href={`tel:${BRAND.phone.replace(/[^+\d]/g, "")}`} className="transition-colors hover:text-primary">
+                  {BRAND.phone}
+                </a>
+              </li>
+              <li className="flex items-start gap-2 text-sm opacity-70">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={2} />
+                <span>{BRAND.address}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="my-8 h-px w-full bg-footer-rule" />
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <p className="text-xs opacity-50">
+            © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
           </p>
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">{BRAND.tagline}</p>
-        </div>
-        <div>
-          <p className="font-display text-lg font-bold text-white">Quick Links</p>
-          <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/60">
-            {FOOTER_QUICK_LINKS.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className="hover:text-white">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <p className="font-display text-lg font-bold text-white">Policies</p>
-          <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/60">
-            {FOOTER_LEGAL.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className="hover:text-white">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <p className="font-display text-lg font-bold text-white">Contact Us</p>
-          <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/60">
-            <li>
-              <a href={`mailto:${BRAND.email}`} className="hover:text-white">
-                {BRAND.email}
-              </a>
-            </li>
-            <li>
-              <a href={`tel:${BRAND.phone.replace(/[^+\d]/g, "")}`} className="hover:text-white">
-                {BRAND.phone}
-              </a>
-            </li>
-            <li>{BRAND.address}</li>
-          </ul>
-        </div>
-      </div>
-      <div className="border-t border-white/10 px-4 py-5 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-sm text-white/50 sm:flex-row">
-          <p>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/privacy-policy" className="hover:text-white">
+            <Link
+              href="/privacy-policy"
+              className="text-xs opacity-50 transition-opacity hover:opacity-100"
+            >
               Privacy
             </Link>
-            <Link href="/terms-of-service" className="hover:text-white">
+            <Link
+              href="/terms-of-service"
+              className="text-xs opacity-50 transition-opacity hover:opacity-100"
+            >
               Terms
             </Link>
-            <Link href="/contact" className="hover:text-white">
+            <Link
+              href="/contact"
+              className="text-xs opacity-50 transition-opacity hover:opacity-100"
+            >
               Contact
             </Link>
           </div>

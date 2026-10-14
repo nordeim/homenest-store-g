@@ -15,8 +15,11 @@
 
 @theme {
   --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  /* Session-34 re-measurement: the reference's body font is Inter (self-
+     hosted, weights 300–700). Inter loads via Google Fonts like Playfair
+     Display; the system stack stays as the offline fallback. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* shadcn-style semantic palette, measured from the reference */
@@ -49,6 +52,12 @@
      remains an independently re-measurable surface; the value tracks
      --color-foreground exactly. */
   --color-footer: hsl(20 15% 10%);
+  /* Session-34 re-measurement (2026-10-14): the reference footer's contained
+     1px divider computes rgba(251,250,249,0.1) (its bg-background/10). Alpha
+     baked into the token for the same reason as --color-panel: Tailwind v4's
+     /10 modifier would color-mix in oklab and compute to oklab(...) instead
+     of the reference's sRGB value. */
+  --color-footer-rule: hsl(30 25% 98% / 0.1);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-card: 0 1px 3px 0 rgb(28 25 23 / 0.06), 0 1px 2px -1px rgb(28 25 23 / 0.06);

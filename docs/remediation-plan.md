@@ -1648,3 +1648,130 @@ typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **506.85 KB** ✓ ·
 **196/196 E2E** (98 specs × 2 projects, 3.6 min) ✓ — all observed on
 the fresh clone before the sweep; no code changes were required, so
 no post-change gate applies. Bidirectional sweep: zero drift.
+
+## 25. Session 34 — fourteenth sweep: footer text-layer + brand + body-font remediation
+
+Sweep context: mandate dated 2026-10-14 (transcript: `docs/session_33.md`);
+fourteenth bidirectional sweep. The sweep itself started green on every
+established pin — trigger bare both states on `/` and `/products` (no
+seventh flip; history: green s3/4 → bare s5 → green s26 → bare s27 → bare
+s30 → bare s32 → bare s34), panel `rgba(255,255,255,0.8)`, account plain
+glyph, body/primary/h1, catalog 8/24, reference robots allow-all +
+sitemap 22, clone SEO superset — but the footer's TEXT layer, never
+measured before (12 prior sweeps pinned only the footer background),
+diverged in three compounding ways. All fixed via TDD in this session.
+
+### 25.1 Findings
+
+- **F34-01 — footer text layer (rendered, not just computed).** The
+  reference footer renders a "quiet" text spec on the session-30
+  bg-foreground canvas: root `text-background` (full `rgb(251,250,249)`)
+  modulated by **element opacity** (70% on links/tagline/contact, 50% on
+  the bottom bar), Playfair `h4` 16px/600 column headings, a 20px/700
+  brand wordmark beside a **bare 24px primary house glyph** (no orange
+  square — that treatment is header-only), 16px orange Mail/Phone/MapPin
+  contact icons, a **contained** 1px `background/10` divider, an equal
+  4-column grid, `mt-16` root margin, `py-12` container, and a
+  `text-xs opacity-50` bottom bar. The clone shipped the v1 port's
+  treatment: header-mirrored brand (orange square + white glyph, 24px
+  wordmark), 18px/700 `p` headings, `text-white/60` **color-alpha**
+  links (rendered ~rgb(165,163,162) vs the reference's ~rgb(187,186,185)
+  — a visible delta the prior §23.3 "both sides rgb(251,250,249)" audit
+  missed because it read computed `color`, not the rendered
+  element-opacity composite), plain-text contact rows, a full-bleed
+  `border-t` bar, and `mt-20`/`py-14` spacing.
+- **F34-02 — header brand mark geometry.** The reference's header mark:
+  36px square, **12px radius** (`rounded-xl` in the reference's v3-era
+  scale), stroke-2 house, `shadow-sm` → `shadow-md` on group hover, and
+  a 20px/700 Playfair wordmark with default letter-spacing. The clone
+  ported `rounded-lg` (8px), `text-[1.4rem]` (22.4px), `tracking-tight`,
+  stroke 2.2, and no shadow. The radius pin also exposed a live trap-log
+  instance: the reference's `rounded-xl` computes 0.75rem=12px, while
+  this build's v4 `--radius-xl` is 1.25rem=20px — a one-notch scale
+  shift, fixed with an explicit `rounded-[12px]` (same doctrine as
+  `rounded-[9999px]` on the panel, trap T-6/T-8).
+- **F34-03 — body typeface.** The reference self-hosts **Inter**
+  (weights 300–700, `document.fonts` verified) and sets its body font to
+  Inter; the clone shipped the system sans stack (v1 port). The
+  reference's own computed footer-link font read "Inter 14px 400" vs the
+  clone's "ui-sans-serif" — a systemic typography divergence on every
+  non-display glyph. Fixed by loading Inter via Google Fonts (the
+  established Playfair pattern) and putting it first in `--font-sans`,
+  system stack retained as offline fallback.
+
+### 25.2 ToDo (executed)
+
+- [x] **R34-01 — footer text layer follows the latest measurement.** RED:
+  extended `tests/e2e/visual-parity.spec.ts` with the quiet-footer spec
+  (root color, link color + opacity 0.7, h4 Playfair 16px/600, brand
+  20px/700, bottom bar 12px + opacity 0.5, divider
+  `rgba(251,250,249,0.1)`/1px — observed failing, 1 failed). GREEN:
+  rewrote `Footer` in `src/components/chrome.tsx` to the measured spec
+  (root `mt-16 bg-footer text-background`; single `py-12` container;
+  equal `lg:grid-cols-4` grid; `space-y-4` columns; h4 headings;
+  `opacity-70` links with `hover:opacity-100 hover:text-primary
+  transition-all`; bare 24px primary House + 20px wordmark; Mail/Phone/
+  MapPin contact icons with mailto/tel links kept as a resting-visual-
+  identical superset; contained divider via the new
+  `--color-footer-rule: hsl(30 25% 98% / 0.1)` token — alpha baked for
+  the T-13 oklab reason; `text-xs opacity-50` bottom bar).
+- [x] **R34-02 — header brand mark geometry.** RED: the same spec's
+  brand-mark pins (12px radius, 36px mark, 20px/700 Playfair wordmark,
+  normal letter-spacing — observed failing on radius). GREEN:
+  `BrandMark` → `rounded-[12px]`, `text-xl` (20px), stroke 2,
+  `shadow-sm transition-shadow group-hover:shadow-md` + `group` wrapper;
+  `tracking-tight` dropped.
+- [x] **R34-03 — body font = Inter.** RED: new parity spec asserting
+  body font-family starts with "Inter" and `document.fonts.check("16px
+  Inter")` (observed failing). GREEN: `--font-sans: "Inter",
+  ui-sans-serif, …` + the Google Fonts Inter link in `index.html`
+  (weights 300–700, `display=swap`), system stack retained as fallback.
+- [x] **R34-04 — session captures.** Five captures →
+  `docs/screenshots/` (`session34-home-desktop`,
+  `session34-pdp-desktop`, `session34-mobile-home`,
+  `session34-mobile-menu-open`, `session34-footer-clone`) plus the
+  sweep evidence set (`_ref-sweep34-*`, pre/post footer rect captures).
+  Post-fix pixel sampling: the clone footer's link and heading rects
+  render **identically** to the reference — same element geometry
+  ([16,157,59,17] / [16,79,358,24]), same bright-pixel counts (204/456),
+  same core colors (rgb(185,182,181) / rgb(251,250,249)).
+- [x] **R34-05 — docs alignment.** This §25, `docs/session_34.md`,
+  AGENTS.md parity-pin line + trap-log instance, PAD §1.4 fonts row +
+  §5.1/§5.2 tables + §5.6 divergence note, README badge/feature/typography
+  rows + Documentation section, SKILL.md typography/token rows, both
+  worklogs (repo Task 24 + workspace), E2E counts 98→101 specs /
+  196→202 runs in README/CLAUDE/PAD.
+
+### 25.3 Decision records
+
+- **The footer's text layer is now a pinned surface** — the third
+  restyle-class event on the footer (bg s30, text layer s34) and the
+  reason the §23 audit note ("both sides rgb(251,250,249)") was wrong:
+  computed `color` alone is not a rendered-color contract when the
+  reference modulates with element opacity. The corrected audit method
+  (computed color + computed opacity + pixel-sampled rects) is recorded
+  in the spec comments and AGENTS.md.
+- **The brand treatments differ by surface on the reference**: header =
+  orange square + white glyph + shadow; footer = bare orange glyph, no
+  square. The clone now mirrors each surface independently instead of
+  reusing the header treatment in the footer.
+- **Inter is loaded from Google Fonts** rather than self-hosted woff2
+  (the reference self-hosts): the clone's established pattern for
+  Playfair is the Google Fonts link, `display=swap` keeps first paint
+  fast, and the system stack remains the offline fallback. Registered
+  in PAD §5.6 as a loading-mechanism divergence with identical rendered
+  fonts.
+- The trigger (7 measurements) and footer (3 events) stay the watched
+  surfaces; the candidate list stays retired; ADR-001 (server-backed
+  auth) remains an owner decision.
+
+### 25.4 Verification gate (post session-34)
+
+typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **508.01 KB** ✓ ·
+**202/202 E2E** (101 specs × 2 projects, 3.9 min) ✓ — all observed
+after the changes. Post-change re-sweep: footer rects pixel-identical
+to the reference (link + h4), Inter loaded and first in the body stack,
+trigger bare 44px superset posture, dialog contract intact
+(`role=dialog`, `aria-modal`, white/80 panel, scroll lock, Escape),
+desktop pins green, db contract re-verified (`env -u DATABASE_URL npm
+run db:setup` → 24 products / 8 categories / 2 users).

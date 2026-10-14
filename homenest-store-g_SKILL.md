@@ -82,9 +82,10 @@ bug unless registered (Appendix C).
    `hsl(160 40% 45%)` is reserved for positive states (In Stock, Free, the
    logged-in avatar dot, the mobile menu close disc). Never introduce a second
    accent hue.
-2. Headings use `font-display` (Playfair Display); body uses the system sans
-   stack. Do not swap or add webfonts beyond the one Google Fonts link in
-   `index.html`.
+2. Headings use `font-display` (Playfair Display); body uses **Inter**
+   (session-34 parity with the reference's measured body face; Google
+   Fonts, system-stack fallback). Do not swap or add webfonts beyond the
+   two Google Fonts links in `index.html` (Playfair Display + Inter).
 3. Active nav = filled orange pill with white text (desktop row and mobile
    row alike). Never underline active links.
 4. Buttons are fully rounded pills; cards use `radius-lg/xl` (12–20 px);
@@ -964,6 +965,7 @@ neither):
 | `ring` | `hsl(24 70% 50%)` | focus ring (= primary) |
 | `badge` | `hsl(38 92% 50%)` = `#F59F0A` | amber "Featured" pill |
 | `footer` | `hsl(20 15% 10%)` = `#1D1816` (= foreground, session-30 re-measurement) | dark footer background |
+| `footer-rule` | `hsl(30 25% 98% / 0.1)` = `rgba(251,250,249,0.1)` | footer divider (session-34, alpha baked per T-13) |
 
 Opacity conventions: primary at 22% for `::selection`; the mobile-menu panel
 is `--color-panel` = `hsl(0 0% 100% / 0.8)` (alpha baked into the token —

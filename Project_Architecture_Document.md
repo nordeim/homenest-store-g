@@ -51,7 +51,7 @@ This PAD is the single source of truth for the HomeNest Kitchen storefront. It d
 | Unit tests | Vitest | 4.1.11 | Node env, zero DOM cost, co-located seam tests |
 | E2E tests | @playwright/test | 1.64.0 | Computed-style assertions (`toHaveCSS`), multi-project (desktop + mobile profiles) |
 | Output | vite-plugin-singlefile | 2.3.3 | Single `dist/index.html` — the deployment unit is one static file |
-| Fonts | Playfair Display (Google Fonts) | — | The reference's display serif; system sans stack for body text matches the reference's `ui-sans-serif` body |
+| Fonts | Playfair Display + Inter (Google Fonts) | — | The reference's display serif and body sans, both measured live (session-34: the reference self-hosts Inter 300–700; the clone loads it via Google Fonts with a system-stack fallback — registered loading-mechanism divergence, identical rendered fonts) |
 
 ### 1.3 Architecture Decision Records
 
@@ -351,7 +351,7 @@ Writes are whole-state `JSON.stringify` after each mutation (debounce unnecessar
 | Role | Face | Weights | Notes |
 |---|---|---|---|
 | Display | Playfair Display | 700 (800 for hero numerals) | Product names, page titles, footer column titles; loaded via Google Fonts with Georgia fallback |
-| Body | System sans (`ui-sans-serif, system-ui, …`) | 400–700 | Matches the reference's body stack exactly; no webfont cost |
+| Body | Inter | 400–700 (300 loaded) | Session-34 parity: the reference's measured body face; Google Fonts with system-stack fallback |
 | Mono | System mono | 400 | Order numbers in legacy surfaces only |
 
 Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, category eyebrows `text-[11px] uppercase tracking-[0.14em] text-primary`.
@@ -372,7 +372,8 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
 | `card` | `hsl(0 0% 100%)` | `rgb(255,255,255)` | Card surfaces | — |
 | `panel` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Mobile menu panel (alpha baked into the token — v4 `/NN` modifiers color-mix in oklab; trap T-13) | — |
-| `footer` | — | `rgb(29,24,22)` | Footer canvas (session-30: = foreground) | white/60 body text |
+| `footer` | — | `rgb(29,24,22)` | Footer canvas (session-30: = foreground) | text-background full color, modulated by element opacity (70% links/body, 50% bottom bar — session-34) |
+| `footer-rule` | `hsl(30 25% 98% / 0.1)` | `rgba(251,250,249,0.1)` | Footer divider (session-34; alpha baked — v4 `/10` would color-mix in oklab) | — |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
 
 ### 5.3 Component Primitives
@@ -406,6 +407,7 @@ These supersets are intentional; they must not change the **resting visuals** of
 13. The mobile menu's search control is a compact muted pill at rest (session-4 measurement, matching the reference) that expands into a working search input on tap — the reference's pill is functionally inert (and unclickable: the reference's own toast viewport covers it). Resting visuals match; function exceeds (registered superset).
 14. **SEO posture superset (session 8, extended session 18).** The reference's robots.txt disallows nothing and its sitemap.xml lists `/admin/*`, `/account`, `/cart` with zero product URLs; the clone disallows private surfaces and lists every visible product as `/products/{slug}`. The reference ships no web app manifest (re-measured 2026-10-13: no `<link rel="manifest">` in its head; `/manifest.webmanifest` and `/site.webmanifest` are answered by the SPA catch-all with `text/html`). The clone ships a valid minimal manifest (`public/manifest.webmanifest`, R18-01): name/short_name, root-relative `start_url`/`scope`, `standalone` display, theme/background `#fbfaf9`, and the two install-required 192px/512px icons reusing the FAVICON-1 CDN logo; a `transformIndexHtml` post-hook in `vite.config.ts` restores the root-absolute href that viteSingleFile's `base: "./"` would otherwise relativize into a deep-route 404.
 15. **Per-route head superset (session 8).** The reference ships a static-title map for 23 paths (PDPs keep the static title, admin titles leak an `admin/` namespace artifact); the clone pins the same map (incl. the "Order Tracking" / "Terms Of Service" quirks) and extends it: PDP → "{Product} | HomeNest Kitchen", humanized unknown slugs, auth/not-found titles, admin titles cleaned. Canonical links + per-route og:url and per-PDP Product JSON-LD are additive (the reference has none).
+16. **Footer contact links + font loading mechanism (session 34).** The reference's footer contact rows are plain text with icons; the clone keeps `mailto:`/`tel:` anchors styled to identical resting visuals (function exceeds — the standing superset pattern). The reference self-hosts its fonts as bundled woff2; the clone loads Playfair Display and Inter via Google Fonts (`display=swap`) with the system stack as offline fallback — identical rendered typefaces, different delivery.
 
 ---
 
@@ -467,7 +469,7 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Password at rest E2E (R5-01) | 1 | 4 | `tests/e2e/password-hash.spec.ts` | Playwright |
 | Account header layout (R5-06) | 1 | 1 | `tests/e2e/account-layout.spec.ts` | Playwright |
 | SEO head gate (R8-06) | 1 | 19 | `tests/e2e/seo-head.spec.ts` | Playwright |
-| **Total** | **20** | **104 unit tests + 98 E2E specs → 300 runs** (104 × 1 + 98 × 2 projects) | | |
+| **Total** | **20** | **104 unit tests + 101 E2E specs → 306 runs** (104 × 1 + 101 × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -486,7 +488,7 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 1. `npm run typecheck` — exit 0
 2. `npm run test` — 104/104
 3. `npm run build` — succeeds (~507 KB single file)
-4. `npm run e2e` — 196/196 across chromium + mobile
+4. `npm run e2e` — 202/202 across chromium + mobile
 5. Docs updated in the same commit when contracts/visuals changed
 6. `AGENTS.md` trap log grown (not worked around) if a new trap was discovered
 7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same change
