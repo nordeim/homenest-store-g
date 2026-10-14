@@ -1578,3 +1578,73 @@ after the change. Post-change re-sweep: clone footer
 `rgb(29,24,22)` (matches the reference exactly), trigger bare icon
 both states (44px superset posture), dialog contract intact, served
 SEO + manifest supersets green.
+
+## 24. Session 32 — thirteenth sweep: no drift, validation track holds
+
+Sweep context: mandate dated 2026-10-14 (transcript: `docs/session_31.md`);
+thirteenth bidirectional sweep. **Workspace was reset before the session**
+— fresh `git clone` of both repos, `npm install`, `npx playwright install
+chromium` (browser cache also wiped), `.env` re-materialized from the
+committed `.env.example`. The fresh-clone path itself validated the
+two-minute zero-manual-steps goal from CLAUDE.md §9.
+
+### 24.1 Findings — zero drift on either side
+
+- Reference (agent-browser, logged in with the owner-supplied account,
+  390×844 and 1440×900): mobile menu trigger BARE dark icon in both
+  states on `/` and `/products` (36×36 transparent, `rgb(29,24,22)`
+  glyph, 16px lucide-menu/X, no inner span — **no sixth flip**; history
+  stays green s3/4 → bare s5 → green s26 → bare s27 → bare s30 → bare
+  s32); footer `bg-foreground` → `rgb(29,24,22)` (session-30 pin holds,
+  no flip back); account icon plain dark glyph; body `rgb(251,250,249)`;
+  primary `rgb(217,110,38)`; h1 Playfair Display 700; catalog 8
+  products; robots allow-all + sitemap link; sitemap 22 statics; open
+  panel `rgba(255,255,255,0.8)` with the Home/Products/Track
+  Order/About/Contact link set.
+- Clone (production preview :4173, fresh build): trigger bare icon both
+  states (44px touch-target superset posture, zero spans), dialog
+  contract intact (`role=dialog`, `aria-modal=true`, "Site menu", scroll
+  lock, panel `rgba(255,255,255,0.8)`), account plain glyph, footer
+  `rgb(29,24,22)` exact, body/primary/h1 pins, served SEO superset
+  (robots 5 disallows, sitemap 36 URLs, manifest 200), PDP head
+  superset (canonical + og:url + Product JSON-LD on
+  `/product/p-knife-set`).
+- Behavior note re-verified as DESIGNED: `/product/1` (the reference's
+  numeric id shape) renders the clone's not-found page because the
+  clone's catalog uses slug ids — while the head seam humanizes the
+  unknown key into the title (`1 | HomeNest Kitchen`, template TITLE-2
+  parity, pinned by `tests/seo.test.ts`). Not a bug; documented catalog
+  superset divergence.
+
+### 24.2 ToDo (validation session — no remediation items)
+
+- [x] **R32-01 — baseline gate reproduced on a fresh clone.** typecheck
+  ✓ lint ✓ 104/104 unit ✓ build **506.85 KB** (5-byte-class delta vs the
+  506.80 KB ledger — dependency micro-drift from the fresh `npm
+  install`; the parity gate is computed styles, and all six parity specs
+  passed) ✓ **196/196 E2E** (3.6 min) ✓.
+- [x] **R32-02 — standing contracts re-verified on the fresh clone.**
+  `env -u DATABASE_URL npm run db:setup` → repo-root `db/custom.db`
+  (24 products, 8 categories, 2 users); `.env` re-created from
+  `.env.example`; paramiko ssh shim re-created at the workspace `bin/`
+  for the push.
+- [x] **R32-03 — session captures.** Four captures →
+  `docs/screenshots/` (`session32-home-desktop`,
+  `session32-pdp-desktop`, `session32-mobile-home`,
+  `session32-mobile-menu-open`) + the reference-side evidence capture
+  `_ref-sweep32-mobile-menu-open.png`.
+
+### 24.3 Decision records
+
+- **No-drift session** (sessions 18/20/22/24 precedent): the candidate
+  list stays retired; the validation track is confirmed as the standing
+  default. The two watched surfaces (trigger — 5 stable-or-flipping
+  measurements; footer — 2) both held at their latest pins this sweep.
+- ADR-001 (server-backed auth) remains an owner decision.
+
+### 24.4 Verification gate (post session-32)
+
+typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **506.85 KB** ✓ ·
+**196/196 E2E** (98 specs × 2 projects, 3.6 min) ✓ — all observed on
+the fresh clone before the sweep; no code changes were required, so
+no post-change gate applies. Bidirectional sweep: zero drift.

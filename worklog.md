@@ -544,3 +544,23 @@ Stage Summary:
 - Parity posture: twelfth sweep caught the footer's flip to bg-foreground (rgb(32,27,24) → rgb(29,24,22)); fixed via TDD; the trigger held (no fifth flip); all other pins green
 - Footer joins the trigger as the second restyled-without-notice reference surface; doctrine stays mechanical — follow the latest measurement, pin it, document the history
 - Candidate list re-retired after remediation: validation track resumes as the standing default unless the reference drifts again; ADR-001 (server-backed auth) remains an owner decision
+
+---
+Task ID: 23
+Agent: main (Super Z)
+Task: Session 32 mandate (record: session_32.md) — workspace reset recovery + thirteenth sweep (no drift), validation session, push
+
+Work Log:
+- Workspace was reset before the session — re-cloned https://github.com/nordeim/homenest-store-g.git (b9ef48a; remote had added only docs/session_31.md, the raw session-30 transcript) and the ecommerce-store reference; npm install; npx playwright install chromium (browser cache wiped with the reset — first E2E attempt failed until installed); .env re-materialized from the committed .env.example; paramiko ssh shim re-created at the workspace bin/ for the push
+- Root docs + session_30/31 + remediation §1–§23 + worklog Tasks 1–22 reviewed; session-30 artifacts re-validated in-tree (footer token hsl(20 15% 10%), parity pin rgb(29,24,22), db scripts, env contract)
+- Baseline gate reproduced on the fresh clone: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.85 KB ✓ (5-byte-class dep micro-drift vs the 506.80 ledger; parity gate = computed styles, all green) 196/196 E2E (3.6 min) ✓
+- Thirteenth bidirectional sweep (agent-browser, logged in, 390×844 + 1440×900): ZERO DRIFT on either side — trigger bare dark icon both states on / and /products (no sixth flip), footer bg-foreground rgb(29,24,22) holds, account plain glyph, body/primary/h1/catalog/robots/sitemap/panel pins, clone dialog contract + served SEO superset (robots 5 disallows, sitemap 36, manifest 200) + PDP head superset green; /product/1 not-found + humanized head title re-verified as DESIGNED (template TITLE-2 parity, pinned by tests/seo.test.ts)
+- Standing contracts re-verified on the fresh clone: env -u DATABASE_URL npm run db:setup → repo-root db/custom.db (24 products, 8 categories, 2 users)
+- No remediation items (validation session, sessions 18/20/22/24 precedent); 4 session captures + 1 reference evidence capture → docs/screenshots/
+- Docs updated: remediation plan §24, docs/session_32.md, README Documentation rows, worklog (this entry); CLAUDE.md/PAD/DEPLOYMENT.md needed no edits (no code/count/env/db change)
+- Committed on main; pushed via docs/ssh_git_wrapper_v3.py --remote git@github.com:nordeim/homenest-store-g.git (dry-run first; remote verified; key parsed ed25519, both copies shredded after)
+
+Stage Summary:
+- Verification ledger: typecheck ✓ lint ✓ 104/104 unit ✓ build 506.85 KB ✓ 196/196 E2E ✓ — observed on a fresh clone (zero-manual-steps goal validated)
+- Parity posture: thirteenth sweep — zero drift; both watched surfaces (trigger, footer) held at their latest pins; candidate list stays retired, validation track confirmed as standing default
+- Environment fully rebuilt after the reset: deps, playwright chromium, .env, ssh shim; ADR-001 (server-backed auth) remains an owner decision

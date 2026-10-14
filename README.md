@@ -184,7 +184,8 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), syst
 - [`docs/session_26.md`](docs/session_26.md) — Session 26 execution record (tenth sweep → reference drift found: menu trigger green disc + plain account icon → TDD remediation + db scripts → push)
 - [`docs/session_28.md`](docs/session_28.md) — Session 28 execution record (eleventh sweep → trigger drift AGAIN (green → bare → green → bare oscillation) → TDD revert to bare icon → CLAUDE.md count refresh → push)
 - [`docs/session_30.md`](docs/session_30.md) — Session 30 execution record (twelfth sweep → footer token drift rgb(32,27,24) → rgb(29,24,22) (= bg-foreground) → TDD fix + docs → push; trigger held, no fifth flip)
-- [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) — raw session transcripts for the session-26 and session-28 records
+- [`docs/session_32.md`](docs/session_32.md) — Session 32 execution record (workspace reset recovery + thirteenth no-drift sweep → validation track holds → push)
+- [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) / [`docs/session_31.md`](docs/session_31.md) — raw session transcripts for the session-26, session-28 and session-30 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
 - [`docs/session_7.md`](docs/session_7.md) / [`docs/session_9.md`](docs/session_9.md) / [`docs/session_11.md`](docs/session_11.md) / [`docs/session_13.md`](docs/session_13.md) / [`docs/session_15.md`](docs/session_15.md) / [`docs/session_17.md`](docs/session_17.md) / [`docs/session_19.md`](docs/session_19.md) / [`docs/session_21.md`](docs/session_21.md) / [`docs/session_23.md`](docs/session_23.md) — raw session transcripts for the session-5, session-8, session-10, session-12, session-14, session-16, session-18, session-20, and session-22 records
 - [`worklog.md`](worklog.md) — running multi-agent work log
