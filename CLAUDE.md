@@ -37,6 +37,7 @@ Non-negotiables:
 ### Tailwind CSS v4
 - CSS-first: `@theme` in `src/index.css` is the only token source. No `tailwind.config.js`, ever.
 - Colors are full `hsl(...)` literals. Parity-critical computed values are pinned in `tests/e2e/visual-parity.spec.ts` — re-measure after token changes.
+- `@custom-variant hover (&:hover);` in index.css overrides v4's built-in hover variant — v4 media-gates `hover:*` behind `@media (hover: hover)`, which silently killed the clone's hovers in no-hover contexts (the v3-era reference applies hover unconditionally). AGENTS.md trap #9.
 - Body font is **Inter** (Google Fonts, system stack fallback — session-34 parity with the reference); display font is Playfair Display.
 - Gradients that need sRGB parity use explicit `linear-gradient(...)` inline styles.
 
@@ -76,7 +77,7 @@ Passwords are hashed at rest (session 5, R5-01): `User.passwordHash` = `s1$<salt
 ## 5. Testing Strategy
 
 - **Unit (Vitest, node env)**: pure seams only — commerce math, db-path contract, catalog↔storage-key registry, password-at-rest contract, route-head seam (`buildRouteMeta`), committed robots/sitemap ↔ catalog consistency, db-scripts contract. Co-located `*.test.ts` next to the seam, plus `tests/*.test.ts` for repo contracts. 104 tests.
-- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap + bare-icon trigger pins), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, search-combobox keyboard plan, account-header layout, password-at-rest, a11y smoke (axe structural gate on eight surfaces incl. checkout/contact and authenticated account/admin), visual parity, SEO head gate (served robots/sitemap, per-route titles, PDP canonical/og/JSON-LD), PWA manifest. 101 specs = 202 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
+- **E2E (Playwright, production build)**: user-visible behavior through real UI interactions — smoke, mobile navigation (incl. modal focus trap + bare-icon trigger + hover-disc pins), mobile header parity, cart-drawer modal semantics, catalog, cart/checkout, auth/admin, search-combobox keyboard plan, account-header layout, password-at-rest, a11y smoke (axe structural gate on eight surfaces incl. checkout/contact and authenticated account/admin), visual parity, SEO head gate (served robots/sitemap, per-route titles, PDP canonical/og/JSON-LD), PWA manifest. 106 specs = 212 runs across chromium + mobile (iPhone 14 profile on chromium engine), `workers: 1`.
 - **Visual parity gate**: `tests/e2e/visual-parity.spec.ts` asserts computed colors/fonts from the reference measurement. Treat it as a build-breaker.
 - Bugs get a failing regression test at the same seam before the fix.
 

@@ -264,10 +264,18 @@ export function ProductPage({ slug }: { slug: string }) {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          {/* Session-36 (F36-11) re-measurement: the reference's PDP action row
+              is a ROW at every width (flex gap-3) — Add-to-Cart h-10 px-8
+              flex-1 (14px/500, shadow, hover:bg-primary/90), Buy Now h-10 px-6
+              with NO flex-1. The old clone markup (flex-col on mobile with
+              BOTH buttons flex-1 h-12) collapsed them to 20-22px: the flex
+              algorithm ignores `height` under `flex-basis: 0%`, so the
+              buttons fell to min-content. Row layout + reference geometry
+              fixes both the collapse and the parity. */}
+          <div className="mt-6 flex gap-3">
             <button
               type="button"
-              className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
+              className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-[9999px] bg-primary px-8 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
               onClick={onAdd}
               disabled={!inStock}
             >
@@ -283,7 +291,7 @@ export function ProductPage({ slug }: { slug: string }) {
             </button>
             <button
               type="button"
-              className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+              className="inline-flex h-10 items-center justify-center rounded-[9999px] border border-border bg-card px-6 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
               onClick={onBuyNow}
               disabled={!inStock}
             >

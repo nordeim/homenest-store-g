@@ -588,3 +588,21 @@ Stage Summary:
 - Parity posture: fourteenth sweep caught three compounding text-layer divergences (footer spec, brand mark, body font) — all remediated to pixel-identical; the corrected audit method (computed color + computed opacity + pixel-sampled rects) is now the standing footer recipe; footer = 3-event watched surface (bg s30, text s34), trigger = 7-measurement watched surface (bare)
 - Inter joins Playfair as the reference-matched typefaces; brand treatments now mirror per-surface (header square vs footer bare glyph)
 - Candidate list stays retired; ADR-001 (server-backed auth) remains an owner decision
+
+---
+Task ID: 25
+Agent: main (Super Z)
+Task: Session 36 mandate — fifteenth sweep (homenest-store-g): v4 hover-gating + header glass + solid panel + hero/PDP action-row remediation via TDD, push
+
+Work Log:
+- Workspace intact from session 34; git pull → 113bc57 (owner added docs/session_35.md, the session-34 transcript); docs + remediation §1–§25 + worklog Tasks 1–24 reviewed; session-34 pins cross-verified in-tree (footer text layer, brand mark rounded-[12px], Inter)
+- Baseline gate reproduced: 104/104 unit, 508.20 KB (190-byte micro-drift, computed-style gate green), 202/202 E2E (3.9 min)
+- Fifteenth bidirectional sweep: all standing pins held (trigger bare BOTH states — no eighth flip; footer bg + text layer; brand; Inter; SEO superset; dialog contract) — then the recipe went one layer deeper (hovers + translucency + action rows) and found: v4 wraps hover: utilities in @media (hover: hover) (reference v3 applies unconditionally → clone hovers dead in no-hover contexts); trigger hover = accent green disc + white glyph + 150ms (clone had none); menu panel BODY solid bg-card (session-4 pin had measured the header row; pixel-verified: clone's white/80 bled the hero through); in-panel pill = reference 40×28 text pill (hidden sm:inline label); header glass = white/80 + blur(24px) + 0.5-alpha hairline (clone: /95 + 8px + solid); hero text layer (36→60px h1, 18→20px p /80 512px, 40px CTA 16/600 px-8); dots/arrows specs; PDP action row = flex row always, Add h-10 px-8 flex-1 500, Buy h-10 px-6 — the clone's flex-col + dual flex-1 h-12 COLLAPSED to 20-22px on mobile (flex-basis 0% overrides height — real touch-target bug); order-success row same collapse
+- TDD: 5 new visual-parity tests + trigger-hover regression test (mobile project guards the un-gating) + order-success 48px pin — all RED observed first; GREEN via @custom-variant hover (&:hover) + 4 alpha-baked tokens (border-soft, hero-body, dot-idle, frost) + chrome.tsx (header/trigger/panel/pill) + home.tsx (hero) + shop.tsx (PDP row) + checkout-flow.tsx (order row); one spec corrected in GREEN (bare-icon pin now moves the pointer off the trigger — the un-gated hover legitimately reads under the pointer, same as the reference)
+- Full gate green: 104/104 unit, 508.72 KB, 212/212 E2E (106 specs × 2, 4.2 min); post-change re-sweep: panel band 118,270 pure-white px (zero bleed), PDP row pixel-identical (236/110/40), trigger hover live, hero exact both viewports
+- Docs: remediation §26, session_36.md, AGENTS trap #9 (+ #5/#8 updates, pins line), CLAUDE counts + hover note, PAD tokens + §5.6 #13, README badge/tokens/rows, SKILL tokens + Appendix C; 5 session captures + 4 sweep evidence captures
+
+Stage Summary:
+- Deliverable: main @ <commit> pushed to git@github.com:nordeim/homenest-store-g.git — v4 hover gating fixed app-wide, header/panel/hero/PDP layers remediated to measured reference specs
+- Verification ledger: typecheck ✓ lint ✓ 104/104 unit ✓ 508.72 KB ✓ 212/212 E2E ✓ — trigger hover + panel solidity + PDP collapse all now pinned regressions
+- Parity posture: trigger bare at rest (7 measurements) + green hover pin; footer/brand/Inter hold; quick-add card chrome on the watch list; ADR-001 still an owner decision

@@ -366,12 +366,16 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `primary-dark` | `hsl(24 70% 43%)` | — | Hover state | — |
 | `muted` | `hsl(30 15% 94%)` | — | Search fields, placeholders surfaces | — |
 | `muted-foreground` | `hsl(20 10% 45%)` | — | Secondary text | ≈ 7:1 on background |
-| `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping (the mobile menu trigger flipped back to a bare dark icon in session 27 — no longer an accent-disc surface) | white text used only on accent badges (decorative) |
+| `accent` | `hsl(160 40% 45%)` | `rgb(69,161,130)` | In-stock, Free shipping, trigger HOVER disc (session-36: the resting trigger is a bare icon; the accent-green disc is its `:hover` treatment) | white text used only on accent badges (decorative) |
 | `destructive` | `hsl(0 72% 51%)` | `rgb(220,40,40)` | Discount pills, form errors | white text 4.6:1 |
 | `badge` | — | `rgb(245,159,10)` | "Featured" pill, filled stars | white bold text on amber is decorative/large |
 | `border` | `hsl(30 15% 88%)` | — | Card/field borders | — |
 | `card` | `hsl(0 0% 100%)` | `rgb(255,255,255)` | Card surfaces | — |
-| `panel` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Mobile menu panel (alpha baked into the token — v4 `/NN` modifiers color-mix in oklab; trap T-13) | — |
+| `panel` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Sticky-HEADER glass since session-36 (with `backdrop-blur-xl` 24px); the mobile-menu panel body is solid `bg-card` — the session-4 white/80 reading had measured the reference's header row (alpha baked into the token — v4 `/NN` modifiers color-mix in oklab; trap T-13) | — |
+| `border-soft` | `hsl(30 15% 88% / 0.5)` | `rgba(229,224,220,0.5)` | Header + menu-panel 0.5-alpha hairlines (session-36; alpha baked) | — |
+| `hero-body` | `hsl(0 0% 100% / 0.8)` | `rgba(255,255,255,0.8)` | Hero paragraph (session-36; the reference's `text-white/80`) | — |
+| `dot-idle` | `hsl(0 0% 100% / 0.4)` | `rgba(255,255,255,0.4)` | Idle hero-carousel dots (session-36) | — |
+| `frost` | `hsl(0 0% 100% / 0.1)` | `rgba(255,255,255,0.1)` | Hero-carousel arrow glass (session-36; with `backdrop-blur-md` 12px) | — |
 | `footer` | — | `rgb(29,24,22)` | Footer canvas (session-30: = foreground) | text-background full color, modulated by element opacity (70% links/body, 50% bottom bar — session-34) |
 | `footer-rule` | `hsl(30 25% 98% / 0.1)` | `rgba(251,250,249,0.1)` | Footer divider (session-34; alpha baked — v4 `/10` would color-mix in oklab) | — |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
@@ -404,7 +408,7 @@ These supersets are intentional; they must not change the **resting visuals** of
 10. "Sign in" row in the mobile menu (the reference's menu lists the five nav links only) — the demo auth entry point; the reference delegates auth to its platform screen.
 11. The mobile menu panel does NOT dim the page beneath it (session-3 re-measurement of the live reference; the session-1 measurement read a dim that is no longer present). Scroll-lock and the focus trap remain.
 12. Color-contrast pairs on parity surfaces (white-on-orange CTAs, white-on-amber "Featured" pills, orange category labels, muted grays) match the reference tokens and fail WCAG AA contrast — documented exclusion from the axe gate (remediation plan §9.2 R3-04).
-13. The mobile menu's search control is a compact muted pill at rest (session-4 measurement, matching the reference) that expands into a working search input on tap — the reference's pill is functionally inert (and unclickable: the reference's own toast viewport covers it). Resting visuals match; function exceeds (registered superset).
+13. The mobile menu's search control is a compact muted pill at rest (session-36 re-measurement: the reference's pill is 40×28, `flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted`, with a `hidden sm:inline` label — icon-only at mobile widths) that expands into a working search input on tap — the reference's pill is functionally inert (and unclickable: the reference's own toast viewport covers it). Resting visuals match; function exceeds (registered superset). The pill keeps an `aria-label` so its accessible name survives the hidden label span (a11y superset).
 14. **SEO posture superset (session 8, extended session 18).** The reference's robots.txt disallows nothing and its sitemap.xml lists `/admin/*`, `/account`, `/cart` with zero product URLs; the clone disallows private surfaces and lists every visible product as `/products/{slug}`. The reference ships no web app manifest (re-measured 2026-10-13: no `<link rel="manifest">` in its head; `/manifest.webmanifest` and `/site.webmanifest` are answered by the SPA catch-all with `text/html`). The clone ships a valid minimal manifest (`public/manifest.webmanifest`, R18-01): name/short_name, root-relative `start_url`/`scope`, `standalone` display, theme/background `#fbfaf9`, and the two install-required 192px/512px icons reusing the FAVICON-1 CDN logo; a `transformIndexHtml` post-hook in `vite.config.ts` restores the root-absolute href that viteSingleFile's `base: "./"` would otherwise relativize into a deep-route 404.
 15. **Per-route head superset (session 8).** The reference ships a static-title map for 23 paths (PDPs keep the static title, admin titles leak an `admin/` namespace artifact); the clone pins the same map (incl. the "Order Tracking" / "Terms Of Service" quirks) and extends it: PDP → "{Product} | HomeNest Kitchen", humanized unknown slugs, auth/not-found titles, admin titles cleaned. Canonical links + per-route og:url and per-PDP Product JSON-LD are additive (the reference has none).
 16. **Footer contact links + font loading mechanism (session 34).** The reference's footer contact rows are plain text with icons; the clone keeps `mailto:`/`tel:` anchors styled to identical resting visuals (function exceeds — the standing superset pattern). The reference self-hosts its fonts as bundled woff2; the clone loads Playfair Display and Inter via Google Fonts (`display=swap`) with the system stack as offline fallback — identical rendered typefaces, different delivery.
@@ -488,7 +492,7 @@ No numeric coverage gates. The standard: **every pure seam has a dedicated unit 
 1. `npm run typecheck` — exit 0
 2. `npm run test` — 104/104
 3. `npm run build` — succeeds (~507 KB single file)
-4. `npm run e2e` — 202/202 across chromium + mobile
+4. `npm run e2e` — 212/212 across chromium + mobile (106 specs; session-36)
 5. Docs updated in the same commit when contracts/visuals changed
 6. `AGENTS.md` trap log grown (not worked around) if a new trap was discovered
 7. Catalog edits: `tests/catalog-hash.test.ts` green — `STORAGE_KEY` bumped and `tests/catalog-registry.json` updated in the same change

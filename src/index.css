@@ -11,7 +11,16 @@
   4. space-y-* is inert on inline first children in v4 — use explicit mt-* on blocks.
   5. backdrop-filter creates a containing block for fixed descendants: the mobile
      menu is portaled to <body>, never nested inside the blurred sticky header.
+  9. v4 wraps every hover: utility in @media (hover: hover) — the v3-era reference
+     applies hover unconditionally (including no-hover contexts and iOS sticky-tap).
+     The @custom-variant override below restores the reference's behavior.
 */
+
+/* Session-36 (F36-01): override the built-in hover variant so hover: utilities
+   emit un-gated `&:hover` rules (v3 behavior, matching the reference). Without
+   this, v4 media-gates hovers and they never fire under touch emulation —
+   pinned by the mobile-project trigger-hover spec (AGENTS.md trap #9). */
+@custom-variant hover (&:hover);
 
 @theme {
   --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
@@ -38,11 +47,28 @@
   --color-border: hsl(30 15% 88%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(20 15% 10%);
-  /* Translucent menu panel (reference measures rgba(255,255,255,0.8)). The
-     alpha is baked into the token on purpose: Tailwind v4's /NN opacity
-     modifiers color-mix in oklab and would compute to oklab(...) instead of
-     the reference's sRGB value (same class of trap as the gradient T-3). */
+  /* Translucent WHITE/80 glass surface — the STICKY HEADER since session-36
+     (the reference's nav root measures rgba(255,255,255,0.8) with a 24px
+     backdrop frost; the v1 port had shipped bg-card/95 + blur(8px)). The
+     menu panel body itself went SOLID bg-card in the same session — the
+     session-4 "translucent panel" pin had measured this header row, not
+     the panel body. Alpha baked into the token on purpose: Tailwind v4's
+     /NN opacity modifiers color-mix in oklab and would compute to oklab(...)
+     instead of the reference's sRGB value (same class of trap as T-3). */
   --color-panel: hsl(0 0% 100% / 0.8);
+  /* Session-36 (F36-05): 0.5-alpha hairline under the sticky header and on
+     the menu panel's bottom edge (reference: rgba(229,224,220,0.5) = its
+     border-border/50; the clone's --color-border is the same solid color,
+     so baking the alpha reproduces the reference exactly). */
+  --color-border-soft: hsl(30 15% 88% / 0.5);
+  /* Session-36 (F36-07): the reference hero paragraph is text-white/80 —
+     rgba(255,255,255,0.8) computed. Alpha baked (T-13). */
+  --color-hero-body: hsl(0 0% 100% / 0.8);
+  /* Session-36 (F36-09): idle carousel dots render rgba(255,255,255,0.4). */
+  --color-dot-idle: hsl(0 0% 100% / 0.4);
+  /* Session-36 (F36-10): hero carousel arrow discs render
+     rgba(255,255,255,0.1) with a 12px frost. */
+  --color-frost: hsl(0 0% 100% / 0.1);
   --color-ring: hsl(24 70% 50%);
   --color-badge: hsl(38 92% 50%);
   /* Session-30 re-measurement (2026-10-14): the reference footer now uses

@@ -197,7 +197,14 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-[300] border-b border-border bg-card/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-[300] border-b border-border-soft bg-panel backdrop-blur-xl">
+      {/* Session-36 (F36-05) re-measurement: the reference's sticky nav paints
+          rgba(255,255,255,0.8) with a 24px backdrop frost and a 0.5-alpha
+          hairline — bg-panel (white/80, alpha-baked) + backdrop-blur-xl (24px
+          in the v4 scale) + border-border-soft. Was bg-card/95 + blur(8px) +
+          solid border (v1 port, never measured). Trap #5 unchanged: any
+          backdrop-filter still creates the containing block — the mobile
+          menu stays portaled to <body>. */}
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" className="rounded-md" aria-label="HomeNest home">
@@ -279,7 +286,7 @@ export function Header() {
           </button>
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent hover:text-white md:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
@@ -299,7 +306,12 @@ export function Header() {
                 buttons with 16px glyphs, while the clone's row keeps the
                 desktop-geometry 44px buttons uniformly (account 20px glyph,
                 cart 24px), so the trigger glyph stays 20px to keep the row's
-                proportional language coherent. */}
+                proportional language coherent.
+                Session-36 (F36-02): the reference's :hover treatment (both
+                states, measured after moving the pointer off the button) is
+                an accent-green disc with a white glyph at 150ms —
+                hover:bg-accent hover:text-white transition-colors (default
+                150ms). The RESTING pin stays the bare icon. */}
             {menuOpen ? <X className="h-5 w-5" strokeWidth={2} /> : <Menu className="h-5 w-5" strokeWidth={2} />}
           </button>
         </div>
@@ -407,11 +419,19 @@ export function Header() {
               />
               <nav
                 id="mobile-nav"
-                className="border-b border-border bg-panel px-4 pb-5 pt-4"
+                className="border-b border-border-soft bg-card"
                 aria-label="Mobile"
               >
+                {/* Session-36 (F36-03/04) re-measurement: the reference's panel
+                    BODY is solid bg-card with a 0.5-alpha bottom hairline (the
+                    session-4 "translucent white/80" pin had measured the nav
+                    ROOT — the header row — not the panel body; pixel-verified:
+                    pure rgb(255,255,255) with zero content bleed-through).
+                    Structure: a px-4 py-4 container (the pill wrapper mb-3,
+                    links gap-1) mirrors the reference's px-4 py-4 space-y-1. */}
+                <div className="px-4 py-4">
                 {menuSearchOpen ? (
-                  <form onSubmit={submitSearch} role="search" className="mb-2">
+                  <form onSubmit={submitSearch} role="search" className="mb-3">
                     <label htmlFor="mobile-search" className="sr-only">
                       Search products
                     </label>
@@ -427,15 +447,22 @@ export function Header() {
                     </div>
                   </form>
                 ) : (
-                  <div className="mb-2">
+                  <div className="mb-3">
                     <button
                       type="button"
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-[9999px] bg-muted text-muted-foreground transition-colors hover:text-foreground"
+                      className="flex items-center gap-2 rounded-[9999px] bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/80"
                       aria-label="Search products"
-                      aria-expanded={menuSearchOpen}
                       onClick={() => setMenuSearchOpen(true)}
                     >
+                      {/* Session-36 (F36-04): the reference's resting pill is
+                          `flex items-center gap-2 px-3 py-1.5 rounded-full
+                          bg-muted` (40×28 icon pill on mobile — the label span
+                          is `hidden sm:inline`, so the words only render
+                          ≥640px where the md:hidden panel is still open).
+                          Was a 40×40 icon disc. The tap-to-expand superset
+                          stays (PAD §5.6 #13). */}
                       <Search className="h-4 w-4" />
+                      <span className="hidden sm:inline">Search products...</span>
                     </button>
                   </div>
                 )}
@@ -470,6 +497,7 @@ export function Header() {
                     </Link>
                   </li>
                 </ul>
+                </div>
               </nav>
             </div>
           ) : null,

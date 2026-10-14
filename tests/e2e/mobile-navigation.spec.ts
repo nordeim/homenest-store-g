@@ -75,22 +75,31 @@ test("hamburger opens the dropdown panel with search pill and links", async ({ p
   await expect(nav.getByRole("link", { name: "Sign in" })).toBeVisible();
 });
 
-test("menu resting visuals match the session-4 reference measurement", async ({ page }) => {
+test("menu resting visuals match the session-36 reference measurement", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Open menu" }).click();
   const nav = page.getByRole("navigation", { name: "Mobile" });
 
-  // Panel: translucent white, NO drop shadow, 1px bottom border.
-  await expect(nav).toHaveCSS("background-color", "rgba(255, 255, 255, 0.8)");
+  // Panel body: SOLID white (session-36 pixel-verified re-measurement —
+  // the session-4 "translucent white/80" pin had measured the
+  // reference's NAV ROOT, i.e. the header row, not the panel body),
+  // NO drop shadow, 1px bottom hairline at 0.5 alpha.
+  await expect(nav).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await expect(nav).toHaveCSS("box-shadow", "none");
   await expect(nav).toHaveCSS("border-bottom-width", "1px");
+  await expect(nav).toHaveCSS("border-bottom-color", "rgba(229, 224, 220, 0.5)");
 
-  // Search pill: muted disc, fully rounded, 40px wide.
+  // Search pill: the reference's compact pill — muted, fully rounded,
+  // 40x28 icon pill on mobile (the label span is `hidden sm:inline`,
+  // so the words only render at >=640px where the panel is still open).
   const pill = nav.getByRole("button", { name: "Search products" });
   await expect(pill).toHaveCSS("background-color", "rgb(242, 240, 237)");
   await expect(pill).toHaveCSS("border-radius", "9999px");
+  await expect(pill).toHaveCSS("color", "rgb(126, 111, 103)");
+  await expect(pill.getByText("Search products...")).toBeHidden();
   const box = await pill.boundingBox();
   expect(Math.round(box?.width ?? 0)).toBe(40);
+  expect(Math.round(box?.height ?? 0)).toBe(28);
 
   // Rows: 14px/500, muted inactive text, 12px active-row radius.
   const active = nav.getByRole("link", { name: "Home", exact: true });
@@ -100,6 +109,28 @@ test("menu resting visuals match the session-4 reference measurement", async ({ 
   const inactive = nav.getByRole("link", { name: "About", exact: true });
   await expect(inactive).toHaveCSS("color", "rgb(126, 111, 103)");
   await expect(inactive).toHaveCSS("font-size", "14px");
+});
+
+test("trigger hover shows the reference green disc (v4 hover gating regression)", async ({ page }) => {
+  await page.goto("/");
+  // The trigger RESTS as a bare dark icon (session-27+ pin) — but the
+  // reference's :hover treatment is an accent-green disc with a white
+  // glyph at 150ms (measured session-36 in BOTH open states, after
+  // moving the pointer off the button). This test runs in the MOBILE
+  // project (touch emulation => @media (hover: hover) evaluates
+  // false), so it also guards the Tailwind v4 hover-variant gating
+  // fix: without the `@custom-variant hover (&:hover)` override in
+  // index.css, v4 wraps hover utilities in @media (hover: hover) and
+  // this pin goes red (AGENTS.md trap #9).
+  const trigger = page.getByRole("button", { name: "Open menu" });
+  await expect(trigger).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(trigger).toHaveCSS("color", "rgb(29, 24, 22)");
+  await trigger.hover();
+  await expect(trigger).toHaveCSS("background-color", "rgb(69, 161, 130)");
+  await expect(trigger).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(trigger).toHaveCSS("transition-duration", "0.15s");
+  await page.mouse.move(10, 400);
+  await expect(trigger).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
 });
 
 test("tapping the search pill expands the input and focuses it", async ({ page }) => {
@@ -145,6 +176,12 @@ test("menu trigger renders a bare dark icon in both states (session-27 re-measur
   await expect(open).toHaveCSS("color", "rgb(29, 24, 22)");
   await expect(open.locator("span")).toHaveCount(0);
   await open.click();
+  // Session-36: the click leaves the pointer ON the trigger, and with the
+  // un-gated hover variant (trap #9) the green hover disc now applies —
+  // the RESTING state must be measured with the pointer moved away
+  // (the reference behaves identically: its green disc under the pointer
+  // after opening is the hover treatment, not the resting state).
+  await page.mouse.move(10, 400);
   const close = page.getByRole("button", { name: "Close menu", exact: true });
   await expect(close).toBeVisible();
   // Open state: SAME treatment — the reference dropped the green disc again

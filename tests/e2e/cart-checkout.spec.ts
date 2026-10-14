@@ -83,6 +83,13 @@ test("placing a COD order lands on the token-gated success page", async ({ page 
   await expect(page.getByText("Cash on Delivery").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Order Details" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Delivery Information" })).toBeVisible();
+  // Session-36 (F36-12): `flex-1` + h-12 inside the mobile flex-col row
+  // collapsed these buttons to 20px (flex-basis 0% overrides the height
+  // utility). They must render at the designed 48px height on every
+  // viewport — this pin guards the collapse regression.
+  const cta = page.getByRole("button", { name: "Continue Shopping" });
+  const ctaBox = await cta.boundingBox();
+  expect(Math.round(ctaBox?.height ?? 0)).toBe(48);
 });
 
 test("the success link rejects tampering", async ({ page }) => {

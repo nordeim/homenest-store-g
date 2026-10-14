@@ -805,11 +805,15 @@ export function OrderSuccessPage() {
         </div>
       </section>
 
+      {/* Session-36 (F36-12): `flex-1` + h-12 inside this mobile flex-col row
+          collapsed both buttons to 20px — the flex algorithm ignores
+          `height` under `flex-basis: 0%`. w-full sm:w-auto keeps the
+          stacked-full-width mobile layout at the designed 48px height. */}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <OutlineButton className="flex-1" onClick={() => navigate("/")}>
+        <OutlineButton className="w-full sm:w-auto" onClick={() => navigate("/")}>
           Back to Home
         </OutlineButton>
-        <PrimaryButton className="flex-1" onClick={() => navigate("/products")}>
+        <PrimaryButton className="w-full sm:w-auto" onClick={() => navigate("/products")}>
           Continue Shopping
         </PrimaryButton>
       </div>

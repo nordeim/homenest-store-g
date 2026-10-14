@@ -966,10 +966,19 @@ neither):
 | `badge` | `hsl(38 92% 50%)` = `#F59F0A` | amber "Featured" pill |
 | `footer` | `hsl(20 15% 10%)` = `#1D1816` (= foreground, session-30 re-measurement) | dark footer background |
 | `footer-rule` | `hsl(30 25% 98% / 0.1)` = `rgba(251,250,249,0.1)` | footer divider (session-34, alpha baked per T-13) |
+| `panel` | `hsl(0 0% 100% / 0.8)` = `rgba(255,255,255,0.8)` | sticky-HEADER glass + `backdrop-blur-xl` (session-36; the menu panel body is solid `bg-card`) |
+| `border-soft` | `hsl(30 15% 88% / 0.5)` = `rgba(229,224,220,0.5)` | header/panel 0.5-alpha hairlines (session-36) |
+| `hero-body` | `hsl(0 0% 100% / 0.8)` = `rgba(255,255,255,0.8)` | hero paragraph (session-36, alpha baked) |
+| `dot-idle` | `hsl(0 0% 100% / 0.4)` = `rgba(255,255,255,0.4)` | idle carousel dots (session-36) |
+| `frost` | `hsl(0 0% 100% / 0.1)` = `rgba(255,255,255,0.1)` | carousel arrow glass (session-36) |
 
-Opacity conventions: primary at 22% for `::selection`; the mobile-menu panel
-is `--color-panel` = `hsl(0 0% 100% / 0.8)` (alpha baked into the token —
-see trap T-13); `bg-card/95` for the translucent sticky header.
+Opacity conventions: primary at 22% for `::selection`; the sticky header is
+`--color-panel` (white/80, alpha baked) with `backdrop-blur-xl` (24px) since
+session-36 — the mobile-menu panel BODY is solid `bg-card` (the session-4
+white/80 reading had measured the header row). The v4 `hover:` variant is
+overridden to plain `&:hover` (`@custom-variant hover (&:hover);` in
+index.css) because v4 media-gates hovers behind `@media (hover: hover)` and
+the v3-era reference does not (trap T-9).
 
 Forbidden colors: any blue/purple/indigo; raw Tailwind palette classes
 (`bg-orange-500` etc.) — use semantic tokens only (pinned by visual-parity
@@ -1086,14 +1095,20 @@ Measured live (agent-browser, desktop + mobile) and pinned by
 3. Mobile menu: inline dropdown panel below the header (not a side drawer);
    hamburger is the TRAILING header icon (right of the cart); no page dim
    (session-3 re-measurement); closes on navigation and Escape; modal focus
-   trap keeps Tab inside the panel. Session-4 re-measurement: the panel is
-   translucent white/80 (`--color-panel`) with NO drop shadow; rows are
-   14px/500 with muted-foreground inactive text and a 12px active-row radius;
-   the search control is a compact muted pill at rest (the reference's pill
-   is inert — the clone expands it into a working input, registered
-   divergence #13). Session-5 re-measurement: the reference DROPPED the
-   green close disc — the trigger is a bare dark icon in BOTH states
-   (transparent 36×36 button, foreground glyph, no inner span).
+   trap keeps Tab inside the panel. Session-36 re-measurement: the panel BODY
+   is SOLID `bg-card` with a `border-border-soft` bottom hairline and NO drop
+   shadow (the session-4 "translucent white/80" reading had measured the
+   reference's header row — now the header itself: `--color-panel` white/80 +
+   `backdrop-blur-xl` 24px); rows are 14px/500 with muted-foreground inactive
+   text and a 12px active-row radius; the search control is the reference's
+   compact 40×28 muted pill (label `hidden sm:inline` — icon-only at mobile;
+   the reference's pill is inert — the clone expands it into a working input,
+   registered divergence #13). Session-5 re-measurement: the reference DROPPED
+   the green close disc — the trigger is a bare dark icon in BOTH states
+   (transparent 36×36 button, foreground glyph, no inner span); session-36
+   added its HOVER pin (accent-green disc + white glyph + 150ms, both
+   states — v4's `@media (hover: hover)` gating had to be overridden first,
+   trap T-9).
 4. Cart summary shows Subtotal / Shipping (Free ≥ $50) / Total — **no tax
    line**.
 5. Checkout defaults to Cash on Delivery; card is the registered superset.

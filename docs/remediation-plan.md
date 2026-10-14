@@ -1775,3 +1775,178 @@ trigger bare 44px superset posture, dialog contract intact
 (`role=dialog`, `aria-modal`, white/80 panel, scroll lock, Escape),
 desktop pins green, db contract re-verified (`env -u DATABASE_URL npm
 run db:setup` → 24 products / 8 categories / 2 users).
+
+## 26. Session 36 — fifteenth sweep: interaction, glass, and text layers
+
+Sweep context: mandate dated 2026-10-14 (transcript: `docs/session_35.md`);
+fifteenth bidirectional sweep (agent-browser, logged in, 390×844 +
+1440×900). All standing pins held on both sides (trigger bare in both
+states — **no eighth flip**; footer bg + full quiet-text layer; brand
+mark; Inter body; panel link set; dialog contract; catalog 8/24;
+robots/sitemap/manifest) — but extending the measurement recipe one
+layer deeper (hover states + translucency + interior action rows)
+surfaced a v4 bug class and a coherent set of unmeasured layers.
+
+### 26.1 Findings
+
+- **F36-01 — Tailwind v4 hover-variant media gating (the v4 bug of the
+  session).** v4 wraps every `hover:*` utility in
+  `@media (hover: hover)`; the reference (v3-era Base44 build) applies
+  hover styles unconditionally. Verified in-tree: the clone's compiled
+  CSS nests `.hover\:bg-muted:hover` inside
+  `@layer utilities > @media (hover: hover)`, so in no-hover
+  measurement contexts (mobile emulation) the clone's hover styles
+  never fire while the reference's do — the sweep initially mis-read
+  this as missing hover classes. Fix: `@custom-variant hover
+  (&:hover);` in `src/index.css` redefines the built-in variant and
+  emits un-gated rules (verified with a scratch build before adopting).
+- **F36-02 — trigger hover spec.** Reference trigger (both states):
+  hover = accent-green disc `rgb(69,161,130)`, white glyph, 150ms
+  transition, `rounded-full` — resting state stays the bare icon (the
+  sweep's first hover measurement was a pointer-left-on-button
+  artifact; hover must be measured after moving the pointer). The
+  clone ships no hover treatment on the trigger.
+- **F36-03 — mobile-menu panel body solidity.** The reference's panel
+  body is `bg-card` SOLID white (`md:hidden overflow-hidden border-t
+  border-border/50 bg-card`; pixel-sampled: 100,208 pure-white px in
+  the panel band vs the clone's translucent blends + hero bleed-through
+  at rgb(166,157,152)). The session-4 "translucent white/80" pin was
+  measured on the reference's NAV ROOT (the translucent header row),
+  not the panel body — the same container-vs-leaves miss as F34-01
+  (footer text). Orange active-pill pixel counts matched exactly
+  (15,357 vs 15,356) — the row treatment itself is already pixel-right.
+- **F36-04 — in-panel search pill.** Reference: a TEXT pill —
+  `flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted
+  text-muted-foreground` (40×28) containing a 16px search glyph and the
+  words "Search products...". Clone: an icon-only 40×40 disc. The
+  resting visual differs (text vs icon); the tap-to-expand superset
+  stays (PAD §5.6 #13).
+- **F36-05 — header glass layer.** Reference nav (closed): bg
+  `rgba(255,255,255,0.8)`, `backdrop-blur(24px)`, border-b 1px
+  `rgba(229,224,220,0.5)`. Clone: `bg-card/95` (oklab 0.95),
+  `backdrop-blur(8px)`, solid border. The reference's header is
+  noticeably more translucent with a heavier frost.
+- **F36-06/07/08 — hero text layer.** Reference: h1
+  `text-4xl md:text-6xl` (36→60px) `font-bold text-white leading-tight
+  mb-4`; p `text-lg md:text-xl text-white/80 max-w-lg mb-8` (18→20px,
+  Inter); CTA `h-10 px-8 text-base font-semibold` (40px tall) with
+  `hover:bg-primary/90 transition-all duration-300`. Clone: h1
+  `text-[2.4rem] md:text-5xl lg:text-6xl` (38.4→48→60) `tracking-tight
+  leading-[1.08]`; p `text-base text-white/85 max-w-md mt-5`; CTA
+  `h-12 px-7 text-sm hover:bg-primary-dark`.
+- **F36-09/10 — hero carousel controls.** Reference dots: active
+  32×6 white pill, inactive 16×6 `rgba(255,255,255,0.4)`. Reference
+  arrows: 40×40, `rgba(255,255,255,0.1)`, `backdrop-blur(12px)`,
+  white 20px stroke-2 glyphs. Clone: dots 28×6 / 10×6 white//50;
+  arrows 44×44 white/15 blur(8px).
+- **F36-11 — PDP action row (real bug + parity).** The reference ships
+  `flex gap-3` (ROW at every width): Add-to-Cart `h-10 px-8 flex-1
+  rounded-full bg-primary text-sm font-medium shadow
+  hover:bg-primary/90`, Buy Now `h-10 px-6` (no flex-1, `shadow-sm`,
+  `hover:bg-accent hover:text-accent-foreground`). The clone ships
+  `flex flex-col gap-3 sm:flex-row` with BOTH buttons
+  `flex-1 h-12 font-semibold` — and on mobile the flex algorithm
+  ignores `h-12` under `flex-basis: 0%`, collapsing both buttons to
+  20-22px (min-content). Verified by mutation test (removing `flex-1`
+  restores 48px). A real usability + a11y bug (touch targets collapse)
+  AND a resting-visual divergence.
+- **F36-12 — order-success row collapse.** Same pattern
+  (`flex-1` on h-12 shared buttons inside `flex-col` on mobile,
+  `checkout-flow.tsx:808`) — same 20px collapse.
+- Watch list (measured, deferred): reference category-card quick-add
+  buttons (36×36, `rgba(255,255,255,0.9)`, blur 4px) — the
+  product-card chrome layer is a registered superset surface; measure
+  as a candidate for a future session.
+
+### 26.2 ToDo (executed, TDD)
+
+- [x] **R36-01 — un-gate hover variants.** `src/index.css`:
+  `@custom-variant hover (&:hover);` (restores v3-style unconditional
+  hover). Scratch-build verified: `.hover\:bg-muted:hover` emits
+  outside any media query.
+- [x] **R36-02 — trigger hover treatment.** chrome.tsx trigger:
+  `hover:bg-accent hover:text-white transition-colors` (accent disc,
+  white glyph, 150ms — matches the reference both states; the 44px
+  touch-target posture stays).
+- [x] **R36-03 — panel body + structure.** nav#mobile-nav →
+  `border-b border-border-soft bg-card` (solid) with an inner
+  `px-4 py-4` container (pill wrapper `mb-3`, links keep the 44px rows
+  / 12px active radius / gap-1). New token
+  `--color-border-soft: hsl(30 15% 88% / 0.5)` (alpha-baked, T-13);
+  `--color-panel` moves from the menu panel to the HEADER surface
+  (same value, re-documented).
+- [x] **R36-04 — search pill becomes the reference text pill.** 40×28
+  `px-3 py-1.5 rounded-full bg-muted text-muted-foreground` with the
+  16px glyph + "Search products..." label; tap-to-expand superset
+  unchanged (spec updated accordingly).
+- [x] **R36-05 — header glass.** header → `bg-panel
+  backdrop-blur-xl border-b border-border-soft` (rgba(255,255,255,0.8)
+  + blur(24px) + 0.5-alpha hairline, all pinned).
+- [x] **R36-06 — hero text layer.** h1 → `font-display text-4xl
+  md:text-6xl font-bold text-white leading-tight mb-4`; p →
+  `text-lg md:text-xl text-white/80 max-w-lg mb-8`; CTA → `h-10 px-8
+  text-base font-semibold hover:bg-primary/90 transition-all
+  duration-300` (w-fit kept).
+- [x] **R36-07 — hero carousel controls.** Dots: active `w-8 h-1.5
+  bg-white`, inactive `w-4 h-1.5 bg-white/40`; arrows: `h-10 w-10
+  bg-white/10 backdrop-blur-md` (blur 12px), glyph h-5 w-5.
+- [x] **R36-08 — PDP action row.** Container `flex gap-3` (row at all
+  widths, the reference layout — also eliminates the flex-basis
+  collapse); Add → `h-10 flex-1 px-8 font-medium shadow-sm
+  hover:bg-primary/90`; Buy → `h-10 px-6 shadow-sm hover:bg-accent
+  hover:text-accent-foreground` (no flex-1).
+- [x] **R36-09 — order-success row.** Drop `flex-1`, add `w-full
+  sm:w-auto` (stacked full-width buttons at the designed 48px height —
+  collapse fixed, layout preserved).
+- [x] **R36-10 — specs (RED first).** mobile-navigation: panel
+  solid-white pin + border soft + pill 40×28 text pin + NEW trigger
+  hover test (mobile project — proves the un-gating); visual-parity:
+  header glass pins + hero-layer pins (viewport-aware 36/60, 18/20) +
+  CTA geometry; NEW pdp-action-row pins in shop specs (40px buttons,
+  row layout, 500 weight, flex-1/auto widths) + order-success 48px
+  height pin.
+- [x] **R36-11 — docs + captures.** AGENTS trap log (#9 hover gating;
+  #6/#8 note updates), parity-pin line; PAD tokens/fonts/§5.6;
+  README design-system rows; SKILL typography rows; both worklogs;
+  session_36.md; captures under `docs/screenshots/`.
+
+### 26.3 Decision records
+
+- The hover-gating override is app-wide and deliberate: the reference
+  is a v3-era build whose hover styles apply unconditionally (verified
+  live), including iOS sticky-tap on touch devices. The clone matches
+  that behavior; the a11y cost (sticky hover on tap) is the reference's
+  own posture and is now documented as trap #9.
+- The `--color-panel` token survives with a new owner: the sticky
+  header (white/80). The menu panel body follows the measured solid
+  `bg-card`. The session-4 "translucent panel" pin is superseded by
+  the session-36 re-measurement (container-vs-body — the corrected
+  audit recipe from §25.3 extended to backgrounds: measure the
+  ELEMENT that paints, not an ancestor).
+- The pill geometry reversal (40×40 disc → 40×28 text pill) retires
+  the touch-target-posture note for the pill specifically: the
+  reference's text pill IS the resting visual, and 28px passes WCAG
+  2.5.8 AA (24px minimum). The 44px posture note remains for the
+  trigger (the documented row superset).
+- PDP buttons become 40px (reference) from 48px; the a11y posture is
+  preserved because the flex-basis collapse was the real touch-target
+  bug (20px buttons) — the fix restores 40px real height.
+- The trigger oscillation count: 7 measurements, still bare at rest
+  in both states; hover treatment is now also pinned (green disc).
+
+### 26.4 Verification gate (post session-36)
+
+typecheck ✓ · lint ✓ · **104/104 unit** ✓ · build **508.72 KB** ✓ ·
+**212/212 E2E** (106 specs × 2 projects, 4.2 min — up from 101/202 with
+the 5 new session-36 tests) ✓. Post-change re-sweep (agent-browser,
+390×844 + 1440×900): header glass exact (rgba(255,255,255,0.8) +
+blur(24px) + rgba(229,224,220,0.5) hairline); panel body solid
+rgb(255,255,255) — pixel band re-sample 118,270 pure-white px, zero
+content bleed-through (the pre-fix hero bled through at
+rgb(166,157,152)); pill 40×28; trigger hover green disc + white glyph +
+150ms live; hero h1 36→60px / p 18→20px rgba(255,255,255,0.8) 512px /
+CTA 40px 16px/600 px-8; dots 32×6 / 16×6; arrows 40px white/10 blur(12);
+PDP action row pixel-identical to the reference (Add 236×40 flex-1 fw
+500, Buy 110×40 content-width, same baseline); order-success buttons
+48px; dialog contract + focus trap + scroll lock + Escape/focus-restore
+all re-verified green in the 212-run suite.

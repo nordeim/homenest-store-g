@@ -46,13 +46,18 @@ export function HomePage() {
           />
           {slide && (
             <div className="relative mx-auto flex min-h-[420px] max-w-7xl flex-col justify-center px-6 py-14 md:min-h-[520px] sm:px-10">
-              <h1 className="max-w-xl font-display text-[2.4rem] font-bold leading-[1.08] tracking-tight md:text-5xl lg:text-6xl">
+              {/* Session-36 (F36-06/07/08) re-measurement: the reference hero
+                  renders text-4xl md:text-6xl (36→60px) with leading-tight,
+                  a text-lg md:text-xl white/80 paragraph (max-w-lg), and an
+                  h-10 px-8 text-base/600 CTA (40px tall). Was 2.4rem/5xl/6xl +
+                  16px/85%/max-w-md + h-12/px-7/text-sm (v1 port). */}
+              <h1 className="mb-4 font-display text-4xl font-bold leading-tight text-white md:text-6xl">
                 {slide.title}
               </h1>
-              <p className="mt-5 max-w-md text-base leading-relaxed text-white/85">{slide.body}</p>
+              <p className="mb-8 max-w-lg text-lg text-hero-body md:text-xl">{slide.body}</p>
               <Link
                 href={slide.href}
-                className="mt-8 inline-flex h-12 w-fit items-center rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
+                className="inline-flex h-10 w-fit items-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground transition-all duration-300 hover:bg-primary/90"
               >
                 {slide.cta}
               </Link>
@@ -65,16 +70,22 @@ export function HomePage() {
                     aria-pressed={dotIndex === index}
                     className={cn(
                       "h-1.5 rounded-full transition-all duration-300",
-                      dotIndex === index ? "w-7 bg-white" : "w-2.5 bg-white/50 hover:bg-white/80",
+                      /* Session-36 (F36-09): reference dots — active 32×6 white,
+                         idle 16×6 white/40 (bg-dot-idle, alpha-baked). */
+                      dotIndex === index ? "w-8 bg-white" : "w-4 bg-dot-idle hover:bg-white/80",
                     )}
                     onClick={() => setIndex(dotIndex)}
                   />
                 ))}
               </div>
               <div className="absolute bottom-6 right-6 flex gap-2 sm:right-10">
+                {/* Session-36 (F36-10): reference arrows — 40px discs,
+                    white/10 glass (bg-frost, alpha-baked) with a 12px frost
+                    (backdrop-blur-md in the v4 scale). Was 44px white/15
+                    blur(8px). */}
                 <button
                   type="button"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-frost text-white backdrop-blur-md transition-colors hover:bg-white/30"
                   aria-label="Previous slide"
                   onClick={() => setIndex((current) => (current - 1 + slides.length) % slides.length)}
                 >
@@ -82,7 +93,7 @@ export function HomePage() {
                 </button>
                 <button
                   type="button"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-frost text-white backdrop-blur-md transition-colors hover:bg-white/30"
                   aria-label="Next slide"
                   onClick={() => setIndex((current) => (current + 1) % slides.length)}
                 >
