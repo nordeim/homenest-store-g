@@ -1,101 +1,130 @@
-Session-42/45 raw transcript (the round that executed Task 30 / the
-session-42 record).
+# Session 45 — Task 33 execution record
+## The twenty-third sweep: the second consecutive full-surface drift re-check
 
-Pulled `5f585da` (owner-added `docs/session_44.md` — the prior round's raw
-transcript; zero code drift). Re-reviewed the root docs, remediation
-§1–§30, worklog Tasks 1–29; environment verified — deps, agent-browser
-0.39.0, the SSH wrapper + paramiko shim, the `.env` contract, the
-repo-root `db/`. One environment quirk: the Playwright chromium cache was
-reset (the same reset that bit session 39) — reinstalled, then the
-baseline gate reproduced exactly: typecheck ✓ lint ✓ 104/104 unit ✓
-build 528.73 KB ✓ 290/290 E2E (5.2 min) ✓.
+Round context: the session-44 validation round (§33) closed clean at
+`96df9b2` (plus the `63133d6`→`63133d0` transcript follow-up); the owner
+then added `docs/session_49.md` (round-added) and `docs/session_50.md`
+(owner commits `2352d73`/`6c9626e` — the raw session-44-round transcript;
+zero code drift). This round executed **Task 33 — the 23rd bidirectional
+sweep**, holding the session-48-suggested cadence: a full-surface drift
+re-check of every pinned surface on both sides. The file's prior content
+(the owner-added session-42-round transcript) is preserved in git at
+`f092666`.
 
-Twentieth bidirectional sweep (agent-browser, logged into the reference,
-390×844 + 1440×900). Standing pins first, pointer moved away per the
-recipe: the mobile trigger reads BARE at rest (measurement 12 — no
-twelfth flip), the account/cart glyphs are plain dark, the header glass
-is `rgba(255,255,255,0.8)` + `blur(24px)` + hairline on a sticky `<nav>`,
-the brand wordmark is Playfair 20px/700 with its 20px icon glyph, the
-footer is `rgb(29,24,22)`, Inter and Playfair are live via
-`document.fonts`, the body is `rgb(251,250,249)`, the mobile menu opens
-with all 5 links + search, and robots/sitemap/manifest serve.
+### Baseline gate (reproduced exactly)
 
-Then the watch-list surfaces, never measured: a fresh order was placed
-on the reference through the logged-in COD flow (`ORD-MV8ZOL1T`), and the
-success page was mapped end to end at both viewports — the
-`max-w-2xl py-12 space-y-8` wrapper (desktop x=384/w=672), the
-`text-center space-y-4` header with NO icon disc (the clone's 80px green
-check disc was a v1 invention — it does not exist on the reference), the
-order pill at `bg-primary/5` + `border-primary/20` + `px-5 py-2` (38px,
-Package 16px), the LARGE amber COD variant (`rounded-2xl` 16px, `p-5`,
-`flex gap-4`, a 40px `bg-amber-100` disc with a 20px amber-600 Banknote,
-16px/600 amber-900 title, 14px amber-700 body with the amount in a
-`<strong>` — NOT the cart's compact 12px variant), the Order Details card
-(16px radius, hairline, no shadow, a `bg-muted/30` p-5 header band,
-Playfair 16px/600 h2, 48px SQUARE images, 14px/500 names, muted totals
-with a 16px/700 Total row, bg-border 1px dividers, FOUR delivery rows
-including the phone row the clone lacked), and the 36px px-4 pill LINKS
-(outline shadow-sm + primary v3 shadow).
+| Stage | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build | **530.57 KB** ✓ — deterministic (two consecutive builds → identical md5); +77 B vs the s44 ledger read of 530.49 KB, provenance environmental (identical source inputs — every commit since `96df9b2` is docs-only; likely transitive-dep patch drift within lockfile ranges after an environment reinstall) |
+| E2E | **312/312 ✓ (156 specs × 2 projects, 5.7 min)** |
 
-The account page, re-measured with TWO orders, exposed the s41 "ONE
-card" reading as a single-order-list artifact: the reference list is a
-`space-y-3` wrapper of ONE CARD PER ORDER, and each row is a button that
-EXPANDS IN PLACE (an accordion body with items, a shipping/total line,
-the address, and a Track Order link). The clone's rows navigate to the
-superset detail page — divergence #20, updated to name the accordion.
+One environment quirk bit first, same class as session-39/44: the
+Playwright chromium cache held revision 1200 while the installed
+@playwright/test 1.64.0 expects 1248 — first E2E attempt: 304 launch
+failures / 8 passing. `npx playwright install chromium` restored it
+(~120 MiB), then the full suite ran green.
 
-Wrote remediation plan §31 (F42-01…F42-15, D1–D6) under the
-validate-then-execute doctrine, cross-checking every finding against
-checkout-flow.tsx and account-pages.tsx.
+### Reference side — every pinned surface re-measured live (zero drift)
 
-TDD: 7 new visual-parity spec blocks appended first; RED observed (14
-failing runs on the pre-change build, both projects). GREEN: 4 new tokens
-(`--color-primary-line`, `--color-cod-disc`, `--color-cod-disc-icon`,
-`--color-cod-title-strong`), the optional additive `Order.phone?: string`
-(types + placeOrder + the checkout call — no seed change, so no
-STORAGE_KEY bump), the OrderSuccessPage rewrite (SuccessCodNotice — the
-measured large variant, retiring the badge-based CodNotice; the
-gallery-band card; square images; muted totals; the phone row; 36px Link
-pills), and the per-order account cards (the li IS the card).
+Logged in with the owner-supplied account; 390×844 mobile +
+1440×900 desktop where noted.
 
-GREEN-side corrections, all mine: the button shadow pins first tried
-exact strings and could never match — the reference composes 2 leading
-transparent shadow layers (v3), this build's v4 composes 4 — so the pins
-now assert the v3 GEOMETRY via containment (new trap #11, written into
-AGENTS.md at the pin); one collateral spec updated (the s36 success-CTA
-48px button pin superseded by the measured 36px LINK, double-pinned in
-cart-checkout + visual-parity).
+- **Chrome pins**: mobile trigger BARE at rest (**measurement 15**,
+  no fifteenth flip; thirteen consecutive bare since s30); account
+  and cart glyphs plain dark 16px `rgb(29,24,22)` 36×36; header
+  glass `rgba(255,255,255,0.8)` + `blur(24px)` + 1px hairline
+  `rgba(229,224,220,0.5)` on a sticky NAV; brand "HomeNest" Playfair
+  Display 20px/700; body `rgb(251,250,249)`; robots allow-all +
+  sitemap link (22 URLs serving).
+- **Mobile menu**: inline `md:hidden` dropdown — 5 links 14px/500,
+  Home active white-on-orange `rgb(217,110,38)`, 44px rows. Zero
+  change.
+- **Home**: h1 36px/700 Playfair white; hero r-24 358×500; card
+  chrome 16px/hairline/white shadow-sm; Featured badge orange pill
+  12px/600 73×22.
+- **/products**: h1 30px/700; "8 products found" (one mid-load
+  hydration-race read of "0" — settled state 8, matching every prior
+  sweep); 36px pill search; 36px pill category filter with hairline;
+  mobile 2-col grid (x=16/x=205, 169px cards).
+- **PDP**: back 14px; h1 30px/700; 356×356 image in r-24 1px-bordered
+  card; "4.9 (412 reviews)"; CTA 40px/9999px orange.
+- **/cart**: h1 "Your Cart" 30px/700 no count; 16px/hairline cards;
+  80×80 square images; h3 16px/600; OS 18px/700; compact amber COD
+  `rgb(255,251,235)`/r-12/border `rgb(253,230,138)`; Proceed
+  40px pill.
+- **/checkout**: h1 30px/700 mb-32; labels 14px/500; fields
+  36px/r-12/hairline/transparent; Place Order 40px pill.
+- **/account**: h1 20px/700; 16px/hairline cards ×4 (profile +
+  per-order — 3 orders); OH h2 20px/700.
+- **/track-order**: h1 30px/700; 56px disc r-16
+  `rgba(217,110,38,0.1)`; 36px pill input; 36px Track; result
+  (ORD-MV8ZOL1T): 18px Playfair/700 number; amber status badge
+  `rgb(254,243,199)` 14px; steps 14px/500 muted; COD r-16.
+- **/order-success** (fresh order **ORD-MVA3M5YT** placed this
+  sweep): h1 "Order Placed!" 30px; pill
+  `rgba(217,110,38,0.05)`/9999px/38px; LARGE amber COD r-16/h-128;
+  CTAs 36px.
+- **/about** and **/contact**: h1 36px/700 both; 4 value cards
+  16px/p-24; promise beige `rgb(243,238,232)` r-24; Send Message
+  36px pill orange.
 
-Full gate green: typecheck ✓ lint ✓ 104/104 unit ✓ 529.56 KB ✓ 304/304
-E2E (152 specs × 2, 5.6 min, zero collateral beyond the one superseded
-pin).
+### Clone side — live verification (production preview :4173)
 
-Post-change re-sweep (live, both viewports): every remediated surface
-reference-exact — the wrapper/py-48/rhythm, no disc, the pill alphas and
-38px height, the amber COD box with its disc/title/body, the card band +
-square images + muted totals + 4 delivery rows + 2 dividers, the 36px
-pills, the desktop geometry byte-for-byte (x=384/w=672); the account
-list renders 2 per-order cards with the 12px seam; the mobile menu
-re-checked (modal dialog, all links + the logged-in Account row).
+- **Mobile menu** (Tailwind v4 trap #5 watch, by hand): modal dialog
+  `aria-modal` / "Site menu", **portalized to `document.body`**
+  (chain `BODY>HTML`), full-width panel at y=64, solid white NAV,
+  5 links + Account + search at 44px rows; **focus trap** — 13 Tab
+  presses stay inside, cycling to the Account link; **Escape closes
+  and restores focus to the "Open menu" trigger** (re-verified
+  cleanly after an initial sloppy read).
+- **Cart drawer** (s43 layer): h2 "Your Cart" 20px/700; 80×80 square
+  r-0 images; 16px/hairline cards; h3 16px/600; price 16px/700
+  `rgb(217,110,38)`; muted-pill steppers `rgb(242,240,237)` 24×24
+  buttons; inline trash; "Order Summary" 18px/700; CTA 40px/9999px;
+  "View full cart" 14px/500 muted; **desktop geometry
+  x=992/w=448/h=900 — byte-for-byte the s43 ledger**.
+- **Header glass**: sticky, `rgba(255,255,255,0.8)`, `blur(24px)`,
+  hairline, h-16.
+- **SEO superset served**: robots.txt (5 disallows), sitemap.xml
+  (36 URLs), manifest.webmanifest 200, per-route title
+  "Products | HomeNest Kitchen".
 
-Nine captures under `docs/screenshots/`: 3 reference evidence
-(_ref-sweep42-success-desktop/mobile, account-orders-expanded-mobile) +
-2 clone before + 4 after.
+### Captures (9 → `docs/screenshots/`)
 
-Docs: remediation §31 checked-off + §31.4 gate, session_42.md (the prior
-raw transcript preserved in git at `7ec9a15`), AGENS pins + trap #11,
-CLAUDE counts (152/304), PAD §5.6 #20 update + #21, README badge/rows +
-the 43/44 transcript rows, SKILL ledger/file/token rows, DEPLOYMENT.md
-(~529 KB still rounds correctly — no edit), both worklogs.
+`_ref-sweep45-menu-mobile`, `_ref-sweep45-success-mobile` (reference
+evidence; the fresh order) + `_sweep45-clone-mobile-menu`,
+`-cart-drawer-mobile`, `-cart-drawer-desktop`, `-home-desktop`,
+`-products-desktop`, `-pdp-desktop`, `-cart-desktop` (clone
+verification). All validated (correct viewport dimensions).
 
-Committed `9acf18f` on main. SSH push via `docs/ssh_git_wrapper_v3.py`:
-fingerprint verified (`3ddaNlFhMz…NnU4PU`), dry-run green (fast-forward
-`5f585da..9acf18f`), real push verified (remote main @ `9acf18f` ==
-local HEAD), operator key shredded after. This file is the follow-up
-transcript commit per the odd-transcript convention.
+### Decision records
 
-**Session-42 is fully closed and pushed.** Next watch list: the
-accordion stays a registered divergence (function exceeds via the detail
-page); admin-only surfaces have no reference counterpart; tile entrance
-animations (transient, D8); reference drift watch; ADR-001 (server-backed
-auth) remains an owner decision.
+- **D1 — validation track.** Zero drift on every pinned surface both
+  sides → no TDD cycle applies (the s18/20/22/24/32/44 no-drift
+  precedent). The 312/312 gate plus the live bidirectional
+  measurements are the deliverable.
+- **D2 — the fresh reference order is evidence, not parity debt.**
+  The reference account holds 4 orders, all rendering the s42
+  per-card shape; the clone's seed-driven state is unaffected.
+- **D3 — the trigger stays bare at measurement 15.**
+- **D4 — the 530.57 KB build-size read is recorded as-is.**
+  Deterministic build, identical source inputs, full gate green —
+  environmental delta; re-flag only if it compounds.
+
+### Verification gate
+
+typecheck ✓ · lint ✓ · 104/104 unit ✓ · 530.57 KB (deterministic) ·
+**312/312 E2E** ✓ · db contract unchanged (24 products / 8
+categories / 2 users) · remediation §34 · README rows · both
+worklogs. Zero code delta this round — AGENTS/CLAUDE/PAD/SKILL/
+DEPLOYMENT stay at the session-43/44 figures; `.env.example` in
+sync.
+
+Pushed to `main` via `docs/ssh_git_wrapper_v3.py` (dry-run first;
+remote verified; key materialized outside the repo and shredded
+after). The raw transcript of this round follows as
+`docs/session_51.md` (round-added follow-up, per the odd-transcript
+convention).
