@@ -872,3 +872,326 @@ test("contact form fields match the reference spec", async ({ page }) => {
   const submitWidth = await submit.evaluate((el) => Math.round(el.getBoundingClientRect().width));
   expect(Math.abs(submitWidth - messageWidth)).toBeLessThanOrEqual(2);
 });
+
+/** Session-41 — the checkout/cart/account/track layer (19th sweep,
+ * 2026-10-15). Reference values measured live (agent-browser, logged in,
+ * 390×844 + 1440×900): F41-01…F41-28, remediation plan §30. */
+
+async function sweep41AddKnife(page: import("@playwright/test").Page) {
+  await page.goto("/product/p-knife-set");
+  await page.getByRole("button", { name: "Add to Cart" }).click();
+  await expect(page.getByRole("button", { name: /Added!/ })).toBeVisible();
+}
+
+test("checkout shell matches the reference wrapper, heading, and grid", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/checkout");
+  // F41-01: max-w-5xl py-8 wrapper.
+  const wrapper = page.locator("main > div");
+  await expect(wrapper).toHaveCSS("max-width", "1024px");
+  await expect(wrapper).toHaveCSS("padding-top", "32px");
+  // F41-02: h1 text-3xl 30px.
+  const h1 = page.getByRole("heading", { name: "Checkout", exact: true });
+  await expect(h1).toHaveCSS("font-size", "30px");
+  await expect(h1).toHaveCSS("font-weight", "700");
+  // F41-03: grid lg:grid-cols-3 gap-8 with a col-span-2 form column.
+  const grid = page.locator('main > div > div[class*="grid-cols-3"]');
+  const viewport = page.viewportSize();
+  const cols = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  expect(cols).toBe(viewport && viewport.width < 1024 ? 1 : 3);
+  await expect(grid).toHaveCSS("column-gap", "32px");
+  const formColumn = grid.locator("xpath=child::*[contains(@class, 'col-span-2')]");
+  await expect(formColumn).toHaveCount(1);
+});
+
+test("checkout section cards match the reference chrome", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/checkout");
+  // F41-04: bg-card rounded-2xl border/50 p-6 space-y-4, NO shadow.
+  const contactCard = page.locator("main section", { hasText: "Contact Information" }).first();
+  await expect(contactCard).toHaveCSS("border-radius", "16px");
+  await expect(contactCard).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(contactCard).toHaveCSS("box-shadow", "none");
+  await expect(contactCard).toHaveCSS("padding", "24px");
+  // F41-05: h2 18px/600 (font-heading text-lg font-semibold).
+  const h2 = contactCard.getByRole("heading", { name: "Contact Information", exact: true });
+  await expect(h2).toHaveCSS("font-size", "18px");
+  await expect(h2).toHaveCSS("font-weight", "600");
+  // The OS heading is 18px/700 (text-lg font-bold).
+  const allOsHeadings = page.getByRole("heading", { name: "Order Summary", exact: true });
+  const osCount = await allOsHeadings.count();
+  for (let i = 0; i < osCount; i += 1) {
+    await expect(allOsHeadings.nth(i)).toHaveCSS("font-size", "18px");
+    await expect(allOsHeadings.nth(i)).toHaveCSS("font-weight", "700");
+  }
+});
+
+test("checkout form fields match the shadcn v3 spec", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/checkout");
+  // F41-06: h-9 36px 16px rounded-[12px] bg-transparent; labels
+  // leading-none 14px/500; space-y-2 field wrappers.
+  const nameInput = page.locator("#co-name");
+  await expect(nameInput).toHaveCSS("height", "36px");
+  await expect(nameInput).toHaveCSS("font-size", "16px");
+  await expect(nameInput).toHaveCSS("border-radius", "12px");
+  await expect(nameInput).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(nameInput).toHaveCSS("border-color", "rgb(229, 224, 220)");
+  const nameLabel = page.locator("label[for='co-name']");
+  await expect(nameLabel).toHaveCSS("font-size", "14px");
+  await expect(nameLabel).toHaveCSS("font-weight", "500");
+  await expect(nameLabel).toHaveCSS("line-height", "14px");
+  // F41-06 rhythm: v4's space-y-2 puts the space on margin-block-end of
+  // non-last children (trap #4) — the label carries the 8px seam.
+  await expect(nameLabel).toHaveCSS("margin-bottom", "8px");
+  // F41-07: the Country select at 36px/12px/transparent.
+  const country = page.locator("#co-country");
+  await expect(country).toHaveCSS("height", "36px");
+  await expect(country).toHaveCSS("border-radius", "12px");
+  await expect(country).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  // F41-08: the notes textarea min-h-60 py-2 16px 12px.
+  const notes = page.locator("#co-notes");
+  await expect(notes).toHaveCSS("min-height", "60px");
+  await expect(notes).toHaveCSS("font-size", "16px");
+  await expect(notes).toHaveCSS("border-radius", "12px");
+});
+
+test("checkout payment options match the reference radio-card", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/checkout");
+  // F41-09: gap-4, 2px primary border when selected, 40px rounded-full
+  // primary/10 disc, 16px/600 title, 14px/400 sub.
+  const cod = page.getByRole("radio", { name: /Cash on Delivery/ });
+  await expect(cod).toHaveCSS("column-gap", "16px");
+  await expect(cod).toHaveCSS("border-width", "2px");
+  await expect(cod).toHaveCSS("border-color", "rgb(217, 110, 38)");
+  await expect(cod).toHaveCSS("background-color", "rgba(217, 110, 38, 0.05)");
+  await expect(cod).toHaveCSS("border-radius", "12px");
+  await expect(cod).toContainText("Cash on Delivery");
+  const title = cod.locator(".font-semibold").first();
+  await expect(title).toHaveCSS("font-size", "16px");
+  await expect(title).toHaveCSS("font-weight", "600");
+  const sub = cod.locator(".text-sm.text-muted-foreground").first();
+  await expect(sub).toHaveCSS("font-size", "14px");
+  await expect(sub).toHaveCSS("font-weight", "400");
+  const disc = cod.locator("[class*='bg-primary-film']").first();
+  const discRadius = await disc.evaluate((el) => getComputedStyle(el).borderRadius);
+  expect(["9999px", "calc(infinity * 1px)"]).toContain(discRadius);
+});
+
+test("checkout order summary matches the reference card and button", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/checkout");
+  // F41-10: rounded-2xl border/50 p-6 no shadow, sticky top-24.
+  const summaryCard = page.locator("main aside").first();
+  await expect(summaryCard).toHaveCSS("border-radius", "16px");
+  await expect(summaryCard).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(summaryCard).toHaveCSS("padding", "24px");
+  await expect(summaryCard).toHaveCSS("box-shadow", "none");
+  await expect(summaryCard).toHaveCSS("position", "sticky");
+  await expect(summaryCard).toHaveCSS("top", "96px");
+  // Dividers are 1px bg-border divs, not <hr>.
+  await expect(summaryCard.locator("hr")).toHaveCount(0);
+  const divider = summaryCard.locator("[class*='bg-border']").first();
+  await expect(divider).toHaveCSS("height", "1px");
+  await expect(divider).toHaveCSS("background-color", "rgb(229, 224, 220)");
+  // Items: 48px images, name 14px/500, Qty 12px, price 14px/600.
+  const itemImg = summaryCard.locator("img").first();
+  await expect(itemImg).toHaveCSS("width", "48px");
+  await expect(itemImg).toHaveCSS("height", "48px");
+  const itemName = summaryCard.locator("p").first();
+  await expect(itemName).toHaveCSS("font-size", "14px");
+  await expect(itemName).toHaveCSS("font-weight", "500");
+  // Total row 18px/700, no border-top seam.
+  const totalRow = summaryCard.locator(".text-lg.font-bold").last();
+  await expect(totalRow).toHaveCSS("font-size", "18px");
+  await expect(totalRow).toHaveCSS("font-weight", "700");
+  // F41-11: Place Order h-10 40px 14px/500 rounded-full with the v3 shadow.
+  const placeOrder = page.getByRole("button", { name: "Place Order" });
+  await expect(placeOrder).toHaveCSS("height", "40px");
+  await expect(placeOrder).toHaveCSS("font-size", "14px");
+  await expect(placeOrder).toHaveCSS("font-weight", "500");
+  await expect(placeOrder).toHaveCSS("border-radius", "9999px");
+  expect((await placeOrder.evaluate((el) => getComputedStyle(el).boxShadow)) !== "none").toBe(true);
+});
+
+test("cart shell matches the reference wrapper, heading, and grid", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/cart");
+  // F41-14/15: max-w-5xl py-8, "Your Cart" 30px with NO count span.
+  const wrapper = page.locator("main > div");
+  await expect(wrapper).toHaveCSS("max-width", "1024px");
+  await expect(wrapper).toHaveCSS("padding-top", "32px");
+  const h1 = page.getByRole("heading", { name: "Your Cart", exact: true });
+  await expect(h1).toHaveText("Your Cart");
+  await expect(h1).toHaveCSS("font-size", "30px");
+  await expect(h1).toHaveCSS("font-weight", "700");
+  await expect(h1.locator("span")).toHaveCount(0);
+  // The reference layout is the same lg:grid-cols-3 shell.
+  const grid = page.locator('main > div > div[class*="grid-cols-3"]');
+  const viewport = page.viewportSize();
+  const cols = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  expect(cols).toBe(viewport && viewport.width < 1024 ? 1 : 3);
+});
+
+test("cart item card matches the reference chrome and internals", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/cart");
+  // F41-16: rounded-2xl border/50 p-4 flex gap-4, NO shadow.
+  const item = page.locator("main li").first();
+  await expect(item).toHaveCSS("border-radius", "16px");
+  await expect(item).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(item).toHaveCSS("padding", "16px");
+  await expect(item).toHaveCSS("column-gap", "16px");
+  await expect(item).toHaveCSS("box-shadow", "none");
+  // SQUARE 80×80 image — no radius, no border.
+  const img = item.locator("img").first();
+  await expect(img).toHaveCSS("width", "80px");
+  await expect(img).toHaveCSS("height", "80px");
+  await expect(img).toHaveCSS("border-radius", "0px");
+  await expect(img).toHaveCSS("border-top-width", "0px");
+  // F41-17: name 16px/600, unit price 16px/700 primary, line total 14px/700.
+  const name = item.locator("h3");
+  await expect(name).toHaveCSS("font-size", "16px");
+  await expect(name).toHaveCSS("font-weight", "600");
+  const unitPrice = item.locator(".text-primary").first();
+  await expect(unitPrice).toHaveCSS("font-size", "16px");
+  await expect(unitPrice).toHaveCSS("font-weight", "700");
+  const lineTotal = item.locator("[class*='items-end'] .font-bold").last();
+  await expect(lineTotal).toHaveCSS("font-size", "14px");
+  // F41-18: the stepper is a MUTED pill with 24×24 buttons.
+  const stepper = item.locator("[class*='bg-muted']").filter({ has: page.getByRole("button") }).first();
+  await expect(stepper).toHaveCSS("background-color", "rgb(242, 240, 237)");
+  const stepButtons = stepper.getByRole("button");
+  await expect(stepButtons.first()).toHaveCSS("width", "24px");
+  await expect(stepButtons.first()).toHaveCSS("height", "24px");
+  const trash = item.getByRole("button", { name: /^Remove/ });
+  const trashSize = await trash.evaluate((el) => {
+    const svg = el.querySelector("svg");
+    return svg ? Math.round(svg.getBoundingClientRect().width) : 0;
+  });
+  expect(trashSize).toBe(16);
+});
+
+test("cart order summary carries the reference amber COD notice", async ({ page }) => {
+  await sweep41AddKnife(page);
+  await page.goto("/cart");
+  // F41-20: h2 18px/700, 1px bg-border dividers (no hr), Total 18px/700,
+  // the amber COD box, and the h-10 Proceed control.
+  const os = page.locator("main aside").first();
+  await expect(os.locator("h2")).toHaveCSS("font-size", "18px");
+  await expect(os.locator("h2")).toHaveCSS("font-weight", "700");
+  await expect(os.locator("hr")).toHaveCount(0);
+  await expect(os.locator(".text-lg.font-bold").last()).toHaveCSS("font-size", "18px");
+  const cod = os.locator("[class*='cod-box'], [data-cod]").first();
+  await expect(cod).toHaveCSS("background-color", "rgb(255, 251, 235)");
+  await expect(cod).toHaveCSS("border-color", "rgb(253, 230, 138)");
+  await expect(cod).toHaveCSS("border-radius", "12px");
+  await expect(cod).toHaveCSS("padding", "12px");
+  const proceed = os.getByRole("link", { name: /Proceed to Checkout/ });
+  await expect(proceed).toHaveCSS("height", "40px");
+  await expect(proceed).toHaveCSS("border-radius", "9999px");
+});
+
+test("account shell matches the reference profile card", async ({ page }) => {
+  await page.goto("/account");
+  await page.getByLabel("Email", { exact: true }).fill("john@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("Demo1234!");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL(/\/account$/);
+  // F41-21: max-w-3xl wrapper.
+  const wrapper = page.locator("main > div");
+  await expect(wrapper).toHaveCSS("max-width", "768px");
+  // F41-22: profile card rounded-2xl border/50 p-6 no shadow; the 20px gap
+  // sits on the IDENTITY row (avatar | text) — the outer row keeps its
+  // R5-06 wrap layout (gap-4 between identity and controls).
+  const profile = page.locator("main [class*='bg-card']").first();
+  await expect(profile).toHaveCSS("border-radius", "16px");
+  await expect(profile).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(profile).toHaveCSS("padding", "24px");
+  await expect(profile).toHaveCSS("box-shadow", "none");
+  const avatar = profile.locator("[class*='rounded-full']").first();
+  const identityRow = avatar.locator("xpath=..");
+  await expect(identityRow).toHaveCSS("column-gap", "20px");
+  await expect(avatar).toHaveCSS("width", "64px");
+  await expect(avatar).toHaveCSS("background-color", "rgba(217, 110, 38, 0.1)");
+  const avatarIcon = await avatar.evaluate((el) => (el.querySelector("svg")?.getAttribute("class") || ""));
+  expect(avatarIcon).toContain("lucide-user");
+  // h1 20px/700.
+  const h1 = profile.getByRole("heading", { level: 1 });
+  await expect(h1).toHaveCSS("font-size", "20px");
+  await expect(h1).toHaveCSS("font-weight", "700");
+  // The role pill is the cream secondary pill, VISIBLE at all widths.
+  const pill = profile.locator("[data-role-pill], .bg-secondary").first();
+  await expect(pill).toBeVisible();
+  await expect(pill).toHaveCSS("background-color", "rgb(243, 238, 232)");
+  await expect(pill).toHaveCSS("color", "rgb(44, 36, 33)");
+  await expect(pill).toHaveCSS("font-size", "12px");
+  await expect(pill).toHaveCSS("font-weight", "600");
+});
+
+test("account order history matches the reference one-card list", async ({ page }) => {
+  // Login → place one order → the orders tab renders the reference list.
+  await page.goto("/account");
+  await page.getByLabel("Email", { exact: true }).fill("john@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("Demo1234!");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL(/\/account$/);
+  await sweep41AddKnife(page);
+  await page.goto("/checkout");
+  await page.getByLabel("Full Name *").fill("John Mercer");
+  await page.getByLabel("Phone Number *").fill("+1 (555) 010-0148");
+  await page.getByLabel("Street Address *").fill("48 Oak Street");
+  await page.getByLabel("City *").fill("San Francisco");
+  await page.getByLabel("State").fill("CA");
+  await page.getByLabel("ZIP Code").fill("94110");
+  await page.getByRole("button", { name: "Place Order" }).click();
+  await page.waitForURL(/\/order-success/);
+  await page.goto("/account");
+  // F41-23: Order History h2 text-xl 20px/700.
+  const h2 = page.getByRole("heading", { name: "Order History", exact: true });
+  await expect(h2).toHaveCSS("font-size", "20px");
+  await expect(h2).toHaveCSS("font-weight", "700");
+  // F41-24: ONE overflow-hidden card; rows p-5 flex items-center gap-4
+  // (the clone renders the row as a link — superset navigation).
+  const ordersCard = page.locator("[data-orders-card], main .overflow-hidden").first();
+  await expect(ordersCard).toHaveCSS("border-radius", "16px");
+  await expect(ordersCard).toHaveCSS("overflow", "hidden");
+  await expect(ordersCard).toHaveCSS("box-shadow", "none");
+  const row = ordersCard.getByRole("link").first();
+  await expect(row).toHaveCSS("padding", "20px");
+  await expect(row).toHaveCSS("column-gap", "16px");
+  const number = row.locator(".font-semibold").first();
+  await expect(number).toHaveCSS("font-size", "16px");
+  await expect(number).toHaveCSS("font-weight", "600");
+  const meta = row.locator(".text-xs").first();
+  await expect(meta).toHaveCSS("font-size", "12px");
+});
+
+test("track order entry matches the reference shell", async ({ page }) => {
+  await page.goto("/track-order");
+  // F41-25: py-12 wrapper (48px).
+  const wrapper = page.locator("main > div");
+  await expect(wrapper).toHaveCSS("padding-top", "48px");
+  // F41-26: 56px disc + 28px icon; h1 text-3xl 30px; sub 16px.
+  const disc = page.locator("main .rounded-2xl, main [class*='rounded-[16px]']").first();
+  await expect(disc).toHaveCSS("width", "56px");
+  await expect(disc).toHaveCSS("height", "56px");
+  const discIcon = await disc.evaluate((el) => {
+    const svg = el.querySelector("svg");
+    return svg ? Math.round(svg.getBoundingClientRect().width) : 0;
+  });
+  expect(discIcon).toBe(28);
+  const h1 = page.getByRole("heading", { name: "Track Your Order" });
+  await expect(h1).toHaveCSS("font-size", "30px");
+  await expect(h1).toHaveCSS("font-weight", "700");
+  const sub = page.locator("main .text-center p").first();
+  await expect(sub).toHaveCSS("font-size", "16px");
+  // F41-27: h-9 rounded-full pill input (16px) + h-9 Track button.
+  const input = page.locator("#track-number");
+  await expect(input).toHaveCSS("height", "36px");
+  await expect(input).toHaveCSS("font-size", "16px");
+  await expect(input).toHaveCSS("border-radius", "9999px");
+  const trackButton = page.getByRole("button", { name: "Track", exact: true });
+  await expect(trackButton).toHaveCSS("height", "36px");
+});

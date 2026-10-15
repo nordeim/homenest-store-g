@@ -11,6 +11,7 @@ import {
   Phone,
   Search,
   Truck,
+  User,
 } from "lucide-react";
 import { BrandMark, Field, PrimaryButton, inputClass } from "@/components/chrome";
 import { ProductCard } from "@/components/product";
@@ -322,19 +323,27 @@ function Card({ title, children }: { title?: string; children: ReactNode }) {
   );
 }
 
+/* F41-24 (s41): the reference renders ONE overflow-hidden card holding
+   p-5 rows — number 16px/600, status pill 12px/600, meta 12px/400 — with
+   hover:bg-muted/30 rows linking to the order detail (superset). */
 function OrderRow({ order }: { order: Order }) {
   return (
-    <li className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <Link href={`/account/orders/${order.id}`} className="font-semibold text-primary hover:underline">
-          {order.number}
-        </Link>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Placed on {new Date(order.placedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}{" "}
-          · {order.items.reduce((sum, item) => sum + item.quantity, 0)} items
-        </p>
-      </div>
-      <div className="flex items-center gap-4 sm:flex-col sm:items-end sm:gap-1">
+    <li>
+      <Link
+        href={`/account/orders/${order.id}`}
+        className="flex w-full items-center gap-4 p-5 transition-colors hover:bg-muted/30"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold text-foreground">{order.number}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {new Date(order.placedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            <span aria-hidden> · </span>
+            {order.items.reduce((sum, item) => sum + item.quantity, 0)} item
+            {order.items.reduce((sum, item) => sum + item.quantity, 0) === 1 ? "" : "s"}
+            <span aria-hidden> · </span>
+            <span className="font-medium text-foreground">{formatMoney(order.totalCents)}</span>
+          </p>
+        </div>
         <span
           className={cn(
             "rounded-full px-2.5 py-1 text-xs font-semibold",
@@ -347,8 +356,7 @@ function OrderRow({ order }: { order: Order }) {
         >
           {statusLabel(order.status)}
         </span>
-        <span className="font-bold text-foreground">{formatMoney(order.totalCents)}</span>
-      </div>
+      </Link>
     </li>
   );
 }
@@ -377,25 +385,28 @@ export function AccountPage() {
   const saved = products.filter((product) => wishlist.includes(product.id) && product.visible);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-3xl space-y-8 px-4 py-10 sm:px-6">
       {/* R5-06: the row wraps and the identity block has a min-width floor —
           long names/emails used to push the Log out control off-viewport on
-          phones (pinned by tests/e2e/account-layout.spec.ts). */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-6 shadow-card">
-        <div className="flex min-w-0 items-center gap-4">
-          <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Package className="h-8 w-8" strokeWidth={1.6} />
+          phones (pinned by tests/e2e/account-layout.spec.ts).
+          F41-22 (s41): the reference chrome — rounded-2xl(16px) border/50
+          hairline, NO shadow, 20px identity gap, a lucide-USER avatar,
+          a 20px h1, and the CREAM role pill visible at all widths. */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-border-soft bg-card p-6">
+        <div className="flex min-w-0 items-center gap-5">
+          <span className="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary-film text-primary">
+            <User className="h-8 w-8" strokeWidth={1.6} />
           </span>
           <div className="min-w-0">
-            <h1 className="break-words font-display text-2xl font-bold text-foreground">{user.name}</h1>
+            <h1 className="break-words font-display text-xl font-bold text-foreground">{user.name}</h1>
             <p className="mt-0.5 flex items-center gap-1.5 break-all text-sm text-muted-foreground">
               <Mail className="h-3.5 w-3.5 shrink-0" /> {user.email}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="hidden rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground sm:inline">
-            {user.role === "admin" ? "Admin" : "User"}
+          <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+            {user.role}
           </span>
           <button
             type="button"
@@ -410,7 +421,7 @@ export function AccountPage() {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
         {(["orders", "profile", "addresses", "saved"] as const).map((key) => (
           <button
             key={key}
@@ -428,10 +439,10 @@ export function AccountPage() {
       </div>
 
       {tab === "orders" && (
-        <div className="mt-6">
-          <h2 className="font-display text-2xl font-bold text-foreground">Order History</h2>
+        <div className="space-y-4">
+          <h2 className="font-display text-xl font-bold text-foreground">Order History</h2>
           {mine.length === 0 ? (
-            <div className="mt-4 rounded-xl border border-border bg-card py-14 text-center shadow-card">
+            <div className="rounded-[16px] border border-border-soft bg-card py-14 text-center">
               <Package className="mx-auto h-10 w-10 text-muted-foreground" strokeWidth={1.4} />
               <p className="mt-4 text-base font-semibold text-foreground">No orders yet</p>
               <p className="mt-1 text-sm text-muted-foreground">Start shopping to see your orders here.</p>
@@ -443,7 +454,7 @@ export function AccountPage() {
               </Link>
             </div>
           ) : (
-            <ul className="mt-4 flex flex-col gap-4">
+            <ul data-orders-card className="overflow-hidden rounded-[16px] border border-border-soft bg-card">
               {mine.map((order) => (
                 <OrderRow key={order.id} order={order} />
               ))}
@@ -453,7 +464,7 @@ export function AccountPage() {
       )}
 
       {tab === "profile" && (
-        <div className="mt-6 grid max-w-lg gap-6">
+        <div className=" grid max-w-lg gap-6">
           <Card>
             <form
               className="grid gap-4 p-6"
@@ -540,7 +551,7 @@ export function AccountPage() {
       )}
 
       {tab === "addresses" && (
-        <div className="mt-6">
+        <div className="">
           <ul className="grid gap-4 sm:grid-cols-2">
             {user.addresses.map((address) => (
               <li key={address.id} className="rounded-xl border border-border bg-card p-5 shadow-card">
@@ -654,7 +665,7 @@ export function AccountPage() {
       )}
 
       {tab === "saved" && (
-        <div className="mt-6">
+        <div className="">
           {saved.length === 0 ? (
             <div className="rounded-xl border border-border bg-card py-14 text-center shadow-card">
               <p className="text-sm text-muted-foreground">Nothing saved yet. Tap the heart on any product.</p>
@@ -769,18 +780,20 @@ export function TrackOrderPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
-      <div className="text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-          <Package className="h-8 w-8 text-primary" strokeWidth={1.7} />
+    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+      {/* F41-26 (s41): 56px (w-14) disc + 28px (w-7) icon, h1 text-3xl
+          30px, sub 16px — the reference entry shell. */}
+      <div className="text-center space-y-2">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-film">
+          <Package className="h-7 w-7 text-primary" strokeWidth={1.7} />
         </span>
-        <h1 className="mt-5 font-display text-4xl font-bold text-foreground">Track Your Order</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="mt-2 font-display text-3xl font-bold text-foreground">Track Your Order</h1>
+        <p className="text-base text-muted-foreground">
           Enter your order number to see the current status
         </p>
       </div>
 
-      <form className="mx-auto mt-8 flex max-w-xl gap-2" onSubmit={onSubmit} role="search">
+      <form className="mx-auto mt-8 flex max-w-xl gap-3" onSubmit={onSubmit} role="search">
         <label htmlFor="track-number" className="sr-only">
           Order number
         </label>
@@ -791,10 +804,15 @@ export function TrackOrderPage() {
             value={number}
             onChange={(e) => setNumber(e.target.value)}
             placeholder="e.g. ORD-ABC123"
-            className="h-12 w-full rounded-full border border-border bg-card pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground"
+            className="h-9 w-full rounded-[9999px] border border-border bg-transparent pl-11 pr-4 text-base text-foreground shadow-sm placeholder:text-muted-foreground"
           />
         </div>
-        <PrimaryButton type="submit">Track</PrimaryButton>
+        <button
+          type="submit"
+          className="inline-flex h-9 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[9999px] bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Track
+        </button>
       </form>
 
       {found === "miss" && (

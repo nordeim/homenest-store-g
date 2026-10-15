@@ -108,6 +108,19 @@
      would serialize as oklab(...) instead of the reference's sRGB value.
      The card image tiles keep bg-muted/30 (invisible under the photo). */
   --color-gallery: hsl(30 15% 94% / 0.3);
+  /* Session-41 (F41-09): the checkout payment option's selected state —
+     bg-primary/5 computes rgba(217,110,38,0.05) on the reference; alpha
+     baked (T-13 pattern). */
+  --color-primary-faint: hsl(24 70% 50% / 0.05);
+  /* Session-41 (F41-20): the reference cart OS carries an AMBER COD box —
+     amber-50 bg / amber-200 border / amber-800 title / amber-700 body,
+     measured rgb(255,251,235) / rgb(253,230,138) / rgb(146,64,14) /
+     rgb(180,83,9). Dedicated tokens (T-13 doctrine: measured sRGB wins;
+     badge-tinted alphas would color-mix in oklab). */
+  --color-cod-bg: rgb(255 251 235);
+  --color-cod-border: rgb(253 230 138);
+  --color-cod-title: rgb(146 64 14);
+  --color-cod-body: rgb(180 83 9);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   /* Session-38 (F38-01): v3 shadow-md geometry — the reference's category

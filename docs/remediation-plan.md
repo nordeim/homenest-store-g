@@ -2510,3 +2510,237 @@ Spec correction in GREEN: the contact-submit full-width pin compares the
 submit against the **textarea** (both w-full at every viewport) — the
 draft compared it to the name input, which is half-width at sm+ (the
 name/email pair is 2-up).
+
+## 30. Session-41 audit — the checkout/cart/account/track layer (19th sweep, 2026-10-15)
+
+Scope: the last never-measured surfaces — the full checkout page, the full
+cart page, the logged-in account page, and the track-order entry page. All
+reference values measured live (agent-browser, logged in, 390×844 mobile +
+1440×900 desktop). The standing-pin battery held first: trigger bare
+(measurement 11 — no eleventh flip), account/cart plain dark glyphs, header
+glass rgba(255,255,255,0.8)+blur(24px)+hairline, brand 20px Playfair + 36px
+12px-radius icon, footer rgb(29,24,22), Inter via document.fonts, mobile menu
+opens with all 5 nav links + search, robots/sitemap/manifest served (36
+URLs). The gallery-thumbnail hypothesis remains closed (s40).
+
+### 30.1 Findings
+
+**Checkout page (F41-01…F41-13):**
+
+- **F41-01 — wrapper**: reference `max-w-5xl mx-auto px-4 sm:px-6 lg:px-8
+  py-8` (1024px, 32px vertical rhythm); clone `max-w-7xl … py-10` (1280px,
+  40px).
+- **F41-02 — h1**: `font-heading text-3xl font-bold` 30px/700 with `mb-8`
+  (32px below); clone `text-4xl` 36px, no margin (the grid's mt-8 owns the
+  gap — visually equivalent but the h1 scale is wrong).
+- **F41-03 — layout**: `grid lg:grid-cols-3 gap-8` with the form column
+  `lg:col-span-2 space-y-6` and the summary in column 3 (measured 629px +
+  299px at 1440); clone `lg:grid-cols-[1fr_360px]` + `flex flex-col gap-6`
+  (fixed 360px aside — a different desktop geometry; the reference's summary
+  is ~1/3 fluid).
+- **F41-04 — section cards**: `bg-card rounded-2xl border border-border/50
+  p-6 space-y-4` — 16px radius, 0.5-alpha hairline, NO shadow, 16px
+  internal rhythm; clone `rounded-xl border border-border bg-card p-6
+  shadow-card` (20px radius, full border, shadow, mt-5 headings).
+- **F41-05 — section headings**: `font-heading text-lg font-semibold`
+  18px/600 (Contact/Shipping/Payment/Notes); the OS heading is `text-lg
+  font-bold` 18px/700; clone ships `text-xl` 20px/700 and `text-2xl` 24px/700.
+- **F41-06 — form fields**: the SAME shadcn v3 spec the contact form
+  remediated in s40 — field wrapper `space-y-2`, label `text-sm font-medium
+  leading-none` (14px/500/14px), input `flex h-9 w-full border border-input
+  bg-transparent px-3 py-1 text-base` (36px, 16px, 12px radius,
+  rgb(229,224,220) border, 4px 12px padding); clone uses the shared
+  `inputClass` (h-12, 14px, rounded-lg→16px, bg-card, px-3.5, mt-1.5
+  margins). The contact-page doctrine repeats: a page-local field class,
+  the shared primitives stay untouched (admin/auth surfaces keep them).
+- **F41-07 — Country select**: `h-9` 36px, 14px text, 12px radius,
+  transparent; clone 48px/16px/bg-card. (The shipping grid itself —
+  `grid sm:grid-cols-3 gap-4`, city/state/zip 1-col each — already
+  matches.)
+- **F41-08 — order-notes textarea**: `min-h-[60px] px-3 py-2 text-base`
+  16px, 12px radius (renders 90px); clone rows=4 py-3 14px rounded-lg
+  (106px).
+- **F41-09 — payment option**: `flex items-center gap-4 p-4 rounded-xl
+  border-2 border-primary bg-primary/5` — gap-4, a 2px border when
+  selected, 40px `rounded-full` primary/10 disc, title 16px/600, sub
+  14px/400; clone `gap-3 border` (1px), `rounded-lg` disc (16px), title
+  `text-sm font-bold` 14px/700. The 20px radio ring (border-2 + 10px dot)
+  already matches.
+- **F41-10 — order summary card**: `bg-card rounded-2xl border
+  border-border/50 p-6 space-y-4 sticky top-24`; clone `rounded-xl …
+  shadow-card`, not sticky. Internal structure: 1px `bg-border` DIVIDERS
+  (not `<hr>`), items `space-y-3 max-h-64 overflow-y-auto pr-1` with
+  48px images, name 14px/500, "Qty: n" 12px/400, price 14px/600; totals
+  `space-y-2 text-sm` 14px/400 (Subtotal/Shipping); Total
+  `flex justify-between font-bold text-lg` 18px/700 (no border-top row);
+  trust row `flex gap-3 pt-1` (14px icons); clone uses `<hr>` full-alpha
+  dividers, no max-h, Total 14px/400 + border-t.
+- **F41-11 — Place Order button**: `h-10 px-8 w-full rounded-full shadow
+  hover:bg-primary/90` — 40px, 14px/500, the v3 `shadow` geometry; clone
+  h-12 48px, fw-600, no shadow.
+- **F41-12 — card rhythm**: cards stack at `space-y-6` (24px — measured
+  cardGap 24); clone `flex flex-col gap-6` (equivalent). No change needed
+  beyond F41-03's column split.
+- **F41-13 — email/full-name grid**: `grid sm:grid-cols-2 gap-4` — clone
+  already matches (name/phone 2-up).
+
+**Cart page (F41-14…F41-20):**
+
+- **F41-14 — wrapper/layout**: same reference shell as checkout —
+  `max-w-5xl … py-8` + `grid lg:grid-cols-3 gap-8`; clone `max-w-7xl
+  py-10` + `lg:grid-cols-[1fr_360px]`.
+- **F41-15 — h1**: "Your Cart" — 30px/700, NO item-count span; clone
+  "Your Cart (1 item)" 36px with a muted count.
+- **F41-16 — item card**: `bg-card rounded-2xl border border-border/50 p-4
+  flex gap-4` with a SQUARE 80×80 image (`w-full h-full object-cover`,
+  NO radius/border); clone `rounded-xl … shadow-card p-4` + 88×88
+  `rounded-lg border border-border bg-muted`.
+- **F41-17 — item internals**: h3 name 16px/600, category 14px/400 muted,
+  unit price 16px/700 primary, right column `flex flex-col items-end
+  justify-between gap-2` carrying the 14px/700 line total; clone renders
+  the line total `ml-auto self-center font-bold` (16px) with no right
+  column.
+- **F41-18 — stepper**: `flex items-center gap-2 bg-muted rounded-full
+  px-2 py-1` — a MUTED pill with 24×24 buttons (w-3 h-3 svgs) and a
+  14px/600 value; clone `rounded-full border border-border` with 36×36
+  (h-9 w-9) buttons.
+- **F41-19 — remove**: inline trash-2 16px in the right column
+  (`text-muted-foreground hover:text-destructive`); clone absolutely
+  positioned `right-3 top-3` h-9 w-9.
+- **F41-20 — cart OS + COD notice**: the reference OS keeps the checkout
+  structure (h2 18px/700, bg-border dividers, subtotal rows `space-y-3
+  text-sm` 14px, Total 18px/700) and carries an AMBER COD box —
+  `bg-amber-50 border border-amber-200 rounded-xl p-3`
+  (rgb(255,251,235) / rgb(253,230,138)), texts 12px/500 rgb(146,64,14) +
+  12px/400 rgb(180,83,9); clone ships a badge-token CodNotice
+  (border-badge/40 bg-badge/10) + 24px h2 + `<hr>` dividers. Continue
+  Shopping is a plain text-sm font-medium muted link on both (the clone's
+  "← " arrow is dropped for text parity).
+
+**Account page (F41-21…F41-24):**
+
+- **F41-21 — wrapper**: `max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-8`
+  (768px); clone `max-w-4xl`.
+- **F41-22 — profile card**: `bg-card rounded-2xl border border-border/50
+  p-6 flex items-center gap-5` — NO shadow, 20px gap; avatar 64px
+  `rounded-full bg-primary/10` with a lucide-**USER** w-8 icon; h1
+  username 20px/700 Playfair; email 14px muted; role pill
+  `inline-flex items-center border px-2.5 py-0.5 text-xs font-semibold`
+  — a CREAM pill (bg rgb(243,238,232) = secondary, text rgb(44,36,33),
+  12px/600, 2px 10px padding, transparent border) VISIBLE at all widths;
+  clone `rounded-xl … shadow-card`, a Package icon, 24px h1, and a
+  `hidden sm:inline` bg-muted pill.
+- **F41-23 — order history heading**: `text-xl font-bold` 20px/700; clone
+  `text-2xl` 24px.
+- **F41-24 — orders container**: ONE `bg-card rounded-2xl border
+  border-border/50 overflow-hidden` card holding `w-full text-left p-5
+  flex items-center gap-4 hover:bg-muted/30` rows — number
+  `font-semibold` 16px/600, status pill 12px/600, meta row 12px/400
+  (date · items · price `font-medium` 12px/500); clone ships separate
+  bordered+shadowed cards per order with 16px texts.
+
+**Track-order page (F41-25…F41-28):**
+
+- **F41-25 — wrapper**: `max-w-2xl mx-auto px-4 sm:px-6 py-12 space-y-8`
+  (48px py); clone `py-14` (56px).
+- **F41-26 — header**: `text-center space-y-2` with a 56px (w-14)
+  `rounded-2xl bg-primary/10` disc + 28px (w-7) lucide-package icon; h1
+  `font-heading text-3xl font-bold` 30px; sub 16px/400 muted. Clone:
+  64px disc + 32px icon, `text-4xl` 36px h1, `text-sm` 14px sub.
+- **F41-27 — search row**: `flex gap-3` with the shadcn input as a PILL —
+  `h-9 rounded-full` 36px, 16px text, transparent, 16px lucide-search at
+  `left-4`; Track button `h-9 rounded-full bg-primary px-6` 36px 14px/500;
+  clone h-12 48px 14px input + 48px PrimaryButton.
+- **F41-28 — empty-state headings**: the reference renders checkout/cart/
+  track h1s at `text-3xl` 30px across the flow (see F41-02/F41-15/
+  F41-26); the clone's "Your cart is empty" / "No items in cart" /
+  "We cannot show that order" states keep `text-3xl` already — only the
+  four measured live-flow h1s need the scale.
+
+### 30.2 ToDo (TDD — RED first, then GREEN)
+
+- [x] **R41-01 — RED specs**: checkout wrapper/h1/layout/cards/fields/PM/
+  summary/button pins, cart h1/card/stepper/OS/COD pins, account wrapper/
+  profile/orders pins, track wrapper/header/search pins — appended to
+  `tests/e2e/visual-parity.spec.ts`
+- [x] **R41-02 — checkout-flow.tsx checkout**: wrapper max-w-5xl py-8 +
+  h1 text-3xl; grid lg:grid-cols-3 with lg:col-span-2 space-y-6 main
+  column; `checkoutCard()` → `bg-card rounded-[16px] border
+  border-border-soft p-6 space-y-4` (no shadow, h2 `text-lg
+  font-semibold`); a `checkoutFieldClass` (shadcn v3) + `space-y-2`
+  wrappers + `leading-none` labels; select/textarea to the 36px/12px/
+  transparent spec; PM options gap-4/border-2/rounded-full disc/16px-600
+  titles; summary card sticky top-24 with bg-border dividers, max-h-64
+  item list, 18px/700 Total, h-10 Place Order with v3 shadow
+- [x] **R41-03 — checkout-flow.tsx cart**: wrapper/h1/layout to the
+  reference shell (text parity: no count span, no arrow); item cards
+  16px-radius hairline p-4 with square 80px imgs + right column (line
+  total 14px/700, muted-pill stepper with 24px buttons, inline trash-2);
+  OS card to the reference structure + amber COD notice
+  (bg-amber-50/border-amber-200 tokens) + h-10 Proceed
+- [x] **R41-04 — account-pages.tsx account**: wrapper max-w-3xl
+  space-y-8; profile card rounded-[16px] border-soft flex items-center
+  gap-5 no-shadow with lucide-User avatar, 20px h1, cream role pill
+  (visible at all widths); Order History h2 text-xl; ONE
+  overflow-hidden orders card with p-5 rows (16px/600 number, 12px meta)
+- [x] **R41-05 — account-pages.tsx track**: wrapper py-12 space-y-8;
+  56px disc + 28px icon; h1 text-3xl + 16px sub; h-9 rounded-full search
+  input (16px) + h-9 px-6 Track button
+- [x] **R41-06 — full gate**: typecheck, lint, unit, build, E2E — zero
+  collateral on the 268 baseline
+- [x] **R41-07 — re-sweep + captures**: every remediated surface
+  re-measured live; after-screenshots to `docs/screenshots/`
+- [x] **R41-08 — docs**: remediation §30 checked-off + §30.4 gate,
+  session_41 record, AGENTS pins, CLAUDE counts, PAD §5.2/§5.6, README,
+  SKILL, both worklogs
+
+### 30.3 Decision records
+
+- **D1 — the checkout keeps its page-local field class.** The shared
+  `inputClass`/`PrimaryButton` stay 48px (admin console + auth pages +
+  account forms depend on them; PAD §5.6 #8 keeps auth as a superset
+  surface). Checkout/cart/track get local classes to the shadcn v3 spec —
+  the same doctrine as the s40 contact form (D3 there).
+- **D2 — the account page keeps its tabs + logout + order-detail link
+  (superset)**, but the DEFAULT view (orders tab) now renders the
+  reference's measured profile card + one-card order list. The superset
+  affordances must not change the resting visuals of the default view.
+- **D3 — the amber COD box gets dedicated tokens**
+  (`--color-cod-bg` rgb(255,251,235), `--color-cod-border`
+  rgb(253,230,138), `--color-cod-title` rgb(146,64,14), `--color-cod-body`
+  rgb(180,83,9)) instead of badge-tinted alphas — v4 `/NN` would color-mix
+  in oklab (trap #8 doctrine; measured sRGB values win).
+- **D4 — the count span and the "← " arrow are dropped** (text parity:
+  the reference h1 is exactly "Your Cart" and the link "Continue
+  Shopping"). The item-count information remains on the cart DRAWER (its
+  own surface) and the badge.
+- **D5 — CodNotice splits per surface.** The cart OS renders the
+  reference's amber box (with the 💵 glyph + 12px texts, measured
+  verbatim); the checkout SUCCESS page keeps the existing notice (never
+  measured — a superset surface; no blind restyle).
+
+### 30.4 Verification gate (post session-41)
+
+Executed 2026-10-15, all stages green:
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | **528.75 KB** ✓ (the checkout/cart/account/track layer + 5 new tokens add ~1.6 KB over the 527.21 KB session-40 ledger) |
+| E2E (Playwright, 2 projects) | **290/290 ✓ (145 specs, 5.1 min)** — 268 baseline + 11 new spec pairs; ZERO collateral |
+| RED observation | 22 failing runs (11 specs × 2 projects) on the pre-change build |
+| post-change re-sweep | checkout: h1 30px/700 mb-8, wrapper max-w-5xl(1024px) py-8, 4 cards 16px/hairline/no-shadow/p-6, fields 36px/16px/12px/transparent + leading-none labels + 8px label seams, PM radio-cards gap-4/border-2/12px radius/40px 9999px discs/16px-600 titles, OS sticky top-24 with bg-border dividers + max-h-64 items + 18px/700 Total + 40px pill Place Order — the desktop geometry is byte-for-byte the reference (main x=240/w=629, OS x=901/w=299); cart: h1 "Your Cart" 30px (no count), 16px/hairline/square-80px item cards, muted-pill 24px steppers, 18px/700 OS h2, amber COD box rgb(255,251,235)/rgb(253,230,138)/12px, 40px Proceed; account: max-w-3xl space-y-8, 16px/hairline profile card with lucide-user 64px disc, 20px h1, cream role pill, one-card p-5 order rows, 20px/700 Order History; track: py-12, 56px disc + 28px icon, 30px h1, 16px sub, 36px 9999px pill input + 36px Track button ✓ |
+| mobile menu | opens with all 6 links (logged in — the Account row replaces Sign in) ✓ |
+| db contract | unchanged (24 products / 8 categories / 2 users) |
+
+Spec corrections in GREEN (both mine, not the code): the field-wrapper
+rhythm pin asserts the LABEL's margin-bottom (8px) per trap #4 — v4's
+space-y-2 is margin-block-end on non-last children, not flex row-gap; the
+orders-card row locator targets the LINK (the clone's row is a link —
+superset navigation), not the reference's button. Two trap-#6 radius fixes
+landed in GREEN on the source: the PM option and the amber COD box both
+shipped `rounded-xl` first (20px in the custom v4 scale) and were corrected
+to `rounded-[12px]`; the PM icon disc uses `rounded-[9999px]` (trap #8 —
+v4's rounded-full serializes as 3.35544e+07px, the pins assert 9999px).
