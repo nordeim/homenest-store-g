@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
 import {
   Banknote,
-  Check,
   ChevronRight,
   CreditCard,
   Mail,
   MapPin,
   Minus,
   Package,
+  Phone,
   Plus,
   ShieldCheck,
   ShoppingBag,
   Trash2,
   Truck,
 } from "lucide-react";
-import { OutlineButton, PrimaryButton } from "@/components/chrome";
+import { PrimaryButton } from "@/components/chrome";
 import { productById } from "@/data/catalog";
 import {
   deliveryWindow,
@@ -30,34 +30,35 @@ import { Link, useQuery, useRouter } from "@/lib/router";
 import { useStore } from "@/lib/store";
 import { cn } from "@/utils/cn";
 
-function CodNotice({ totalCents, amountDue }: { totalCents?: number; amountDue?: string }) {
+/* Session-42 (F42-05, remediation §31 D2): the success page's COD notice is
+   the LARGE amber variant, measured 2026-10-15 — bg-amber-50 /
+   border-amber-200 / rounded-2xl(16px) / p-5 / flex gap-4 with a 40px
+   amber-100 disc holding a 20px amber-600 Banknote, a 16px/600 amber-900
+   title and a 14px/400 amber-700 body (the amount in a <strong>).
+   Token-backed; separate from the cart's compact variant
+   (CartCodNotice below) — supersedes the s41 D5 hold. */
+function SuccessCodNotice({ totalCents }: { totalCents: number }) {
   return (
-    <div className="rounded-xl border border-badge/40 bg-badge/10 p-4">
-      <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-        <Banknote className="h-4 w-4 text-primary" />
-        Cash on Delivery
-      </p>
-      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-        {amountDue ? (
-          <>
-            Amount due: <span className="font-bold text-primary">{amountDue}</span>
-          </>
-        ) : (
-          <>
-            Pay when your order arrives. Please have{" "}
-            <span className="font-bold text-primary">{totalCents !== undefined ? formatMoney(totalCents) : ""}</span>{" "}
-            ready when your order arrives. Our delivery team will collect payment at your door.
-          </>
-        )}
-      </p>
+    <div data-cod-success className="flex gap-4 rounded-[16px] border border-cod-border bg-cod-bg p-5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[9999px] bg-cod-disc">
+        <Banknote className="h-5 w-5 text-cod-disc-icon" strokeWidth={2} />
+      </div>
+      <div>
+        <p className="text-base font-semibold text-cod-title-strong">Cash on Delivery</p>
+        <p className="mt-0.5 text-sm text-cod-body">
+          Please have <strong className="font-bold">{formatMoney(totalCents)}</strong> ready when your order arrives.
+          Our delivery team will collect payment at your door.
+        </p>
+      </div>
     </div>
   );
 }
 
-/* Session-41 (F41-20): the reference cart OS carries an AMBER COD box —
+/* Session-41 (F41-20): the reference cart OS carries the AMBER COD box —
    bg-amber-50 / border-amber-200 / amber-800 title / amber-700 body at
    12px, rounded-xl p-3. Token-backed (see --color-cod-* in index.css);
-   the checkout SUCCESS page keeps the badge-based CodNotice (D5). */
+   the compact CART variant — the success page ships the large variant
+   above (session-42 D2). */
 function CartCodNotice({ totalCents }: { totalCents: number }) {
   return (
     <div data-cod className="rounded-[12px] border border-cod-border bg-cod-bg p-3">
@@ -336,6 +337,7 @@ export function CheckoutPage() {
     setError(null);
     const result = placeOrder({
       email: form.email,
+      phone: form.phone,
       last4:
         form.payment === "card"
           ? form.card.replace(/\D/g, "").slice(-4)
@@ -725,7 +727,6 @@ export function CheckoutPage() {
 
 export function OrderSuccessPage() {
   const query = useQuery();
-  const { navigate } = useRouter();
   const { orders, user } = useStore();
   const number = query.get("order");
   const token = query.get("token");
@@ -747,106 +748,139 @@ export function OrderSuccessPage() {
   const isCod = order.paymentLast4 === "COD";
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
-      <div className="text-center">
-        <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-accent-soft">
-          <Check className="h-10 w-10 text-accent" strokeWidth={2.5} />
-        </span>
-        <h1 className="mt-6 font-display text-4xl font-bold text-foreground">Order Placed!</h1>
-        <p className="mt-3 text-muted-foreground">
-          Thank you for your order. We'll start processing it right away.
-        </p>
-        <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-          <Package className="h-4 w-4" />
-          Order #{order.number}
+    /* F42-01: max-w-2xl py-12 space-y-8 — one 32px rhythm (v4 space-y =
+       margin-block-end on non-last children, trap #4). */
+    <div className="mx-auto max-w-2xl space-y-8 px-4 py-12 sm:px-6">
+      {/* F42-02/03: text-center space-y-4 header with NO icon disc — the
+          reference renders none (the v1 80px accent disc removed,
+          remediation §31 D4). */}
+      <div className="space-y-4 text-center">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-foreground">Order Placed!</h1>
+          <p className="mt-2 text-muted-foreground">
+            Thank you for your order. We'll start processing it right away.
+          </p>
+        </div>
+        {/* F42-04: bg-primary/5 + border-primary/20 + px-5 py-2 — alpha-baked
+            tokens (v4 /NN would color-mix in oklab, trap #8). */}
+        <p
+          data-order-pill
+          className="inline-flex items-center gap-2 rounded-[9999px] border border-primary-line bg-primary-faint px-5 py-2"
+        >
+          <Package className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold text-primary">Order #{order.number}</span>
         </p>
       </div>
 
-      {isCod && (
-        <div className="mt-8">
-          <CodNotice totalCents={order.totalCents} />
-        </div>
-      )}
+      {isCod && <SuccessCodNotice totalCents={order.totalCents} />}
 
-      <section className="mt-8 overflow-hidden rounded-xl border border-border bg-card shadow-card">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="font-display text-xl font-bold text-foreground">Order Details</h2>
+      {/* F42-06/07: 16px-radius hairline card, NO shadow, overflow-hidden;
+          the header band is bg-muted/30 (the --color-gallery token) with a
+          Playfair 16px/600 h2. */}
+      <section data-success-card className="overflow-hidden rounded-[16px] border border-border-soft bg-card">
+        <div data-card-band className="border-b border-border-soft bg-gallery p-5">
+          <h2 className="font-display text-base font-semibold text-foreground">Order Details</h2>
         </div>
-        <ul className="flex flex-col gap-4 px-6 py-5">
+        {/* F42-08: p-5 space-y-3 items — 48px SQUARE images (no radius, no
+            border), 14px/500 names, 12px qty, 14px/600 prices. */}
+        <div data-order-items className="space-y-3 p-5">
           {order.items.map((item) => (
-            <li key={item.productId} className="flex items-center gap-4">
-              <img
-                src={item.image}
-                alt=""
-                width={56}
-                height={56}
-                className="h-14 w-14 rounded-lg border border-border bg-muted object-cover"
-              />
+            <div key={item.productId} className="flex items-center gap-3">
+              <img src={item.image} alt="" width={48} height={48} className="h-12 w-12 object-cover" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                <p className="text-sm font-medium text-foreground">{item.name}</p>
                 <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
               </div>
-              <span className="font-bold text-foreground">{formatMoney(item.unitCents * item.quantity)}</span>
-            </li>
+              <p className="shrink-0 text-sm font-semibold text-foreground">
+                {formatMoney(item.unitCents * item.quantity)}
+              </p>
+            </div>
           ))}
-        </ul>
-        <dl className="flex flex-col gap-2 border-t border-border px-6 py-4 text-sm">
+        </div>
+        <div className="h-px shrink-0 bg-border" />
+        {/* F42-09: p-5 space-y-2 text-sm — muted 14px/400 rows, the Total
+            row 16px/700, "Free" MUTED (not green); the promo Discount row
+            (superset #2) rides the same muted spec (§31 D5). */}
+        <div data-order-totals className="space-y-2 p-5 text-sm">
           <div className="flex justify-between">
-            <dt className="text-muted-foreground">Subtotal</dt>
-            <dd className="text-muted-foreground">{formatMoney(order.subtotalCents)}</dd>
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="text-muted-foreground">{formatMoney(order.subtotalCents)}</span>
           </div>
           {order.discountCents > 0 && (
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Discount</dt>
-              <dd className="text-accent">−{formatMoney(order.discountCents)}</dd>
+              <span className="text-muted-foreground">Discount</span>
+              <span className="text-muted-foreground">−{formatMoney(order.discountCents)}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <dt className="text-muted-foreground">Shipping</dt>
-            <dd className={order.shippingCents === 0 ? "text-accent" : "text-muted-foreground"}>
+            <span className="text-muted-foreground">Shipping</span>
+            <span className="text-muted-foreground">
               {order.shippingCents === 0 ? "Free" : formatMoney(order.shippingCents)}
-            </dd>
+            </span>
           </div>
-          <div className="flex justify-between">
-            <dt className="font-bold text-foreground">Total</dt>
-            <dd className="font-bold text-foreground">{formatMoney(order.totalCents)}</dd>
+          <div className="flex justify-between text-base font-bold text-foreground">
+            <span>Total</span>
+            <span>{formatMoney(order.totalCents)}</span>
           </div>
-        </dl>
-        <div className="border-t border-border px-6 py-5">
-          <h3 className="text-sm font-bold text-foreground">Delivery Information</h3>
-          <ul className="mt-3 flex flex-col gap-2 text-sm text-muted-foreground">
+        </div>
+        <div className="h-px shrink-0 bg-border" />
+        {/* F42-10: p-5 space-y-3 — h3 Inter 14px/600; FOUR 14px/400 muted
+            rows with 16px primary icons (package/phone/mail/map-pin) — the
+            phone row is new (Order.phone, §31 D3). */}
+        <div data-delivery-info className="space-y-3 p-5">
+          <h3 className="text-sm font-semibold text-foreground">Delivery Information</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-primary" /> {order.shippingAddress.name}
+              <Package className="h-4 w-4 shrink-0 text-primary" /> {order.shippingAddress.name}
             </li>
+            {order.phone && (
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 shrink-0 text-primary" /> {order.phone}
+              </li>
+            )}
             <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-primary" /> {order.email}
+              <Mail className="h-4 w-4 shrink-0 text-primary" /> {order.email}
             </li>
-            <li className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" /> {order.shippingAddress.line1}
-              {order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : ""}, {order.shippingAddress.city},{" "}
-              {order.shippingAddress.state} {order.shippingAddress.zip}, {order.shippingAddress.country}
+            <li className="flex items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>
+                {order.shippingAddress.line1}
+                {order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : ""},{" "}
+                {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip},{" "}
+                {order.shippingAddress.country}
+              </span>
             </li>
           </ul>
+          {/* Registered divergence #6 (superset): the reference ships no
+              estimated-delivery row; this one rides the measured row spec. */}
           {windowLabel && (
-            <p className="mt-3 text-sm text-muted-foreground">
-              <Truck className="mr-1.5 inline h-4 w-4 text-primary" />
-              Estimated delivery: <span className="font-semibold text-foreground">{windowLabel}</span>
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Truck className="h-4 w-4 shrink-0 text-primary" />
+              <span>
+                Estimated delivery: <span className="font-semibold text-foreground">{windowLabel}</span>
+              </span>
             </p>
           )}
         </div>
       </section>
 
-      {/* Session-36 (F36-12): `flex-1` + h-12 inside this mobile flex-col row
-          collapsed both buttons to 20px — the flex algorithm ignores
-          `height` under `flex-basis: 0%`. w-full sm:w-auto keeps the
-          stacked-full-width mobile layout at the designed 48px height. */}
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <OutlineButton className="w-full sm:w-auto" onClick={() => navigate("/")}>
+      {/* F42-11: flex-col sm:flex-row gap-3 with h-9 36px px-4 pills —
+          outline (shadow-sm = the pinned v3 geometry) + primary (the v3
+          default-shadow geometry, same string as pillButtonClass). The
+          reference ships real links; the clone's Link keeps the router. */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Link
+          href="/"
+          className="inline-flex h-9 items-center justify-center rounded-[9999px] border border-border bg-transparent px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+        >
           Back to Home
-        </OutlineButton>
-        <PrimaryButton className="w-full sm:w-auto" onClick={() => navigate("/products")}>
+        </Link>
+        <Link
+          href="/products"
+          className="inline-flex h-9 items-center justify-center rounded-[9999px] bg-primary px-4 text-sm font-medium text-primary-foreground shadow-[0_1px_3px_0_rgb(0_0_0/0.1),0_1px_2px_-1px_rgb(0_0_0/0.1)] transition-colors hover:bg-primary/90"
+        >
           Continue Shopping
-        </PrimaryButton>
+        </Link>
       </div>
     </div>
   );

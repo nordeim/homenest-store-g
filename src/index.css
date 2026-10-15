@@ -121,6 +121,17 @@
   --color-cod-border: rgb(253 230 138);
   --color-cod-title: rgb(146 64 14);
   --color-cod-body: rgb(180 83 9);
+  /* Session-42 (F42-04): the success-page order pill's border — the
+     reference's border-primary/20 computes rgba(217,110,38,0.2); alpha
+     baked (T-13 pattern). */
+  --color-primary-line: hsl(24 70% 50% / 0.2);
+  /* Session-42 (F42-05): the success-page COD variant is the LARGE amber
+     box — a 40px amber-100 disc (rgb(254,243,199)) with a 20px amber-600
+     Banknote glyph (rgb(217,119,6)) and a 16px/600 amber-900 title
+     (rgb(120,53,15)). Measured sRGB, token-backed (T-13 doctrine). */
+  --color-cod-disc: rgb(254 243 199);
+  --color-cod-disc-icon: rgb(217 119 6);
+  --color-cod-title-strong: rgb(120 53 15);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   /* Session-38 (F38-01): v3 shadow-md geometry — the reference's category

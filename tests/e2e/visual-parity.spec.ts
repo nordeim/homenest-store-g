@@ -1130,8 +1130,12 @@ test("account shell matches the reference profile card", async ({ page }) => {
   await expect(pill).toHaveCSS("font-weight", "600");
 });
 
-test("account order history matches the reference one-card list", async ({ page }) => {
+test("account order history matches the reference card list (s42 supersession)", async ({ page }) => {
   // Login → place one order → the orders tab renders the reference list.
+  // s41 read this as ONE card holding all rows; the s42 re-measurement
+  // with two orders exposed per-order cards (F42-13). This single-order
+  // smoke keeps its assertions — they hold under both structures — while
+  // the per-order spec below pins the space-y-3 list shape.
   await page.goto("/account");
   await page.getByLabel("Email", { exact: true }).fill("john@example.com");
   await page.getByLabel("Password", { exact: true }).fill("Demo1234!");
@@ -1152,8 +1156,10 @@ test("account order history matches the reference one-card list", async ({ page 
   const h2 = page.getByRole("heading", { name: "Order History", exact: true });
   await expect(h2).toHaveCSS("font-size", "20px");
   await expect(h2).toHaveCSS("font-weight", "700");
-  // F41-24: ONE overflow-hidden card; rows p-5 flex items-center gap-4
-  // (the clone renders the row as a link — superset navigation).
+  // F41-24 (s42-superseded pin, values hold): the overflow-hidden card —
+  // with one order the per-order card IS the first overflow-hidden card;
+  // rows p-5 flex items-center gap-4 (the clone renders the row as a
+  // link — superset navigation, PAD §5.6 #20).
   const ordersCard = page.locator("[data-orders-card], main .overflow-hidden").first();
   await expect(ordersCard).toHaveCSS("border-radius", "16px");
   await expect(ordersCard).toHaveCSS("overflow", "hidden");
@@ -1194,4 +1200,234 @@ test("track order entry matches the reference shell", async ({ page }) => {
   await expect(input).toHaveCSS("border-radius", "9999px");
   const trackButton = page.getByRole("button", { name: "Track", exact: true });
   await expect(trackButton).toHaveCSS("height", "36px");
+});
+
+/* ── Session-42 (twentieth sweep): the order-success / account-orders layer ──
+   Measured live 2026-10-15 on nest-culinary-hub.base44.app (fresh COD order,
+   logged-in, 390×844 + 1440×900). Findings F42-01…F42-15 in
+   docs/remediation-plan.md §31. */
+
+async function sweep42PlaceOrder(page: import("@playwright/test").Page) {
+  await page.goto("/product/p-knife-set");
+  await page.getByRole("button", { name: "Add to Cart" }).click();
+  await expect(page.getByRole("button", { name: /Added!/ })).toBeVisible();
+  await page.goto("/checkout");
+  await page.getByLabel("Full Name *").fill("John Mercer");
+  await page.getByLabel("Phone Number *").fill("+1 (555) 010-0148");
+  await page.getByLabel("Email Address").fill("john@example.com");
+  await page.getByLabel("Street Address *").fill("48 Oak Street");
+  await page.getByLabel("City *").fill("San Francisco");
+  await page.getByLabel("State").fill("CA");
+  await page.getByLabel("ZIP Code").fill("94110");
+  await page.getByRole("button", { name: "Place Order" }).click();
+  await page.waitForURL(/\/order-success/);
+}
+
+test("order success shell matches the reference wrapper and pill", async ({ page }) => {
+  await sweep42PlaceOrder(page);
+  // F42-01: max-w-2xl py-12 wrapper, 32px space-y-8 rhythm.
+  const wrapper = page.locator("main > div");
+  await expect(wrapper).toHaveCSS("max-width", "672px");
+  await expect(wrapper).toHaveCSS("padding-top", "48px");
+  // F42-02/03: h1 text-3xl 30px/700 with NO icon disc above it (the v1
+  // 80px accent disc is removed per remediation §31 D4).
+  const h1 = page.getByRole("heading", { name: "Order Placed!", exact: true });
+  await expect(h1).toHaveCSS("font-size", "30px");
+  await expect(h1).toHaveCSS("font-weight", "700");
+  expect(await page.locator("main [class*='bg-accent-soft']").count()).toBe(0);
+  const sub = h1.locator("xpath=following-sibling::p[1]");
+  await expect(sub).toHaveCSS("font-size", "16px");
+  await expect(sub).toHaveCSS("margin-top", "8px");
+  // F42-04: the order pill — primary-faint bg, primary-line border, px-5
+  // py-2, 38px tall, Package 16px, span 14px/600 primary.
+  const pill = page.locator("[data-order-pill]");
+  await expect(pill).toHaveCSS("background-color", "rgba(217, 110, 38, 0.05)");
+  await expect(pill).toHaveCSS("border-color", "rgba(217, 110, 38, 0.2)");
+  await expect(pill).toHaveCSS("padding", "8px 20px");
+  await expect(pill).toHaveCSS("height", "38px");
+  const pillRadius = await pill.evaluate((el) => getComputedStyle(el).borderRadius);
+  expect(["9999px", "calc(infinity * 1px)"]).toContain(pillRadius);
+  const pillText = pill.getByText(/^Order #ORD-/);
+  await expect(pillText).toHaveCSS("font-size", "14px");
+  await expect(pillText).toHaveCSS("font-weight", "600");
+  await expect(pillText).toHaveCSS("color", "rgb(217, 110, 38)");
+  const pillIcon = pill.locator("svg");
+  const pillIconW = await pillIcon.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+  expect(pillIconW).toBe(16);
+});
+
+test("order success carries the reference large amber COD notice", async ({ page }) => {
+  await sweep42PlaceOrder(page);
+  // F42-05: the SUCCESS variant — 16px radius, p-5, flex gap-4, 40px
+  // amber-100 disc with a 20px amber-600 Banknote, title 16px/600
+  // rgb(120,53,15), body 14px/400 rgb(180,83,9) (remediation §31 D2 —
+  // separate from the cart's compact 12px variant).
+  const box = page.locator("[data-cod-success]");
+  await expect(box).toHaveCSS("background-color", "rgb(255, 251, 235)");
+  await expect(box).toHaveCSS("border-color", "rgb(253, 230, 138)");
+  await expect(box).toHaveCSS("border-radius", "16px");
+  await expect(box).toHaveCSS("padding", "20px");
+  await expect(box).toHaveCSS("column-gap", "16px");
+  const disc = box.locator("[class*='rounded-full'], [class*='rounded-[9999px]']").first();
+  await expect(disc).toHaveCSS("width", "40px");
+  await expect(disc).toHaveCSS("height", "40px");
+  await expect(disc).toHaveCSS("background-color", "rgb(254, 243, 199)");
+  const discIcon = disc.locator("svg");
+  await expect(discIcon).toHaveCSS("width", "20px");
+  await expect(discIcon).toHaveCSS("color", "rgb(217, 119, 6)");
+  const title = box.getByText("Cash on Delivery", { exact: true });
+  await expect(title).toHaveCSS("font-size", "16px");
+  await expect(title).toHaveCSS("font-weight", "600");
+  await expect(title).toHaveCSS("color", "rgb(120, 53, 15)");
+  const body = box.getByText(/Please have/);
+  await expect(body).toHaveCSS("font-size", "14px");
+  await expect(body).toHaveCSS("color", "rgb(180, 83, 9)");
+});
+
+test("order success card matches the reference chrome and header band", async ({ page }) => {
+  await sweep42PlaceOrder(page);
+  // F42-06: 16px radius, hairline border, no shadow, overflow-hidden.
+  const card = page.locator("[data-success-card]");
+  await expect(card).toHaveCSS("border-radius", "16px");
+  await expect(card).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(card).toHaveCSS("box-shadow", "none");
+  await expect(card).toHaveCSS("overflow", "hidden");
+  // F42-01 rhythm: the card is a non-last space-y-8 child (margin-block-end
+  // 32px per trap #4).
+  await expect(card).toHaveCSS("margin-bottom", "32px");
+  // F42-07: the muted/30 header band + Playfair 16px/600 h2.
+  const band = card.locator("[data-card-band]");
+  await expect(band).toHaveCSS("background-color", "rgba(242, 240, 237, 0.3)");
+  await expect(band).toHaveCSS("padding", "20px");
+  await expect(band).toHaveCSS("border-bottom-width", "1px");
+  await expect(band).toHaveCSS("border-bottom-color", "rgba(229, 224, 220, 0.5)");
+  const h2 = card.getByRole("heading", { name: "Order Details", exact: true });
+  await expect(h2).toHaveCSS("font-size", "16px");
+  await expect(h2).toHaveCSS("font-weight", "600");
+  await expect(h2).toHaveCSS("font-family", /Playfair Display/);
+});
+
+test("order success items and totals match the reference rows", async ({ page }) => {
+  await sweep42PlaceOrder(page);
+  const card = page.locator("[data-success-card]");
+  // F42-08: 48px SQUARE images (radius 0, no border), 14px/500 names,
+  // 12px qty, 14px/600 prices, space-y-3 rhythm, p-5.
+  const items = card.locator("[data-order-items]");
+  await expect(items).toHaveCSS("padding", "20px");
+  const img = items.locator("img").first();
+  await expect(img).toHaveCSS("width", "48px");
+  await expect(img).toHaveCSS("height", "48px");
+  await expect(img).toHaveCSS("border-radius", "0px");
+  await expect(img).toHaveCSS("border-top-width", "0px");
+  const name = items.locator("p.font-medium").first();
+  await expect(name).toHaveCSS("font-size", "14px");
+  await expect(name).toHaveCSS("font-weight", "500");
+  const qty = items.getByText(/^Qty:/);
+  await expect(qty).toHaveCSS("font-size", "12px");
+  const price = items.locator("p.font-semibold").first();
+  await expect(price).toHaveCSS("font-size", "14px");
+  await expect(price).toHaveCSS("font-weight", "600");
+  // F42-09: totals p-5 space-y-2 text-sm; muted 14px/400 rows; the Total
+  // row 16px/700; "Free" is MUTED (not green).
+  const totals = card.locator("[data-order-totals]");
+  await expect(totals).toHaveCSS("padding", "20px");
+  const subtotalRow = totals.getByText("Subtotal").locator("xpath=..");
+  await expect(subtotalRow).toHaveCSS("font-size", "14px");
+  const shippingValue = totals.getByText("Free", { exact: true });
+  await expect(shippingValue).toHaveCSS("color", "rgb(126, 111, 103)");
+  const totalRow = totals.getByText("Total", { exact: true }).locator("xpath=..");
+  await expect(totalRow).toHaveCSS("font-size", "16px");
+  await expect(totalRow).toHaveCSS("font-weight", "700");
+  // The bg-border 1px dividers between sections (not section border-t).
+  const dividers = card.locator(".bg-border");
+  await expect(dividers).toHaveCount(2);
+});
+
+test("order success delivery information matches the reference rows", async ({ page }) => {
+  await sweep42PlaceOrder(page);
+  const card = page.locator("[data-success-card]");
+  // F42-10: h3 Inter 14px/600; FOUR rows (name, phone, email, address)
+  // 14px/400 muted with 16px primary icons — the phone row is new
+  // (Order.phone, remediation §31 D3).
+  const block = card.locator("[data-delivery-info]");
+  const h3 = block.getByRole("heading", { name: "Delivery Information" });
+  await expect(h3).toHaveCSS("font-size", "14px");
+  await expect(h3).toHaveCSS("font-weight", "600");
+  await expect(h3).toHaveCSS("font-family", /Inter/);
+  const rows = block.locator("li");
+  await expect(rows).toHaveCount(4);
+  const phone = block.getByText("+1 (555) 010-0148");
+  await expect(phone).toBeVisible();
+  await expect(phone).toHaveCSS("font-size", "14px");
+  await expect(phone).toHaveCSS("color", "rgb(126, 111, 103)");
+  const firstIcon = rows.first().locator("svg");
+  await expect(firstIcon).toHaveCSS("color", "rgb(217, 110, 38)");
+  const firstIconW = await firstIcon.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+  expect(firstIconW).toBe(16);
+});
+
+test("order success buttons match the reference 36px pills", async ({ page }) => {
+  await sweep42PlaceOrder(page);
+  // F42-11: h-9 36px rounded-full 14px/500 px-4 pills — outline (Back to
+  // Home) + primary (Continue Shopping) — in a flex-col sm:flex-row gap-3
+  // row (the last space-y-8 child).
+  const back = page.getByRole("link", { name: "Back to Home" });
+  await expect(back).toHaveCSS("height", "36px");
+  await expect(back).toHaveCSS("border-radius", "9999px");
+  await expect(back).toHaveCSS("font-size", "14px");
+  await expect(back).toHaveCSS("font-weight", "500");
+  await expect(back).toHaveCSS("padding-left", "16px");
+  await expect(back).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(back).toHaveCSS("border-color", "rgb(229, 224, 220)");
+  // Shadow pins assert the v3 GEOMETRY via containment — the reference is
+  // v3-composed (2 leading transparent shadow layers), this build's v4
+  // composes 4; exact-string pins can never match across engines (trap
+  // #10 doctrine: pin the geometry, not the serialization).
+  const backShadow = await back.evaluate((el) => getComputedStyle(el).boxShadow);
+  expect(backShadow).toContain("rgba(0, 0, 0, 0.05) 0px 1px 2px 0px");
+  const cont = page.getByRole("link", { name: "Continue Shopping" });
+  await expect(cont).toHaveCSS("height", "36px");
+  await expect(cont).toHaveCSS("background-color", "rgb(217, 110, 38)");
+  await expect(cont).toHaveCSS("color", "rgb(255, 255, 255)");
+  const contShadow = await cont.evaluate((el) => getComputedStyle(el).boxShadow);
+  expect(contShadow).toContain("rgba(0, 0, 0, 0.1) 0px 1px 3px 0px");
+  expect(contShadow).toContain("rgba(0, 0, 0, 0.1) 0px 1px 2px -1px");
+  const row = back.locator("xpath=..");
+  const viewport = page.viewportSize();
+  await expect(row).toHaveCSS("flex-direction", viewport && viewport.width < 640 ? "column" : "row");
+  await expect(row).toHaveCSS("row-gap", "12px");
+});
+
+test("account orders list renders per-order reference cards", async ({ page }) => {
+  // F42-13 (supersedes s41 F41-24's "ONE card" reading — a single-order
+  // list artifact): the list is a space-y-3 wrapper of ONE CARD PER ORDER.
+  // Login → place TWO orders → assert the per-card structure.
+  await page.goto("/account");
+  await page.getByLabel("Email", { exact: true }).fill("john@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("Demo1234!");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL(/\/account$/);
+  await sweep42PlaceOrder(page);
+  await sweep42PlaceOrder(page);
+  await page.goto("/account");
+  const list = page.locator("[data-orders-list]");
+  const cards = list.locator("li");
+  await expect(cards).toHaveCount(2);
+  const first = cards.first();
+  await expect(first).toHaveCSS("border-radius", "16px");
+  await expect(first).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(first).toHaveCSS("box-shadow", "none");
+  await expect(first).toHaveCSS("overflow", "hidden");
+  // v4 space-y-3 puts the 12px seam on margin-block-end of non-last cards.
+  await expect(first).toHaveCSS("margin-bottom", "12px");
+  // F42-14 (s41 row internals hold): the row link p-5 gap-4 with 16px/600
+  // numbers and 12px meta.
+  const row = first.getByRole("link");
+  await expect(row).toHaveCSS("padding", "20px");
+  await expect(row).toHaveCSS("column-gap", "16px");
+  const number = row.locator(".font-semibold").first();
+  await expect(number).toHaveCSS("font-size", "16px");
+  await expect(number).toHaveCSS("font-weight", "600");
+  const meta = row.locator(".text-xs").first();
+  await expect(meta).toHaveCSS("font-size", "12px");
 });

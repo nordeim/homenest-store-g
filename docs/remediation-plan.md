@@ -2744,3 +2744,194 @@ landed in GREEN on the source: the PM option and the amber COD box both
 shipped `rounded-xl` first (20px in the custom v4 scale) and were corrected
 to `rounded-[12px]`; the PM icon disc uses `rounded-[9999px]` (trap #8 —
 v4's rounded-full serializes as 3.35544e+07px, the pins assert 9999px).
+
+## 31. Session-42 findings — the order-success/account-orders layer (twentieth sweep, 2026-10-15)
+
+Sweep context: standing pins all held (trigger bare — measurement 12, no
+flip; account/cart plain dark glyphs; header glass `rgba(255,255,255,0.8)`
++ `blur(24px)`; brand Playfair 20px/700 + 20px icon glyph; footer
+`rgb(29,24,22)`; Inter live; body `rgb(251,250,249)`; mobile menu opens
+with all 5 links + search; robots/sitemap/manifest live). A fresh order
+was placed on the reference (`ORD-MV8ZOL1T`, logged-in COD flow) to
+measure the never-measured success surface, and the account page was
+re-measured with TWO orders — which exposed a single-order artifact in the
+s41 reading (below). Every finding cross-checked against
+`src/pages/checkout-flow.tsx` (OrderSuccessPage, CodNotice) and
+`src/pages/account-pages.tsx` (OrderRow) before writing this section.
+
+### 31.1 Findings (measured on the reference, both viewports)
+
+**Order-success page (F42-01…F42-12):**
+
+- **F42-01 — wrapper**: `max-w-2xl mx-auto px-4 sm:px-6 py-12 space-y-8`
+  (672px, 48px py, 32px rhythm; desktop x=384/w=672 centered); clone
+  `py-14` 56px with per-section `mt-8` margins and no rhythm class.
+- **F42-02 — header**: `text-center space-y-4` holding a PLAIN div
+  (h1 `font-heading text-3xl font-bold` 30px/700 + p 16px/400 muted with
+  `mt-2` 8px) plus the order pill (16px seam from the outer space-y-4).
+- **F42-03 — NO success icon**: the reference renders NO check disc above
+  the h1. The clone's 80px `bg-accent-soft` disc + 40px Check glyph is a
+  v1 invention on a now-measured parity surface — removed per the s39
+  shipping-rows doctrine (removed, not registered).
+- **F42-04 — order pill**: `inline-flex items-center gap-2 bg-primary/5
+  border border-primary/20 rounded-full px-5 py-2` (38px tall, padding
+  8px 20px, bg `rgba(217,110,38,0.05)`, border `rgba(217,110,38,0.2)`)
+  with a 16px primary lucide-package icon and span `text-sm
+  font-semibold text-primary` 14px/600 ("Order #ORD-…"); clone ships
+  `bg-primary/10 border-primary/30 px-4` — wrong alphas and padding.
+- **F42-05 — COD notice (SUCCESS variant, measured)**: `bg-amber-50
+  border border-amber-200 rounded-2xl p-5 flex gap-4` — bg
+  rgb(255,251,235), border rgb(253,230,138), **16px radius**, 20px
+  padding, flex gap-4; a 40px `bg-amber-100` (rgb(254,243,199))
+  `rounded-full` disc holding a 20px Banknote glyph at amber-600
+  rgb(217,119,6) stroke-2; title "Cash on Delivery" 16px/600
+  rgb(120,53,15) lh24; body "Please have $X ready…" 14px/400
+  rgb(180,83,9) lh20 `mt-0.5`. This SUPERSEDES remediation §30 D5 — the
+  success page is no longer unmeasured, and it is NOT the cart's compact
+  variant (12px/12px-radius/p-3, §30 F41-20): it is the large variant.
+  The clone currently renders the badge-based v1 CodNotice.
+- **F42-06 — card chrome**: `bg-card rounded-2xl border border-border/50
+  overflow-hidden` — 16px radius, hairline, NO shadow; clone
+  `rounded-xl border-border shadow-card`.
+- **F42-07 — card header band**: `p-5 border-b border-border/50
+  bg-muted/30` — 20px padding, a rgba(242,240,237,0.3) band (the
+  `--color-gallery` token), hairline bottom, h2 "Order Details"
+  `font-heading` Playfair 16px/600; clone `px-6 py-4` (no band) with
+  h2 `text-xl font-bold` 20px/700.
+- **F42-08 — items**: `p-5 space-y-3`, rows `flex gap-3 items-center`
+  with **48px SQUARE images** (radius 0, NO border), name `text-sm
+  font-medium` 14px/500, qty `text-xs text-muted-foreground` 12px/400,
+  price `text-sm font-semibold` 14px/600; clone `ul gap-4 px-6 py-5`
+  with 56px `rounded-lg border` images, 14px/600 names, `font-bold`
+  prices.
+- **F42-09 — totals**: `p-5 space-y-2 text-sm` (separated from the items
+  by a `bg-border h-[1px] w-full` divider, not a section border-t):
+  Subtotal/Shipping rows 14px/400 muted with the value "Free" MUTED (not
+  green); Total row 16px/700 both sides; clone `dl gap-2 px-6 py-4` with
+  Total at 14px and `text-accent` Free.
+- **F42-10 — delivery section**: `p-5 space-y-3` (after a second
+  bg-border divider) with h3 "Delivery Information" Inter 14px/600 and a
+  `space-y-2 text-sm text-muted-foreground` wrapper of `flex
+  items-center gap-2` rows (14px/400 muted, 16px primary lucide icons):
+  **package (name), phone, mail, map-pin (address)** — FOUR rows; the
+  clone renders three (no phone row — `Order` lacks the field) and a
+  14px/700 h3.
+- **F42-11 — buttons**: `flex flex-col sm:flex-row gap-3` with h-9 36px
+  `rounded-full` 14px/500 pills — Back to Home OUTLINE (transparent,
+  border rgb(229,224,220)) + Continue Shopping PRIMARY (bg-primary,
+  white); clone ships the 48px shared PrimaryButton/OutlineButton.
+- **F42-12 — NON-FINDING (divergence holds)**: the reference renders NO
+  estimated-delivery row; the clone's `deliveryWindow` row stays
+  (registered divergence #6) styled to the measured row spec.
+
+**Account orders list (F42-13…F42-15):**
+
+- **F42-13 — per-order cards**: the list is a `space-y-3` wrapper of
+  `bg-card rounded-2xl border border-border/50 overflow-hidden` cards,
+  ONE PER ORDER (12px gaps). **Supersedes s41 F41-24's "ONE card"**
+  reading — the 2026-10-15 re-measurement with two orders exposed the
+  s41 single-order list as an artifact (one card holding one row is
+  indistinguishable from one card per order). The clone ships ONE card
+  with all rows.
+- **F42-14 — row internals hold** (s41): `w-full text-left p-5 flex
+  items-center gap-4 hover:bg-muted/30` — number 16px/600, status pill
+  12px/600, meta 12px/400. No change.
+- **F42-15 — accordion vs navigation**: the reference rows are BUTTONS
+  that expand in place (a `border-t border-border/50` body: items,
+  shipping/total line, address, a Track Order link → `/track-order`).
+  The clone rows are LINKS to the superset `/account/orders/:id` detail
+  page — the registered divergence #20 stays (function exceeds: the
+  detail page shows the same content plus status timeline and tracking);
+  only the resting card structure is remediated (F42-13).
+
+### 31.2 ToDo (TDD — RED first, then GREEN)
+
+- [x] **R42-01 — RED specs**: success shell (wrapper/h1/no-disc/pill),
+  the amber COD box, card chrome/header-band/items/totals/delivery rows,
+  the 36px pill buttons, the account per-order cards — appended to
+  `tests/e2e/visual-parity.spec.ts`; the superseded s41 account-orders
+  pin (ONE card) updated to per-order cards
+- [x] **R42-02 — data seam**: `Order.phone?: string` (types.ts),
+  `placeOrder` collects `form.phone` (store.tsx + CheckoutPage call) —
+  optional field, seed untouched, NO STORAGE_KEY bump (the hash contract
+  pins `catalog.ts` only; old orders hydrate without the row)
+- [x] **R42-03 — index.css tokens**: `--color-cod-title-strong`
+  rgb(120,53,15), `--color-cod-disc` rgb(254,243,199),
+  `--color-cod-disc-icon` rgb(217,119,6) (trap #8 doctrine — measured
+  sRGB, no `/NN` oklab color-mix)
+- [x] **R42-04 — OrderSuccessPage**: wrapper `py-12 space-y-8`; header
+  restructure (disc removed, h1 30px, nested plain div, pill
+  `bg-primary/5 border-primary/20 px-5`); `SuccessCodNotice` (the
+  measured large amber variant, separate from CartCodNotice); card
+  chrome + `bg-gallery` header band + Playfair 16px/600 h2; 48px square
+  item images + 14px/500 names; totals 14px/400 + 16px/700 Total +
+  muted Free; delivery 4 rows (phone added) + 14px/600 h3; 36px pill
+  buttons
+- [x] **R42-05 — AccountPage orders**: per-order cards (`space-y-3`
+  wrapper, one `rounded-[16px] border-border-soft overflow-hidden` card
+  per order — OrderRow becomes the card)
+- [x] **R42-06 — full gate**: typecheck, lint, unit, build, E2E — zero
+  collateral on the 290 baseline (one superseded s41 pin updated)
+- [x] **R42-07 — re-sweep + captures**: every remediated surface
+  re-measured live; after-screenshots to `docs/screenshots/`
+- [x] **R42-08 — docs**: remediation §31 checked-off + §31.4 gate,
+  session_42 record, AGENTS pins, CLAUDE counts, PAD §5.6 #20 update +
+  #21 (success icon removal), README, SKILL, both worklogs
+
+### 31.3 Decision records
+
+- **D1 — the accordion stays a divergence (function exceeds).** The
+  reference's rows expand in place; the clone's rows navigate to the
+  registered superset detail page (PAD §5.6 #20, wording updated to name
+  the accordion). Resting visuals (per-order cards) are remediated; the
+  expansion behavior is not ported — a row cannot both navigate and
+  expand, and the detail page already shows the accordion's full
+  content.
+- **D2 — two CodNotice variants, two components.** The cart OS keeps
+  `CartCodNotice` (compact 12px variant, §30 D3); the success page gains
+  `SuccessCodNotice` (large variant with the amber-100 disc). Both are
+  token-backed; they share `--color-cod-bg/border` and differ in radius,
+  padding, disc, and text scale. The v1 badge-based `CodNotice` is
+  retired from the success page (D5 superseded — the surface is now
+  measured).
+- **D3 — `phone?: string` is optional and additive.** No STORAGE_KEY
+  bump: the catalog-hash contract pins `src/data/catalog.ts` (untouched,
+  seed ships `orders: []`), hydration keeps unknown fields, and old
+  persisted orders simply render without the phone row. New orders
+  persist the checkout phone.
+- **D4 — the 80px success disc is REMOVED, not registered** (the s39
+  shipping-rows doctrine: a resting-visual invention on a measured
+  parity surface cannot become a resting-identical superset).
+- **D5 — supersets keep the measured row spec.** The `deliveryWindow`
+  row (#6) renders after the address as another 14px muted row with the
+  truck glyph; the promo Discount row (#2) renders inside the totals
+  block only when `discountCents > 0`, styled to the muted-row spec.
+- **D6 — the token-gate empty state stays.** The reference's bogus-order
+  URL renders an unguarded skeleton ("$---"); the clone's capability
+  gate (`?order=&token=`) is a deliberate security superset — no blind
+  restyle of its state.
+
+### 31.4 Verification gate (post session-42)
+
+Executed 2026-10-15, all stages green:
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | **529.56 KB** ✓ (the success-page layer + per-order cards + 4 tokens add ~0.8 KB over the 528.73 KB session-41 ledger) |
+| E2E (Playwright, 2 projects) | **304/304 ✓ (152 specs, 5.6 min)** — 290 baseline + 7 new spec pairs; ONE superseded pin (the s36 48px shared-button height → the measured 36px link, updated in cart-checkout) |
+| RED observation | 14 failing runs (7 specs × 2 projects) on the pre-change build |
+| post-change re-sweep | success: wrapper 672px/py-48/space-y-8 with NO icon disc, h1 30px/700 mt-0, pill rgba(217,110,38,0.05)/0.2/38px/8-20px/9999px, COD rgb(255,251,235)/16px-radius/p-20/gap-16 with the 40px rgb(254,243,199) disc + 20px rgb(217,119,6) Banknote + 16px/600 rgb(120,53,15) title + 14px rgb(180,83,9) body, card 16px/hairline/no-shadow/overflow-hidden/mb-32, band rgba(242,240,237,0.3)/p-20/border-b-1, h2 Playfair 16px/600, 48px square imgs, 14px/500 names, 14px/600 prices, Total 16px/700, Free muted rgb(126,111,103), 4 delivery rows, 2 bg-border dividers, 36px/9999px/px-16 buttons — the desktop geometry is byte-for-byte (x=384/w=672) |
+| account orders | 2 per-order cards (16px/hairline/no-shadow/overflow-hidden) with a 12px seam, rows p-5/gap-16/hover-muted ✓ |
+| mobile menu | opens as the modal dialog with all 5 links + Account (logged in) ✓ |
+| db contract | unchanged (24 products / 8 categories / 2 users; the Order.phone field is optional-and-additive — no seed change, no STORAGE_KEY bump) |
+
+Spec corrections in GREEN (mine, not the code): the button shadow pins assert
+the v3 GEOMETRY via containment instead of exact strings — the reference is
+v3-composed (2 leading transparent shadow layers) while this build's v4
+composes 4, so exact-string pins can never match across engines (the trap
+#10 doctrine, now written down at the pin). One collateral spec updated:
+the s36 success-CTA pin (48px button) superseded by the measured 36px LINK
+(F42-11) — the height is double-pinned (cart-checkout + visual-parity).

@@ -124,6 +124,7 @@ interface StoreValue {
     email: string;
     address: Omit<Address, "id" | "isDefault" | "label">;
     last4: string;
+    phone?: string;
   }) => { ok: true; order: Order } | { ok: false; error: string };
   subscribe: (email: string) => string;
   updateProduct: (id: string, patch: Partial<Product>) => void;
@@ -356,6 +357,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       email: string;
       address: Omit<Address, "id" | "isDefault" | "label">;
       last4: string;
+      phone?: string;
     }) => {
       if (state.cart.length === 0) return { ok: false as const, error: "No items in cart" };
       for (const line of state.cart) {
@@ -398,6 +400,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         totalCents: computed.totalCents,
         promoCode: computed.appliedCode,
         shippingAddress: input.address,
+        phone: input.phone?.trim() || undefined,
         paymentLast4: input.last4,
         carrier: null,
         trackingNumber: null,

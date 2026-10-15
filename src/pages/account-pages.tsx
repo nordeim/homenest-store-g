@@ -323,12 +323,17 @@ function Card({ title, children }: { title?: string; children: ReactNode }) {
   );
 }
 
-/* F41-24 (s41): the reference renders ONE overflow-hidden card holding
-   p-5 rows — number 16px/600, status pill 12px/600, meta 12px/400 — with
-   hover:bg-muted/30 rows linking to the order detail (superset). */
+/* F41-24 → F42-13 (s42 supersession): the reference list is a space-y-3
+   wrapper of ONE CARD PER ORDER (the s41 "ONE card" reading was a
+   single-order-list artifact — re-measured 2026-10-15 with two orders).
+   Row internals hold from s41: p-5 flex items-center gap-4, number
+   16px/600, status pill 12px/600, meta 12px/400 — with hover:bg-muted/30
+   rows linking to the order detail (superset navigation, PAD §5.6 #20 —
+   the reference's rows expand in place; function exceeds via the detail
+   page). */
 function OrderRow({ order }: { order: Order }) {
   return (
-    <li>
+    <li className="overflow-hidden rounded-[16px] border border-border-soft bg-card">
       <Link
         href={`/account/orders/${order.id}`}
         className="flex w-full items-center gap-4 p-5 transition-colors hover:bg-muted/30"
@@ -454,7 +459,7 @@ export function AccountPage() {
               </Link>
             </div>
           ) : (
-            <ul data-orders-card className="overflow-hidden rounded-[16px] border border-border-soft bg-card">
+            <ul data-orders-list className="space-y-3">
               {mine.map((order) => (
                 <OrderRow key={order.id} order={order} />
               ))}

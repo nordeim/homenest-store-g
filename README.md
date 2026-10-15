@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20290%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20304%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -30,7 +30,7 @@ SEO is a registered superset: per-route titles/canonicals/OG-Twitter tags, a gen
 | 🛠️ Admin console | Revenue/orders/products stats, order status transitions with carrier tracking, product stock/visibility editing, carousel management |
 | ♿ Accessible | 44px touch targets, focus-visible rings, semantic landmarks, one `<main>` per page, reduced-motion support, modal mobile menu + cart drawer with focus traps, axe structural-a11y gate on eight surfaces |
 | 🔍 SEO-ready | Per-route titles/canonical/OG-Twitter via a pure head seam, generated robots.txt + sitemap.xml (24 product URLs), schema.org JSON-LD (Organization, WebSite, per-PDP Product nodes) |
-| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 145 Playwright E2E specs (290 runs) including computed-style visual-parity (home content layer, PDP/catalog/content-page layer, watch-list closure layer, checkout/cart/account/track layer, mobile header parity, hover-state pins), modal semantics, a11y smoke gates, and the served SEO artifacts |
+| 🧪 Tested | 104 Vitest unit tests on pure seams (incl. the db-scripts contract) + 152 Playwright E2E specs (304 runs) including computed-style visual-parity (home content layer, PDP/catalog/content-page layer, watch-list closure layer, checkout/cart/account/track layer, order-success/account-orders layer, mobile header parity, hover-state pins), modal semantics, a11y smoke gates, and the served SEO artifacts |
 
 ## Architecture
 
@@ -124,7 +124,7 @@ Open `http://localhost:5173`. Verify setup: the home page renders the "New Arriv
 npm run typecheck       # tsc --noEmit (strict; no unused locals/params)
 npm run test            # Vitest unit tests (104)
 npm run build           # production single-file build (prebuild regenerates SEO artifacts)
-npm run e2e             # Playwright E2E (145 specs / 290 runs) — requires npm run build first
+npm run e2e             # Playwright E2E (152 specs / 304 runs) — requires npm run build first
 npm run verify          # typecheck + lint + unit + build in one command
 npm run db:setup        # materialize the SQLite contract db (repo-root db/custom.db)
 ```
@@ -201,7 +201,9 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), **In
 - [`docs/session_39.md`](docs/session_39.md) — Session 39 execution record (seventeenth sweep → PDP/catalog/content-page layer: wrapper rhythms, md grid breakpoint, gallery tile, info rows, cream pills, stepper, related carousel, /products filters + 2-up mobile grid, contact/about wrappers, PDP shipping rows removed → push; the file's prior session-38 transcript content is preserved in git at `c1d162b`)
 - [`docs/session_40.md`](docs/session_40.md) — Session 40 execution record (eighteenth sweep → watch-list closure layer: PDP gallery hairline (thumbnail row disproven), about internals (h3 cards, md grid, flat h1, cream CTA), the legal template + reference-verbatim policies + dynamic date, contact form fields → push; the file's prior session-39 transcript content is preserved in git at `d2019e3`)
 - [`docs/session_41.md`](docs/session_41.md) — Session 41 execution record (nineteenth sweep → the checkout/cart/account/track layer: max-w-5xl shell + lg:grid-cols-3 checkout layout, shadcn v3 fields, PM radio-cards, sticky OS, cart square-image cards + muted-pill steppers + amber COD box, account profile card + one-card order list, track pill search → push; the file's prior raw transcript is preserved in git at `7ec9a15`)
-- [`docs/session_42.md`](docs/session_42.md) — raw session transcript for the session-40 record (pushed as `7ec9a15` by the prior round)
+- [`docs/session_42.md`](docs/session_42.md) — Session 42 execution record (twentieth sweep → the order-success/account-orders layer: no-disc header + primary-line pill, the large amber COD variant, the gallery-band card with square images, the 4-row delivery block with phone, 36px pill links, per-order account cards → push; the file's prior raw transcript is preserved in git at `7ec9a15`)
+- [`docs/session_43.md`](docs/session_43.md) — raw session transcript for the session-41 record (pushed as `a0d5ae0` by the prior round)
+- [`docs/session_44.md`](docs/session_44.md) — raw session transcript for the session-41 record (owner-added `5f585da`)
 - [`docs/session_37.md`](docs/session_37.md) — raw session transcript for the session-36 record
 - [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) / [`docs/session_31.md`](docs/session_31.md) / [`docs/session_33.md`](docs/session_33.md) / [`docs/session_35.md`](docs/session_35.md) — raw session transcripts for the session-26, session-28, session-30, session-32 and session-34 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record

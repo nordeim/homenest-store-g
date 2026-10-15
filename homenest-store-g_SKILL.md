@@ -197,8 +197,11 @@ stylesheet in `index.html` (weights 400–800 + italic 400).
 `ring`, `badge` (amber-400 stars, session-38 — the "Featured" pill is `primary`),
 `footer` (near-black warm brown) + the alpha-baked parity films (`panel`,
 `border-soft`, `hero-body`, `quick-add`, `primary-film`, `primary-faint`,
-`secondary-hover`, `gallery`) and the amber COD quartet (`cod-bg`/`cod-border`/
-`cod-title`/`cod-body`, session-41 — measured sRGB, not badge alphas).
+`secondary-hover`, `gallery`, `primary-line` (session-42, the success order
+pill border)) and the amber COD tokens (`cod-bg`/`cod-border`/`cod-title`/
+`cod-body`, session-41 — measured sRGB, not badge alphas — plus the
+session-42 large-variant trio `cod-disc`/`cod-disc-icon`/
+`cod-title-strong`).
 ⚠️ Values are full `hsl()` literals (badge is `#fbbf24` hex — hsl rounding drifts
 a channel) — bare `H S% L%` triplets resolve to transparent in v4 (trap T-1).
 
@@ -253,16 +256,16 @@ pinned). `lib/store.tsx` is the only stateful module.
 | `src/components/product.tsx` | 121 | `ProductCard` (session-38 chrome/badges/hover-revealed quick-add), `Stars`, `ProductGrid` (session-39: grid-cols-2 md:3 lg:4), price row |
 | `src/pages/home.tsx` | 315 | Hero carousel (fixed 500/600px card), FeatureBar, 8 category icon tiles, Featured (6) + New (8) scroll-snap carousels, gradient CTA; exports `ProductRow`/`CarouselArrows` (reused by the PDP related section, session-39) |
 | `src/pages/shop.tsx` | 404 | Products list (URL-driven search/category/sort, session-39 h-9 pill filters + 2-up mobile grid), PDP (session-39: space-y rhythm, md grid, gallery tile + session-40 border-soft hairline, info rows, stepper, related carousel — no shipping rows), 404 |
-| `src/pages/checkout-flow.tsx` | 853 | Cart page (session-41: square-image cards, muted-pill steppers, amber COD OS), single-page checkout (session-41: max-w-5xl shell, lg:grid-cols-3, shadcn fields, PM radio-cards, sticky OS), order success |
-| `src/pages/account-pages.tsx` | 881 | Auth (login/register), profile + order history + tabs (session-41: reference profile card + one-card order list), account order detail, track-order lookup (session-41: pill search shell) |
+| `src/pages/checkout-flow.tsx` | 887 | Cart page (session-41: square-image cards, muted-pill steppers, amber COD OS), single-page checkout (session-41: max-w-5xl shell, lg:grid-cols-3, shadcn fields, PM radio-cards, sticky OS; session-42: persists `form.phone`), order success (session-42: no-disc header, primary-line pill, SuccessCodNotice, gallery-band card, square images, muted totals, 4-row delivery, 36px pill links) |
+| `src/pages/account-pages.tsx` | 886 | Auth (login/register), profile + order history + tabs (session-41: reference profile card; session-42: per-order cards), account order detail, track-order lookup (session-41: pill search shell) |
 | `src/pages/content-pages.tsx` | 409 | About (session-40 internals: h3 cards, md grid, flat h1, cream CTA), Contact (session-39 wrappers/cards + session-40 shadcn field layer), 5 legal pages (session-40: reference template + verbatim policies + dynamic `legalDate()`) |
 | `src/pages/admin-pages.tsx` | 349 | Admin console (dashboard, products, orders, analytics, categories, carousel, settings) |
-| `src/lib/store.tsx` | 491 | `StoreProvider` + `useStore` — cart/auth/orders/UI state, localStorage persistence |
+| `src/lib/store.tsx` | 528 | `StoreProvider` + `useStore` — cart/auth/orders/UI state, localStorage persistence (session-42: `placeOrder` persists `phone`) |
 | `src/lib/commerce.ts` | 232 | Pure money/shipping/promo/order/validation domain functions |
 | `src/lib/router.tsx` | 126 | History-API router: `RouterProvider`, `useRouter`, `Link`, `matchPath` |
 | `src/lib/db-path.ts` | 67 | `DATABASE_URL` contract + schema-relative resolution (pure) |
 | `src/data/catalog.ts` | 700 | `BRAND`, `CATEGORIES` (8), `PRODUCTS` (24), `CAROUSEL` (3), `DEMO_USERS` (2), nav/footer link tables, product lookup helpers |
-| `src/types.ts` | 122 | All shared interfaces (§20) |
+| `src/types.ts` | 133 | All shared interfaces (§20) — session-42 adds `Order.phone?` |
 | `src/index.css` | 99 | `@theme` tokens + base styles |
 | `src/utils/cn.ts` | 6 | `cn()` = clsx + tailwind-merge |
 
@@ -618,7 +621,7 @@ every push):
 npm run typecheck   # tsc --noEmit — zero errors
 npm run test        # vitest — 104/104 (7 files)
 npm run build       # vite build — single-file dist/index.html (prebuild regenerates SEO artifacts)
-npm run e2e         # playwright — 290/290 (145 specs × chromium+mobile)
+npm run e2e         # playwright — 304/304 (152 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
@@ -1083,20 +1086,24 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
   + `tests/catalog-hash.test.ts` + `tests/password.test.ts` +
   `tests/seo.test.ts` + `tests/sitemap.test.ts` + `tests/db-scripts.test.ts`
   = **104 tests, 7 files, all green**.
-- E2E (playwright, production build via preview server): **145 specs** —
-  visual-parity 52 (incl. the session-39 PDP/catalog/content-page layer,
+- E2E (playwright, production build via preview server): **152 specs** —
+  visual-parity 59 (incl. the session-39 PDP/catalog/content-page layer,
   the session-40 watch-list closure layer: about internals, legal
-  template + verbatim policies + dynamic date, contact form fields; and
-  the session-41 checkout/cart/account/track layer: the max-w-5xl +
+  template + verbatim policies + dynamic date, contact form fields; the
+  session-41 checkout/cart/account/track layer: the max-w-5xl +
   lg:grid-cols-3 checkout shell, shadcn v3 fields, PM radio-cards, the
   sticky OS card, cart square-image cards + muted-pill steppers + the
-  amber COD box, the account profile card + one-card order list, the
-  track-order pill search),
+  amber COD box, the account profile card + order list, the track-order
+  pill search; and the session-42 order-success/account-orders layer: the
+  no-disc header + primary-line order pill, the large amber COD variant
+  with its amber-100 disc, the gallery-band card with square images and
+  muted totals, the 4-row delivery block with phone, the 36px pill
+  links, the per-order account cards),
   seo-head 19, mobile-navigation 15, cart-checkout 9, a11y-smoke 8,
   search-keyboard 8, auth-admin 7, catalog 6, smoke 5,
   mobile-header-parity 5, password-hash 4, pwa-manifest 3, cart-drawer 3,
-  account-layout 1 — × 2 projects (chromium, mobile) = **290 executions,
-  all green** (session-41 gate, 5.1 min).
+  account-layout 1 — × 2 projects (chromium, mobile) = **304 executions,
+  all green** (session-42 gate, 5.6 min).
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site

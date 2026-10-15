@@ -83,13 +83,15 @@ test("placing a COD order lands on the token-gated success page", async ({ page 
   await expect(page.getByText("Cash on Delivery").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Order Details" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Delivery Information" })).toBeVisible();
-  // Session-36 (F36-12): `flex-1` + h-12 inside the mobile flex-col row
-  // collapsed these buttons to 20px (flex-basis 0% overrides the height
-  // utility). They must render at the designed 48px height on every
-  // viewport — this pin guards the collapse regression.
-  const cta = page.getByRole("button", { name: "Continue Shopping" });
+  // Session-36 (F36-12) → session-42 (F42-11) supersession: the success
+  // CTAs are real LINKS at the measured h-9 36px pill spec (the reference
+  // ships a > button at 36px; the s36 48px shared-button pin guarded a
+  // flex-1 collapse that no longer applies — the h-9 pills carry no
+  // flex-1, and the 36px height is pinned by visual-parity's
+  // success-buttons spec).
+  const cta = page.getByRole("link", { name: "Continue Shopping" });
   const ctaBox = await cta.boundingBox();
-  expect(Math.round(ctaBox?.height ?? 0)).toBe(48);
+  expect(Math.round(ctaBox?.height ?? 0)).toBe(36);
 });
 
 test("the success link rejects tampering", async ({ page }) => {

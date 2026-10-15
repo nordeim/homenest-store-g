@@ -102,6 +102,11 @@ export interface Order {
   totalCents: number;
   promoCode: string | null;
   shippingAddress: Omit<Address, "id" | "isDefault" | "label">;
+  /* Session-42 (F42-10, remediation §31 D3): optional additive field — the
+     reference's success page renders a phone row in Delivery Information.
+     Old persisted orders hydrate without it (no row rendered); the catalog
+     seed is untouched, so no STORAGE_KEY bump. */
+  phone?: string;
   paymentLast4: string;
   carrier: string | null;
   trackingNumber: string | null;
