@@ -1,7 +1,7 @@
 # Deployment Guide
 
 HomeNest Kitchen ships as a **single-file Vite SPA** (`dist/index.html`,
-~529 KB / ~136 KB gzip) with zero server and zero external services — one
+~530 KB / ~136 KB gzip) with zero server and zero external services — one
 static artifact plus its asset folder. This guide covers the supported
 production paths and the environment contract. (Customized from the
 `ecommerce-store` template to align with this codebase; the template's

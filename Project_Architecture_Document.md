@@ -423,6 +423,9 @@ These supersets are intentional; they must not change the **resting visuals** of
 20. **Account/order-row functional supersets (session 41, remediation §30 D2; session 42 update).** The reference's account rows are `<button>` elements that EXPAND IN PLACE (an accordion body: items, shipping/total line, address, a Track Order link); the clone renders the whole `p-5` row as a real link to the `/account/orders/:id` detail page (superset navigation — the same function-exceeds pattern as #16/#18; the detail page shows the accordion's full content plus the status timeline and tracking). Resting visuals are reference parity since session 42: a `space-y-3` list of ONE CARD PER ORDER (the s41 "ONE card" reading was a single-order-list artifact). The clone's account page also keeps the Log out control (R5-06 wrap-layout contract) and its tab row (profile/addresses/saved — #4/#5 family); the DEFAULT (orders) view renders the reference's measured profile card and per-order card list. The cart page keeps the collapsed promo-code entry (#2) and the checkout keeps the card option (#3) inside the reference's measured chrome.
 
 21. **Order-success internals (session 42, remediation §31).** The v1 port's 80px green check disc above "Order Placed!" never existed on the reference — REMOVED, do not re-add (the s39 shipping-rows doctrine: a resting-visual invention on a measured surface cannot become a resting-identical superset). The success page's COD notice is the measured LARGE amber variant (`SuccessCodNotice` — 16px radius, p-5, 40px amber-100 disc), distinct from the cart's compact 12px variant (`CartCodNotice`); both are token-backed. `Order.phone?: string` is an optional additive field persisted by `placeOrder` and rendered as the reference's fourth Delivery Information row — old persisted orders hydrate without it (the catalog seed is untouched, so no STORAGE_KEY bump). The success CTAs are real links at the measured h-9 36px pill spec (the retired shared 48px buttons survive on admin/auth/account surfaces).
+
+22. **Cart drawer superset (session 43, remediation §32).** The reference's header cart control is a plain anchor that **navigates to `/cart`** — it has no drawer (verified live at both viewports: zero dialogs/asides; the s41/s42 transcripts' "cart drawer" phrasing described the cart-icon → /cart-page flow). The clone's cart icon instead opens a modal side drawer (session-4 R4-01's a11y fix: aria-modal, focus trap, focus restore, Escape — pinned by `tests/e2e/cart-drawer.spec.ts`). Function exceeds (quick cart access + one-tap checkout without leaving the page); per the "supersets keep the measured row spec" doctrine the drawer's internals speak the s41-measured cart design language (16px hairline cards with square 80×80 images, muted-pill 24px-button steppers, inline 16px trash-2, "Order Summary" footer with the h-10 pill CTA) on a cream `bg-background` panel, and a "View full cart" control reaches the parity `/cart` page. The drawer's own chrome (right-side panel, max-w-md, `bg-foreground/40` dim overlay, drawer shadow) is superset chrome like the admin surfaces; its compact footer renders Subtotal + Total only — the full OS (shipping, COD, promo) lives on `/cart`.
+
 ---
 
 ## 6. Security Architecture
@@ -471,19 +474,20 @@ Email + password against the seeded/registered user list; session = `sessionUser
 | Robots/sitemap artifacts (R8-01/02/03) | 1 | 33 | `tests/sitemap.test.ts` | Vitest (node) |
 | db scripts contract (R26-03) | 1 | 9 | `tests/db-scripts.test.ts` | Vitest (node) |
 | Smoke | 1 | 5 | `tests/e2e/smoke.spec.ts` | Playwright |
-| Mobile navigation (incl. session-27 bare-icon trigger pins) | 1 | 14 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
+| Mobile navigation (incl. session-27 bare-icon trigger pins) | 1 | 15 | `tests/e2e/mobile-navigation.spec.ts` | Playwright |
 | Mobile header parity (incl. session-26 account-icon pins) | 1 | 5 | `tests/e2e/mobile-header-parity.spec.ts` | Playwright |
-| Cart drawer modal | 1 | 3 | `tests/e2e/cart-drawer.spec.ts` | Playwright |
+| Cart drawer modal + measured-language pins (session 43) | 1 | 7 | `tests/e2e/cart-drawer.spec.ts` | Playwright |
 | Catalog | 1 | 6 | `tests/e2e/catalog.spec.ts` | Playwright |
 | Cart & checkout | 1 | 9 | `tests/e2e/cart-checkout.spec.ts` | Playwright |
 | Auth & admin | 1 | 7 | `tests/e2e/auth-admin.spec.ts` | Playwright |
-| Visual parity | 1 | 6 | `tests/e2e/visual-parity.spec.ts` | Playwright |
+| Visual parity (computed-style pins, sessions 12–42) | 1 | 59 | `tests/e2e/visual-parity.spec.ts` | Playwright |
 | A11y smoke (axe) | 1 | 8 | `tests/e2e/a11y-smoke.spec.ts` | Playwright |
-| Search combobox keyboard (R5-02) | 1 | 5 | `tests/e2e/search-keyboard.spec.ts` | Playwright |
+| Search combobox keyboard (R5-02) | 1 | 8 | `tests/e2e/search-keyboard.spec.ts` | Playwright |
 | Password at rest E2E (R5-01) | 1 | 4 | `tests/e2e/password-hash.spec.ts` | Playwright |
 | Account header layout (R5-06) | 1 | 1 | `tests/e2e/account-layout.spec.ts` | Playwright |
 | SEO head gate (R8-06) | 1 | 19 | `tests/e2e/seo-head.spec.ts` | Playwright |
-| **Total** | **20** | **104 unit tests + 101 E2E specs → 306 runs** (104 × 1 + 101 × 2 projects) | | |
+| PWA manifest (R18-01) | 1 | 3 | `tests/e2e/pwa-manifest.spec.ts` | Playwright |
+| **Total** | **14 E2E spec files + 7 unit files** | **104 unit tests + 156 E2E specs → 312 runs** (104 × 1 + 156 × 2 projects) | | |
 
 ### 7.2 Test Patterns
 
@@ -596,7 +600,7 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 
 | File | Lines | Purpose |
 |---|---|---|
-| `src/components/chrome.tsx` | ~831 | Header + portaled mobile menu, APG search combobox (keyboard plan), modal cart drawer, toaster, chat FAB, footer, feature bar, form primitives |
+| `src/components/chrome.tsx` | ~978 | Header + portaled mobile menu, APG search combobox (keyboard plan), modal cart drawer (measured-language internals, session 43), toaster, chat FAB, footer, feature bar, form primitives |
 | `src/lib/store.tsx` | ~525 | Single store: state, persistence, all mutations (async hashed auth incl. upgrade-on-login) |
 | `src/pages/checkout-flow.tsx` | ~853 | Cart, checkout (COD + card), token-gated success |
 | `src/pages/account-pages.tsx` | ~881 | Auth card (async auth), account tabs, order detail, track order + stepper |
@@ -613,7 +617,7 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | `src/index.css` | ~104 | `@theme` tokens (+ `--color-panel`) + base styles |
 | `src/lib/db-path.ts` | ~60 | DATABASE_URL resolution contract |
 | `tests/e2e/mobile-navigation.spec.ts` | ~223 | The parity-critical menu behaviors (incl. session-27 bare-icon trigger pins) |
-| `tests/e2e/cart-drawer.spec.ts` | ~70 | Cart drawer modal semantics (focus trap, restore) |
+| `tests/e2e/cart-drawer.spec.ts` | ~191 | Cart drawer modal semantics (focus trap, restore) + the measured-language pins (session 43) |
 | `tests/e2e/search-keyboard.spec.ts` | ~106 | APG combobox keyboard plan (arrows/Home/End/Enter/Escape) |
 | `tests/e2e/password-hash.spec.ts` | ~121 | Password-at-rest E2E: hashed seed, register, round-trip, legacy upgrade |
 | `tests/e2e/account-layout.spec.ts` | ~36 | Account header stays inside the viewport with long identities |

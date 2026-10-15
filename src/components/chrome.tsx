@@ -16,9 +16,12 @@ import {
   MapPin,
   Menu,
   MessageCircle,
+  Minus,
   Phone,
+  Plus,
   Search,
   ShoppingBag,
+  Trash2,
   UserRound,
   X,
   Truck,
@@ -511,7 +514,7 @@ export function Header() {
 }
 
 export function CartDrawer() {
-  const { cartOpen, setCartOpen, cart, products, setLineQty, removeLine, totals, cartCount } = useStore();
+  const { cartOpen, setCartOpen, cart, products, setLineQty, removeLine, totals } = useStore();
   const { navigate } = useRouter();
   const drawerRef = useRef<HTMLElement | null>(null);
 
@@ -564,6 +567,15 @@ export function CartDrawer() {
 
   if (!cartOpen) return null;
 
+  /* Session-43 (F43-01…F43-08, remediation §32): the reference's cart icon
+     NAVIGATES to /cart — it has no drawer — so this panel is a registered
+     superset (PAD §5.6 #22). Per the "supersets keep the measured row
+     spec" doctrine (§31 D5), the internals speak the s41-MEASURED cart
+     design language (§30 F41-14…F20): 16px hairline cards with square
+     80×80 images, muted-pill 24px-button steppers, the inline 16px
+     trash-2, the OS footer (h2 18px/700, Total 18px/700) and the h-10
+     pill CTA. The panel canvas is bg-background (cream) so the white
+     cards read exactly as they do on the page. */
   return (
     <div className="fixed inset-0 z-[500]">
       <button
@@ -575,83 +587,114 @@ export function CartDrawer() {
       />
       <aside
         ref={drawerRef}
-        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-card shadow-drawer"
+        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-background shadow-drawer"
         role="dialog"
         aria-modal="true"
         aria-label="Cart"
       >
-        <div className="flex h-16 items-center justify-between border-b border-border px-5">
-          <h2 className="font-display text-xl font-bold text-foreground">Cart ({cartCount})</h2>
+        {/* F43-02/F43-08: the heading is exactly "Your Cart" — the count
+            lives on the header badge (F41-15), never the heading. The row
+            keeps h-16 with the 0.5-alpha hairline and the 36px close
+            control of the measured button family. */}
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-border-soft bg-card px-4">
+          <h2 className="font-display text-xl font-bold text-foreground">Your Cart</h2>
           <button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-foreground"
             aria-label="Close cart"
             onClick={() => setCartOpen(false)}
           >
-            <X />
+            <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 overflow-y-auto p-4">
           {cart.length === 0 && (
-            <p className="py-10 text-center text-sm text-muted-foreground">Your cart is empty.</p>
+            <div className="py-10 text-center">
+              <h3 className="font-display text-lg font-bold text-foreground">Your cart is empty</h3>
+              <p className="mt-1 text-sm text-muted-foreground">No items in cart. Start shopping to fill it up.</p>
+            </div>
           )}
           <ul className="flex flex-col gap-4">
             {cart.map((line) => {
               const product = productById(line.productId, products);
               if (!product) return null;
               return (
-                <li key={line.productId} className="flex gap-3 border-b border-border pb-4">
-                  <img
-                    src={product.image}
-                    alt=""
-                    width={72}
-                    height={72}
-                    className="h-[72px] w-[72px] rounded-lg border border-border bg-muted object-cover"
-                  />
+                /* F43-03: the measured card chrome — 16px radius, 0.5-alpha
+                   hairline, p-4 gap-4, NO shadow; the 80×80 image is SQUARE. */
+                <li
+                  key={line.productId}
+                  className="flex gap-4 rounded-[16px] border border-border-soft bg-card p-4"
+                >
+                  <img src={product.image} alt="" width={80} height={80} className="h-20 w-20 object-cover" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>
-                    <p className="text-sm font-semibold text-primary">{formatMoney(product.priceCents)}</p>
-                    <div className="mt-2 flex items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{product.name}</h3>
+                    <p className="mt-0.5 text-sm capitalize text-muted-foreground">
+                      {product.category.replace("-", " ")}
+                    </p>
+                    <p className="mt-1 text-base font-bold text-primary">{formatMoney(product.priceCents)}</p>
+                    {/* F43-05: the MUTED pill stepper — 24×24 buttons, 12px
+                        glyphs, 14px/600 value (F41-18). */}
+                    <div className="mt-3 flex items-center gap-2 rounded-full bg-muted px-2 py-1">
                       <button
                         type="button"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border"
+                        className="inline-flex h-6 w-6 items-center justify-center rounded-[9999px] text-foreground"
                         aria-label={`Decrease ${product.name}`}
                         onClick={() => setLineQty(line.productId, line.quantity - 1)}
                       >
-                        −
+                        <Minus className="h-3 w-3" />
                       </button>
-                      <span className="w-6 text-center text-sm font-medium">{line.quantity}</span>
+                      <span className="w-6 text-center text-sm font-semibold" aria-live="polite">
+                        {line.quantity}
+                      </span>
                       <button
                         type="button"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border"
+                        className="inline-flex h-6 w-6 items-center justify-center rounded-[9999px] text-foreground"
                         aria-label={`Increase ${product.name}`}
                         onClick={() => setLineQty(line.productId, line.quantity + 1)}
                       >
-                        +
-                      </button>
-                      <button
-                        type="button"
-                        className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
-                        aria-label={`Remove ${product.name}`}
-                        onClick={() => removeLine(line.productId)}
-                      >
-                        <X className="h-4 w-4" />
+                        <Plus className="h-3 w-3" />
                       </button>
                     </div>
+                  </div>
+                  {/* F43-04/F43-06: the measured right column — 14px/700 line
+                      total above the inline 16px trash-2 (F41-17/19). */}
+                  <div className="flex flex-col items-end justify-between gap-2">
+                    <p className="text-sm font-bold text-foreground">
+                      {formatMoney(product.priceCents * line.quantity)}
+                    </p>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-[9999px] text-muted-foreground transition-colors hover:text-destructive"
+                      aria-label={`Remove ${product.name}`}
+                      onClick={() => removeLine(line.productId)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </li>
               );
             })}
           </ul>
         </div>
-        <div className="border-t border-border px-5 py-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-semibold text-foreground">{formatMoney(totals.subtotalCents)}</span>
+        {/* F43-07: the measured OS language — h2 18px/700, Total 18px/700,
+            the h-10 40px pill CTA (the page's pillButtonClass spec, D3
+            keeps the summary compact: no shipping/COD/promo here — the
+            full OS lives one tap away on /cart). */}
+        <div className="shrink-0 space-y-4 border-t border-border-soft bg-card p-6">
+          <h2 className="font-display text-lg font-bold text-foreground">Order Summary</h2>
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Subtotal</dt>
+              <dd className="font-medium text-foreground">{formatMoney(totals.subtotalCents)}</dd>
+            </div>
+          </dl>
+          <div className="flex justify-between text-lg font-bold text-foreground">
+            <span>Total</span>
+            <span>{formatMoney(totals.totalCents)}</span>
           </div>
           <button
             type="button"
-            className="mt-4 flex h-12 w-full items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-[9999px] bg-primary px-8 text-sm font-medium text-primary-foreground shadow-[0_1px_3px_0_rgb(0_0_0/0.1),0_1px_2px_-1px_rgb(0_0_0/0.1)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => {
               setCartOpen(false);
               navigate("/checkout");
@@ -662,7 +705,7 @@ export function CartDrawer() {
           </button>
           <button
             type="button"
-            className="mt-2 flex h-11 w-full items-center justify-center rounded-full text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            className="flex w-full items-center justify-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             onClick={() => {
               setCartOpen(false);
               navigate("/cart");

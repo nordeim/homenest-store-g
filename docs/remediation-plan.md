@@ -2935,3 +2935,153 @@ composes 4, so exact-string pins can never match across engines (the trap
 #10 doctrine, now written down at the pin). One collateral spec updated:
 the s36 success-CTA pin (48px button) superseded by the measured 36px LINK
 (F42-11) — the height is double-pinned (cart-checkout + visual-parity).
+
+## 32. Session-43 audit — the cart-drawer superset alignment (21st sweep, 2026-10-15)
+
+Scope: the last clone-only interactive surface never aligned to the measured
+design language — the **cart drawer** — plus the standing drift-watch battery.
+All reference values measured live (agent-browser, logged in, 390×844 mobile +
+1440×900 desktop). The baseline gate reproduced first: typecheck ✓ lint ✓
+104/104 unit ✓ build 529.56 KB ✓ 304/304 E2E ✓.
+
+**Sweep summary:** all standing pins held (trigger bare — measurement 13, no
+thirteenth flip; account/cart plain dark 16px glyphs rgb(29,24,22); header
+glass rgba(255,255,255,0.8)+blur(24px)+0.5 hairline; brand Playfair 20px/700;
+footer rgb(29,24,22); Inter + Playfair-700 via document.fonts; body
+rgb(251,250,249); robots/sitemap serve). Drift watch: the reference /cart
+page re-measured against the s41 pins — h1 "Your Cart" 30px/700 with NO
+count span, 80×80 SQUARE images, `bg-card rounded-2xl border border-border/50
+p-4 flex gap-4` cards — **zero drift**. The mobile menu re-checked on the
+reference (inline `px-4 py-4 space-y-1` dropdown in the sticky nav, 14px/500
+muted links, radius-12px active pill) and on the clone (modal dialog, all 5
+links + auth row, solid white panel) — both hold to their contracts.
+
+### 32.1 Findings
+
+- **F43-01 — the headline: the reference has NO cart drawer.** The
+  reference's header cart control is a plain anchor (`href="/cart"`) that
+  NAVIGATES to the /cart page — verified live at both viewports (0
+  `[role=dialog]`, 0 `aside` anywhere in the DOM after the click; path
+  `/cart`, h1 "Your Cart"). The prior transcripts' "opening the cart
+  drawer" phrasing (s41/s42) was loose language for the cart-icon →
+  /cart-page flow. The clone's `CartDrawer` (chrome.tsx) is therefore an
+  **unregistered superset**: the cart icon opens a modal side drawer with
+  quick-checkout access, and a "View full cart" control reaches the parity
+  /cart page. It is NOT in PAD §5.6 (divergences #1–#21) — it predates the
+  registration discipline (session-4 R4-01 added it as an a11y fix). It
+  must be registered AND its internals brought to the s41-measured cart
+  design language (the "supersets keep the measured row spec" doctrine,
+  §31 D5).
+- **F43-02 — drawer heading**: v1 "Cart (1)" 20px/700 Playfair with a
+  live-count suffix; the measured doctrine (F41-15) puts the count on the
+  header badge, never the heading — and the page h1 is exactly "Your
+  Cart". Panel-scale heading: `font-display text-xl font-bold` "Your Cart",
+  no count.
+- **F43-03 — drawer item rows**: v1 renders border-b divider rows with
+  72px `rounded-lg border bg-muted` images; the measured cart card is
+  `rounded-[16px] border border-border-soft bg-card p-4 flex gap-4` with
+  an 80×80 SQUARE image (radius 0, border 0). The drawer panel canvas
+  flips to `bg-background` (cream) so the white cards read exactly as they
+  do on the page.
+- **F43-04 — drawer item internals**: v1 name/price 14px/600 with no
+  category, no line total, no right column; the measured spec is h3
+  16px/600 name, 14px/400 muted category, 16px/700 primary unit price,
+  right column `flex flex-col items-end justify-between gap-2` with the
+  14px/700 line total and the remove control.
+- **F43-05 — drawer stepper**: v1 ships loose `h-9 w-9` (36px)
+  rounded-full bordered buttons; the measured stepper is the MUTED pill
+  `flex items-center gap-2 bg-muted rounded-full px-2 py-1` with 24×24
+  buttons, 12px glyphs and a 14px/600 value.
+- **F43-06 — drawer remove**: v1 is an X glyph in a 36px button; the
+  measured remove is the inline trash-2 16px (`text-muted-foreground
+  hover:text-destructive`) living in the right column.
+- **F43-07 — drawer footer**: v1 "Subtotal" plain row + a 48px (h-12)
+  Checkout pill + an h-11 underline "View full cart"; the measured OS
+  language is h2 "Order Summary" 18px/700, Subtotal row 14px (muted label
+  / medium value), Total row 18px/700, and the h-10 40px
+  `rounded-[9999px]` 14px/500 pill CTA with the v3 shadow. "View full
+  cart" adopts the measured muted text-link spec (14px/500).
+- **F43-08 — drawer chrome coherence**: header row keeps h-16 but gains
+  the 0.5-alpha `border-border-soft` hairline; the close control drops
+  h-11 w-11 (44px) to h-9 w-9 (36px) matching the site's measured
+  button family (menu trigger 36×36); the empty state aligns its copy to
+  the page's ("Your cart is empty" + the muted sub, no trailing period).
+
+### 32.2 ToDo (TDD — RED first, then GREEN)
+
+- [x] **R43-01 — RED specs**: 4 new cart-drawer spec blocks (header/heading
+  + empty state, item card chrome, item internals + stepper + trash,
+  footer OS language + CTA + View-full-cart) appended to
+  `tests/e2e/cart-drawer.spec.ts` — pins of the MEASURED cart language on
+  the superset surface (doctrine: supersets keep the measured row spec).
+  RED observed: 8 failing runs (4 specs × 2 projects) on the pre-change
+  build; the 3 existing modal-semantics specs stayed green
+- [x] **R43-02 — CartDrawer restyle**: panel `bg-background`; header
+  `h-16 px-4 border-b border-border-soft bg-card` with "Your Cart"
+  `font-display text-xl font-bold` (no count) + 36px close; body `p-4`
+  with `space-y-4` measured cards (80×80 square images, h3/category/price,
+  right column line total + trash-2 16px, muted-pill steppers); footer
+  `p-6 border-t border-border-soft bg-card space-y-4` with the OS
+  language (h2 18px/700, Subtotal 14px, Total 18px/700, h-10 pill
+  Checkout, 14px/500 muted "View full cart"); empty state copy aligned
+- [x] **R43-03 — register the superset**: PAD §5.6 #22 — the cart-drawer
+  function-exceeds entry (icon opens a drawer instead of navigating;
+  internals speak the s41 measured cart language; "View full cart" reaches
+  the parity page)
+- [x] **R43-04 — full gate**: typecheck, lint, unit, build, E2E — zero
+  collateral on the 304 baseline (the 3 existing modal-semantics specs
+  stayed green: same focusable set, same names)
+- [x] **R43-05 — re-sweep + captures**: the drawer re-measured live on
+  both viewports; before/after screenshots to `docs/screenshots/`
+- [x] **R43-06 — docs**: remediation §32 check-off + §32.4 gate,
+  session_43 record, AGENTS pin paragraph + drawer note, CLAUDE counts,
+  PAD §5.6 #22 + file-table rows, README badge/rows, SKILL ledger/file
+  rows, DEPLOYMENT check, both worklogs
+
+### 32.3 Decision records
+
+- **D1 — the drawer stays a superset, restyled — not removed.** The
+  reference's cart icon navigates to /cart; the clone's opens a modal
+  drawer. Removing it would follow the letter of pure parity but gut the
+  function-exceeds pattern the project has deliberately built everywhere
+  else (modal menu dialog #10/#11, search-pill expansion #13, detail-page
+  navigation #20, CTA-as-link #18) — and the drawer carries pinned modal
+  semantics (R4-01: aria-modal, focus trap, focus restore). Keeping it
+  with measured-language internals follows the standing doctrine:
+  supersets keep the measured row spec (§31 D5).
+- **D2 — the drawer is a clone-only surface; its pins are
+  measured-language pins, not reference pins.** The specs assert the s41
+  cart values (16px cards, square 80px images, muted pill steppers,
+  18px/700 OS, h-10 CTA) against the drawer because that IS the site's
+  measured cart language — but no reference URL is involved, and the
+  drawer's chrome (right-side panel, max-w-md, dim overlay, drawer
+  shadow) stays unregistered-chrome (like admin surfaces).
+- **D3 — the compact summary.** The drawer footer renders Subtotal +
+  Total + CTA + View-full-cart — NOT the full OS (no shipping row, no
+  COD box, no promo entry). The full measured OS lives one tap away on
+  /cart; duplicating it in the drawer doubles the disclosure surface for
+  no parity value (the reference has no drawer to measure).
+- **D4 — the overlay dim stays.** `bg-foreground/40` dims the page under
+  the modal drawer. The mobile menu doesn't dim (measured reference
+  behavior, #11), but the menu is an inline dropdown semantically; the
+  drawer is a full modal sheet over the page — the dim is the standard
+  sheet affordance and part of the superset chrome (D2).
+- **D5 — the count span is retired everywhere.** The header badge owns
+  the count (F41-15 doctrine); the drawer heading now reads "Your Cart"
+  exactly, matching the page h1 copy at panel scale (20px/700 vs the
+  page's 30px/700).
+
+### 32.4 Verification gate (post session-43)
+
+Executed 2026-10-15, all stages green:
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | **530.49 KB** ✓ (the drawer layer + 3 lucide glyph imports add ~0.9 KB over the 529.56 KB session-42 ledger) |
+| E2E (Playwright, 2 projects) | **312/312 ✓ (156 specs, 6.3 min)** — 304 baseline + 4 new spec pairs; ZERO collateral (all 3 existing modal-semantics specs green) |
+| RED observation | 8 failing runs (4 specs × 2 projects) on the pre-change build |
+| post-change re-sweep | live, both viewports: h2 "Your Cart" 20px/700 Playfair, close 36×36, panel bg-background rgb(251,250,249), cards 16px/rgba(229,224,220,0.5)/p-16/none-shadow, images 80×80 square r-0, h3 16px/600, price 16px/700 rgb(217,110,38), line total 14px, stepper rgb(242,240,237) with 24px buttons, trash 16px, footer h2 "Order Summary" 18px/700, Total 18px, CTA 40px/9999px/14px/500/rgb(217,110,38), View full cart 14px/500/rgb(126,111,103); desktop panel x=992/w=448/h=900; mobile menu re-checked (modal dialog, all 5 links + auth row, solid white panel) ✓ |
+| db contract | unchanged (24 products / 8 categories / 2 users; no catalog or persistence-shape change — no STORAGE_KEY bump) |

@@ -8,8 +8,8 @@ description: >
   containing block, hsl() literals, oklab gradients), the parity contract with
   the reference site, the two-layer test architecture, and every lesson from
   the Session 1 remediation.
-version: 1.3.0
-last_updated: 2026-10-12
+version: 1.4.0
+last_updated: 2026-10-15
 tags:
   - react
   - vite
@@ -18,7 +18,7 @@ tags:
   - visual-parity
   - testing
   - skill
-project_state: "typecheck clean · 95/95 unit · build green · 182/182 E2E (chromium + mobile) · SEO head contract gated"
+project_state: "typecheck clean · 104/104 unit · build green (single file ~530 KB) · 312/312 E2E (156 specs × chromium + mobile) · SEO head contract gated"
 ---
 
 # HomeNest Store G — Project Skill
@@ -252,7 +252,7 @@ pinned). `lib/store.tsx` is the only stateful module.
 | File | Lines | Purpose |
 |---|---|---|
 | `src/App.tsx` | 106 | Route switch (`matchPath` → page), auth/admin gating, skip link |
-| `src/components/chrome.tsx` | 766 | `Header` (+ search overlay + portal mobile nav), `CartDrawer` (modal), `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
+| `src/components/chrome.tsx` | 978 | `Header` (+ search overlay + portal mobile nav), `CartDrawer` (modal; session-43: the reference has NO drawer — its cart anchor navigates to /cart — so the drawer is the PAD §5.6 #22 superset, internals at the s41-measured cart language: 16px hairline cards, square 80×80 images, muted-pill steppers, trash-2, OS footer, h-10 CTA), `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
 | `src/components/product.tsx` | 121 | `ProductCard` (session-38 chrome/badges/hover-revealed quick-add), `Stars`, `ProductGrid` (session-39: grid-cols-2 md:3 lg:4), price row |
 | `src/pages/home.tsx` | 315 | Hero carousel (fixed 500/600px card), FeatureBar, 8 category icon tiles, Featured (6) + New (8) scroll-snap carousels, gradient CTA; exports `ProductRow`/`CarouselArrows` (reused by the PDP related section, session-39) |
 | `src/pages/shop.tsx` | 404 | Products list (URL-driven search/category/sort, session-39 h-9 pill filters + 2-up mobile grid), PDP (session-39: space-y rhythm, md grid, gallery tile + session-40 border-soft hairline, info rows, stepper, related carousel — no shipping rows), 404 |
@@ -418,7 +418,13 @@ Verified behaviors (kept honest by E2E):
 - **Cart drawer:** the same modal contract — `aria-modal="true"`, focus
   moves into the drawer on open (close button first), Tab/Shift+Tab cycle
   within it, Escape and the backdrop click-catcher close it, focus restores
-  to the cart trigger (pinned by `tests/e2e/cart-drawer.spec.ts`).
+  to the cart trigger (pinned by `tests/e2e/cart-drawer.spec.ts`). The
+  reference has NO drawer (its cart anchor navigates to /cart — session-43
+  finding), so the drawer is the registered superset PAD §5.6 #22 with its
+  internals pinned to the s41-measured cart language ("Your Cart" 20px/700
+  Playfair, 16px hairline cards + square 80×80 images, muted-pill
+  steppers, inline trash-2, "Order Summary" 18px/700 footer, h-10 pill
+  CTA) — 4 measured-language specs added in session 43.
 - **Touch targets:** nav rows `min-h-11` (44 px); icon buttons h-10/h-11.
 - **Reduced motion:** global `prefers-reduced-motion` clamp in `index.css`
   (all durations → 0.01 ms).
@@ -621,7 +627,7 @@ every push):
 npm run typecheck   # tsc --noEmit — zero errors
 npm run test        # vitest — 104/104 (7 files)
 npm run build       # vite build — single-file dist/index.html (prebuild regenerates SEO artifacts)
-npm run e2e         # playwright — 304/304 (152 specs × chromium+mobile)
+npm run e2e         # playwright — 312/312 (156 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
@@ -1086,7 +1092,7 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
   + `tests/catalog-hash.test.ts` + `tests/password.test.ts` +
   `tests/seo.test.ts` + `tests/sitemap.test.ts` + `tests/db-scripts.test.ts`
   = **104 tests, 7 files, all green**.
-- E2E (playwright, production build via preview server): **152 specs** —
+- E2E (playwright, production build via preview server): **156 specs** —
   visual-parity 59 (incl. the session-39 PDP/catalog/content-page layer,
   the session-40 watch-list closure layer: about internals, legal
   template + verbatim policies + dynamic date, contact form fields; the
@@ -1099,10 +1105,14 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
   with its amber-100 disc, the gallery-band card with square images and
   muted totals, the 4-row delivery block with phone, the 36px pill
   links, the per-order account cards),
+  cart-drawer 7 (incl. the session-43 cart-drawer superset layer: the
+  reference-has-no-drawer fact, the measured-language pins — "Your Cart"
+  20px/700, 16px hairline cards with square 80×80 images, muted-pill
+  steppers, inline trash-2, "Order Summary" footer with the h-10 pill CTA),
   seo-head 19, mobile-navigation 15, cart-checkout 9, a11y-smoke 8,
   search-keyboard 8, auth-admin 7, catalog 6, smoke 5,
-  mobile-header-parity 5, password-hash 4, pwa-manifest 3, cart-drawer 3,
-  account-layout 1 — × 2 projects (chromium, mobile) = **304 executions,
+  mobile-header-parity 5, password-hash 4, pwa-manifest 3,
+  account-layout 1 — × 2 projects (chromium, mobile) = **312 executions,
   all green** (session-42 gate, 5.6 min).
 - Reproduce: `npm run verify && npm run e2e`.
 

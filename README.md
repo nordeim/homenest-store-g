@@ -1,6 +1,6 @@
 # HomeNest Kitchen
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20304%20e2e-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![React](https://img.shields.io/badge/React-19.2-61dafb) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Tailwind](https://img.shields.io/badge/TailwindCSS-4.1-38bdf8) ![Tests](https://img.shields.io/badge/tests-104%20unit%20%2B%20312%20e2e-brightgreen)
 
 A production-grade e-commerce storefront and admin console for premium home & kitchen products — a visual and functional clone of `nest-culinary-hub.base44.app` built as a single-file React SPA, with a 24-product catalog, cart, cash-on-delivery checkout, order tracking, customer accounts, and a full admin console.
 
@@ -202,8 +202,10 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), **In
 - [`docs/session_40.md`](docs/session_40.md) — Session 40 execution record (eighteenth sweep → watch-list closure layer: PDP gallery hairline (thumbnail row disproven), about internals (h3 cards, md grid, flat h1, cream CTA), the legal template + reference-verbatim policies + dynamic date, contact form fields → push; the file's prior session-39 transcript content is preserved in git at `d2019e3`)
 - [`docs/session_41.md`](docs/session_41.md) — Session 41 execution record (nineteenth sweep → the checkout/cart/account/track layer: max-w-5xl shell + lg:grid-cols-3 checkout layout, shadcn v3 fields, PM radio-cards, sticky OS, cart square-image cards + muted-pill steppers + amber COD box, account profile card + one-card order list, track pill search → push; the file's prior raw transcript is preserved in git at `7ec9a15`)
 - [`docs/session_42.md`](docs/session_42.md) — Session 42 execution record (twentieth sweep → the order-success/account-orders layer: no-disc header + primary-line pill, the large amber COD variant, the gallery-band card with square images, the 4-row delivery block with phone, 36px pill links, per-order account cards → push; the file's prior raw transcript is preserved in git at `7ec9a15`)
-- [`docs/session_43.md`](docs/session_43.md) — raw session transcript for the session-41 record (pushed as `a0d5ae0` by the prior round)
+- [`docs/session_43.md`](docs/session_43.md) — Session 43 execution record (twenty-first sweep → the cart-drawer superset layer: reference-has-no-drawer fact established, drawer restyled to the s41-measured cart design language — "Your Cart" 20px/700, 16px hairline cards with square 80×80 images, muted-pill steppers, inline trash-2, "Order Summary" footer with the h-10 pill CTA — and registered as PAD §5.6 #22 → push; the file's prior raw transcript is preserved in git at `a0d5ae0`)
 - [`docs/session_44.md`](docs/session_44.md) — raw session transcript for the session-41 record (owner-added `5f585da`)
+- [`docs/session_45.md`](docs/session_45.md) — raw session transcript for the session-42 record (round-added `f092666`)
+- [`docs/session_46.md`](docs/session_46.md) — raw session transcript for the session-42 record (owner-added `a62fc85`)
 - [`docs/session_37.md`](docs/session_37.md) — raw session transcript for the session-36 record
 - [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) / [`docs/session_31.md`](docs/session_31.md) / [`docs/session_33.md`](docs/session_33.md) / [`docs/session_35.md`](docs/session_35.md) — raw session transcripts for the session-26, session-28, session-30, session-32 and session-34 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
