@@ -208,6 +208,7 @@ Typography: **Playfair Display** 700 for display headings (`font-display`), **In
 - [`docs/session_46.md`](docs/session_46.md) — raw session transcript for the session-42 record (owner-added `a62fc85`)
 - [`docs/session_47.md`](docs/session_47.md) — raw session transcript for the session-43 record (round-added `2c21b6f`)
 - [`docs/session_48.md`](docs/session_48.md) — raw session transcript for the session-43 record (owner-added `0b25748`)
+- [`docs/session_49.md`](docs/session_49.md) — raw session transcript for the session-44 record (round-added, follow-up commit)
 - [`docs/session_37.md`](docs/session_37.md) — raw session transcript for the session-36 record
 - [`docs/session_27.md`](docs/session_27.md) / [`docs/session_29.md`](docs/session_29.md) / [`docs/session_31.md`](docs/session_31.md) / [`docs/session_33.md`](docs/session_33.md) / [`docs/session_35.md`](docs/session_35.md) — raw session transcripts for the session-26, session-28, session-30, session-32 and session-34 records
 - [`docs/session_25.md`](docs/session_25.md) — raw session transcript for the session-24 record
