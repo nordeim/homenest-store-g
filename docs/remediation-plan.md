@@ -3085,3 +3085,159 @@ Executed 2026-10-15, all stages green:
 | RED observation | 8 failing runs (4 specs × 2 projects) on the pre-change build |
 | post-change re-sweep | live, both viewports: h2 "Your Cart" 20px/700 Playfair, close 36×36, panel bg-background rgb(251,250,249), cards 16px/rgba(229,224,220,0.5)/p-16/none-shadow, images 80×80 square r-0, h3 16px/600, price 16px/700 rgb(217,110,38), line total 14px, stepper rgb(242,240,237) with 24px buttons, trash 16px, footer h2 "Order Summary" 18px/700, Total 18px, CTA 40px/9999px/14px/500/rgb(217,110,38), View full cart 14px/500/rgb(126,111,103); desktop panel x=992/w=448/h=900; mobile menu re-checked (modal dialog, all 5 links + auth row, solid white panel) ✓ |
 | db contract | unchanged (24 products / 8 categories / 2 users; no catalog or persistence-shape change — no STORAGE_KEY bump) |
+
+---
+
+## 33. Session-44 audit — the full-surface drift re-check (22nd sweep, 2026-10-15)
+
+Sweep context: mandate dated 2026-10-15 (transcripts:
+`docs/session_47.md` round-added / `docs/session_48.md` owner-added,
+both records of the session-43 round); this round executed **Task 32 —
+the twenty-second bidirectional sweep**, the first full-surface drift
+re-check since the cart-drawer layer closed (session-48's suggested next
+round). The posture going in: 21 sweeps of measured pins, 312 pinned
+E2E runs, one open owner decision (ADR-001), and a watch list
+(accordion divergence #20, admin surfaces, entrance animations D8,
+reference drift). The round's question: has the reference drifted on
+any pinned surface?
+
+### 33.1 Findings — zero drift on every pinned surface
+
+**Reference side (agent-browser, logged in with the owner-supplied
+account, 390×844 mobile + 1440×900 desktop where noted):**
+
+- Standing chrome pins: mobile menu trigger BARE at rest —
+  **measurement 14, no fourteenth flip** (history: green s3/4 → bare s5
+  → green s26 → bare s27 → bare s30 → bare s32 → bare s44); account and
+  cart glyphs plain dark 16px lucide `rgb(29,24,22)` 36×36; header glass
+  `rgba(255,255,255,0.8)` + `blur(24px)` + 1px hairline
+  `rgba(229,224,220,0.5)` on a sticky NAV (not `<header>`); brand text
+  "HomeNest" Playfair Display 20px/700; footer `rgb(29,24,22)`; body
+  `rgb(251,250,249)`; robots allow-all + sitemap link; sitemap serving.
+- Mobile menu (mandate's standing emphasis): opens as the inline
+  `md:hidden` dropdown inside the sticky nav — search control + all 5
+  links (Home/Products/Track Order/About/Contact) at 14px/500, Home
+  active as white-on-orange, 44px rows. Zero change.
+- Home: h1 "Elevate Your Kitchen" 36px/700 Playfair white; hero
+  rounded-24px 358×500 overflow-hidden; product card chrome
+  `bg-card rounded-2xl overflow-hidden border border-border/50 shadow-sm`
+  (16px radius, 1px hairline rgba(229,224,220,0.5), white); Featured
+  badge orange pill 12px/600.
+- /products: h1 "All Products" 30px/700 Playfair; "8 products found";
+  search 36px pill; category select 36px pill 1px hairline; mobile
+  2-col grid.
+- PDP (`/product/69d42b98…`): back link 14px; h1 30px/700 Playfair;
+  image 356×356 in a 24px-radius 1px-bordered card; "4.9 (412
+  reviews)"; Add-to-Cart 40px/9999px orange.
+- /cart (the s43 drift-watch target): h1 "Your Cart" 30px/700 **no
+  count**; cards 16px radius / 1px hairline rgba(229,224,220,0.5) /
+  p-16; images 80×80 **square r-0**; h3 16px/600; OS h2 18px/700;
+  compact amber COD `rgb(255,251,235)` / 12px radius / p-12; Proceed
+  CTA 40px/9999px. **Zero drift from the s41/s43 measurements.**
+- /checkout: h1 "Checkout" 30px/700 mb-32; labels 14px/500; fields
+  36px / 12px radius / 1px hairline / transparent bg; Place Order
+  40px/9999px orange.
+- /account: h1 (user name) 20px/700; profile card 16px radius / 1px
+  hairline / p-24 (spec-pinned 24px exact); role pill; "Order History"
+  h2 20px/700; per-order cards 16px radius / 1px border (the account
+  now carries 2 orders — both render the s42 per-card shape).
+- /track-order entry: h1 30px/700; 56px disc `rgba(217,110,38,0.1)`
+  rounded-16px; 36px pill input + 36px Track button; 16px sub. Result
+  surface (existing ORD-MV8ZOL1T): order number 18px Playfair/700;
+  amber status badge `rgb(254,243,199)` 14px; vertical stepper steps
+  14px/500 muted; amber COD `rgb(255,251,235)` / 16px radius.
+- /order-success (a fresh order ORD-MV96YYQU placed this sweep): h1
+  "Order Placed!" 30px; order pill
+  `rgba(217,110,38,0.05)`/9999px/16px; LARGE amber COD
+  `rgb(255,251,235)` / 16px radius / h-128 with icon disc; CTAs 36px
+  pills.
+- /about: h1 36px/700; value cards 16px radius p-24; "Our Promise"
+  beige `rgb(243,238,232)` 24px radius. /contact: h1 36px; info cards
+  16px p-24; Send Message 36px/9999px orange.
+
+**Clone side (production preview :4173, the same 530.49 KB build that
+passed the 312/312 gate):**
+
+- Mobile menu live (the Tailwind v4 trap #5 watch): modal dialog with
+  `aria-modal=true` / aria-label "Site menu", **portalized outside the
+  header** (`portalOutsideHeader: true`), panel spans full width at
+  y=64 below the h-16 header (not confined to the header box — the
+  backdrop-filter containing-block fix holds), solid white bg-card
+  panel, all 5 nav links + the Account auth row + search control;
+  focus trap verified by hand (six Tab presses stay inside the dialog,
+  cycling to the Account link); Escape closes and restores focus.
+- Cart drawer (the s43 layer): every pin exact live — h2 "Your Cart"
+  20px/700 Playfair, 80×80 square images, 16px/hairline cards, h3
+  16px/600, muted-pill steppers `rgb(242,240,237)` with 24×24 buttons,
+  inline trash present, CTA 40px pill; desktop panel geometry
+  x=992/w=448/h=900 — byte-for-byte with the s43 ledger.
+- Header glass `rgba(255,255,255,0.8)` + `blur(24px)` + hairline.
+- Served SEO superset: robots.txt (5 disallows), sitemap.xml (36
+  `<loc>` URLs), manifest.webmanifest 200, `<title>HomeNest Kitchen</title>`.
+
+**Conclusion: ZERO drift on either side — no new findings (F44-xx:
+none).** The reference is stable at its 2026-10-12-through-15 measured
+state; the clone's 312 pinned runs remain a faithful, verified
+parity+superset record of it.
+
+### 33.2 ToDo (validation session — no remediation items)
+
+- [x] **R44-01 — baseline gate reproduced.** typecheck ✓ lint ✓
+  104/104 unit ✓ build **530.49 KB** ✓ **312/312 E2E (156 specs,
+  5.7 min)** ✓ — exact session-43 ledger match. (Environment quirk
+  repeated: the Playwright chromium cache was wiped again — the known
+  session-39 quirk; `npx playwright install chromium` restored it, then
+  the full suite ran green. First E2E attempt before the install: 304
+  launch failures, 8 passing — discarded as tooling, not product.)
+- [x] **R44-02 — reference-side full-surface drift re-check.** Every
+  pinned surface re-measured live (chrome pins, home, /products, PDP,
+  /cart, /checkout, /account, /track-order entry + result,
+  /order-success via a fresh order, /about, /contact, mobile menu,
+  robots/sitemap) — zero drift, zero new findings.
+- [x] **R44-03 — clone-side live verification.** Mobile menu modal +
+  portal + focus trap + Escape by hand; cart-drawer pins at both
+  viewports (desktop geometry byte-for-byte); header glass; served SEO
+  artifacts. All exact.
+- [x] **R44-04 — session captures.** 9 images → `docs/screenshots/`
+  (`_ref-sweep44-menu-mobile`, `_ref-sweep44-track-result-mobile`,
+  `_sweep44-clone-mobile-menu`, `_sweep44-clone-cart-drawer-mobile`,
+  `_sweep44-clone-cart-drawer-desktop`, `_sweep44-clone-home-desktop`,
+  `_sweep44-clone-products-desktop`, `_sweep44-clone-pdp-desktop`,
+  `_sweep44-clone-cart-desktop`).
+- [x] **R44-05 — documentation alignment.** This §33 record; the
+  `session_44.md` round record (the prior owner-added transcript is
+  preserved in git at `5f585da`); README session rows (the 44 record
+  row + the 47/48 transcript rows); both worklogs. No count-bearing
+  doc changes (AGENTS/CLAUDE/PAD/SKILL/DEPLOYMENT stay at the
+  session-43 figures — no code or test change this round).
+  `.env.example` verified in sync with `.env`.
+
+### 33.3 Decision records
+
+- **D1 — validation track, no code change.** Zero drift on every
+  pinned surface means no TDD cycle applies this round (the
+  sessions 18/20/22/24/32 no-drift precedent). The 312/312 gate plus
+  the live bidirectional measurements ARE the deliverable.
+- **D2 — the fresh reference order (ORD-MV96YYQU) is evidence, not a
+  parity debt.** The reference account now holds 3 orders (2 prior + 1
+  sweep-placed); the account surface renders per-order cards for all
+  of them — consistent with the s42 per-card shape. The clone's
+  catalog/orders are seed-driven and unaffected; no STORAGE_KEY or
+  seed change.
+- **D3 — the trigger history stays bare at measurement 14.** The
+  oscillation era (green s3/4 → bare s5 → green s26 → bare s27) is
+  long settled; twelve consecutive bare measurements since s30. The
+  clone's trigger pin stays the 44px touch-target superset with the
+  bare glyph.
+
+### 33.4 Verification gate (post session-44)
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | **530.49 KB** ✓ (unchanged — zero code delta this round) |
+| E2E (Playwright, 2 projects) | **312/312 ✓ (156 specs, 5.7 min)** — exact session-43 ledger match |
+| post-change re-sweep | N/A (no code change; the live clone verification in §33.1 IS the post-state) |
+| db contract | unchanged (24 products / 8 categories / 2 users; no seed or persistence change) |
