@@ -249,10 +249,10 @@ pinned). `lib/store.tsx` is the only stateful module.
 | `src/components/chrome.tsx` | 766 | `Header` (+ search overlay + portal mobile nav), `CartDrawer` (modal), `Toaster`, `ChatButton`, `Footer`, `FeatureBar`, `PageShell`, `Field`, `PrimaryButton`, `OutlineButton`, `BrandMark` |
 | `src/components/product.tsx` | 121 | `ProductCard` (session-38 chrome/badges/hover-revealed quick-add), `Stars`, `ProductGrid` (session-39: grid-cols-2 md:3 lg:4), price row |
 | `src/pages/home.tsx` | 315 | Hero carousel (fixed 500/600px card), FeatureBar, 8 category icon tiles, Featured (6) + New (8) scroll-snap carousels, gradient CTA; exports `ProductRow`/`CarouselArrows` (reused by the PDP related section, session-39) |
-| `src/pages/shop.tsx` | 402 | Products list (URL-driven search/category/sort, session-39 h-9 pill filters + 2-up mobile grid), PDP (session-39: space-y rhythm, md grid, gallery tile, info rows, stepper, related carousel — no shipping rows), 404 |
+| `src/pages/shop.tsx` | 404 | Products list (URL-driven search/category/sort, session-39 h-9 pill filters + 2-up mobile grid), PDP (session-39: space-y rhythm, md grid, gallery tile + session-40 border-soft hairline, info rows, stepper, related carousel — no shipping rows), 404 |
 | `src/pages/checkout-flow.tsx` | 818 | Cart page, single-page checkout, order success |
 | `src/pages/account-pages.tsx` | 858 | Auth (login/register), profile + order history + tabs, account order detail, track-order lookup |
-| `src/pages/content-pages.tsx` | 347 | About, Contact (session-39 wrappers/cards/form), 5 legal pages |
+| `src/pages/content-pages.tsx` | 409 | About (session-40 internals: h3 cards, md grid, flat h1, cream CTA), Contact (session-39 wrappers/cards + session-40 shadcn field layer), 5 legal pages (session-40: reference template + verbatim policies + dynamic `legalDate()`) |
 | `src/pages/admin-pages.tsx` | 349 | Admin console (dashboard, products, orders, analytics, categories, carousel, settings) |
 | `src/lib/store.tsx` | 491 | `StoreProvider` + `useStore` — cart/auth/orders/UI state, localStorage persistence |
 | `src/lib/commerce.ts` | 232 | Pure money/shipping/promo/order/validation domain functions |
@@ -615,7 +615,7 @@ every push):
 npm run typecheck   # tsc --noEmit — zero errors
 npm run test        # vitest — 104/104 (7 files)
 npm run build       # vite build — single-file dist/index.html (prebuild regenerates SEO artifacts)
-npm run e2e         # playwright — 250/250 (125 specs × chromium+mobile)
+npm run e2e         # playwright — 268/268 (134 specs × chromium+mobile)
 ```
 
 Before committing, also verify:
@@ -1080,13 +1080,15 @@ shapes (reference `/product/{id}` + legacy slug `/products/{slug}`).
   + `tests/catalog-hash.test.ts` + `tests/password.test.ts` +
   `tests/seo.test.ts` + `tests/sitemap.test.ts` + `tests/db-scripts.test.ts`
   = **104 tests, 7 files, all green**.
-- E2E (playwright, production build via preview server): **125 specs** —
-  visual-parity 32 (incl. the session-39 PDP/catalog/content-page layer),
+- E2E (playwright, production build via preview server): **134 specs** —
+  visual-parity 41 (incl. the session-39 PDP/catalog/content-page layer
+  and the session-40 watch-list closure layer: about internals, legal
+  template + verbatim policies + dynamic date, contact form fields),
   seo-head 19, mobile-navigation 15, cart-checkout 9, a11y-smoke 8,
   search-keyboard 8, auth-admin 7, catalog 6, smoke 5,
   mobile-header-parity 5, password-hash 4, pwa-manifest 3, cart-drawer 3,
-  account-layout 1 — × 2 projects (chromium, mobile) = **250 executions,
-  all green** (session-39 gate, 4.6 min).
+  account-layout 1 — × 2 projects (chromium, mobile) = **268 executions,
+  all green** (session-40 gate, 4.8 min).
 - Reproduce: `npm run verify && npm run e2e`.
 
 ## Appendix C: Parity Contract with the Reference Site

@@ -2337,3 +2337,176 @@ GREEN-side fix beyond the plan text: three of the new pins exposed the
 `3.35544e+07px` (`calc(infinity * 1px)`), not `9999px`; the tag pills, the
 stepper container, and the /products search pill now use explicit
 `rounded-[9999px]` (the established convention on every pinned pill surface).
+
+## 29. Session-40 — eighteenth sweep: the watch-list closure layer (2026-10-15)
+
+The session-39 watch list: the PDP gallery thumbnail row, the about-page
+internal cards (D4), and the legal-page wrappers. All three were measured
+this sweep, logged in, @390×844 + 1440×900, plus the standing-pin battery
+(trigger measurement 10 — still bare; header glass, brand, footer, Inter,
+mobile menu all hold) and the D4 leftover — the contact form field layer.
+
+### 29.1 Findings (measured live, agent-browser)
+
+**PDP gallery (watch-list closure + one drift):**
+
+- **F40-01 — gallery tile carries `border border-border/50`.** Measured on
+  ALL 8 reference PDPs, both viewports: the tile class is `aspect-square
+  rounded-3xl overflow-hidden bg-muted/30 border border-border/50` — 1px
+  solid rgba(229,224,220,0.5). The session-39 pin recorded "no border";
+  whether reference drift or a miss, measured values win: the clone
+  (borderless `bg-gallery` tile) needs the hairline.
+- **Non-finding (watch-list closure): the gallery thumbnail row does not
+  exist.** All 8 reference products render a single gallery image at both
+  viewports — the "gallery array renders thumbnails" hypothesis is
+  disproven. The clone's single-image gallery is parity; no data-model
+  change is needed.
+
+**About internals (the D4 layer — never measured until now):**
+
+- **F40-02 — header rhythm**: `text-center space-y-4` (16px), clone had
+  space-y-3 (12px).
+- **F40-03 — header h1**: `font-heading text-4xl font-bold` FLAT 36px
+  (no responsive scale); the clone had `md:text-5xl` (48px at desktop).
+- **F40-04 — header subtitle**: `text-lg text-muted-foreground max-w-2xl
+  mx-auto` (18px/28px); the clone had `text-sm sm:text-base` (14/16px).
+- **F40-05 — story grid**: `grid md:grid-cols-2 gap-6` — a whole sm→md
+  tablet band diverged (clone: `gap-5 sm:grid-cols-2`, 2-up too early,
+  20px gaps).
+- **F40-06 — story card chrome**: `p-6 rounded-2xl bg-card border
+  border-border/50 space-y-3` — 16px radius, the 0.5-alpha hairline, NO
+  shadow, 12px internal rhythm; the clone had `rounded-xl border
+  border-border bg-card p-6 shadow-card` (20px radius, full-alpha border,
+  shadow).
+- **F40-07 — icon box radius**: reference `rounded-xl` computes **12px**
+  (v3 scale); the clone's custom `--radius-xl: 1.25rem` computes 20px —
+  trap #6 corollary: pinned surfaces need explicit `rounded-[12px]`.
+- **F40-08 — card heading**: **h3** `font-heading text-lg font-semibold`
+  (18px/600, lh 28px) on the space-y-3 rhythm; the clone had an **h2**
+  `mt-4 font-display text-xl font-bold` (20px/700, mt rhythm).
+- **F40-09 — card body**: `text-muted-foreground text-sm leading-relaxed`
+  (14px/22.75px) with no mt (space-y-3 owns it); the clone had mt-2.
+- **F40-10 — promise CTA container**: `text-center p-10 rounded-3xl
+  bg-secondary` (40px uniform); the clone had `px-6 py-12 sm:px-10`
+  (24/48px at mobile).
+- **F40-11 — CTA heading**: `font-heading text-2xl font-bold mb-3` FLAT
+  24px; the clone had `md:text-3xl` (30px at desktop).
+- **F40-12 — CTA body**: `text-muted-foreground max-w-2xl mx-auto
+  leading-relaxed` (16px/26px, no mt — mb-3 on the h2 owns the gap); the
+  clone had `mt-4 text-sm sm:text-base` (14px mobile).
+
+**Legal pages (never measured until now):**
+
+- **F40-13 — wrapper**: `max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12`;
+  the clone had `py-14` (56px) and no `lg:px-8`.
+- **F40-14 — h1 + date row**: h1 is `font-heading text-4xl font-bold
+  text-foreground mb-8`; the date is INSIDE the prose as
+  `<p><strong>Last updated:</strong> 10/15/2026</p>` (16px, strong 700,
+  muted). The clone had a separate 14px `mt-2` row with a STATIC
+  "October 12, 2026".
+- **F40-15 — prose container**: `prose prose-neutral max-w-none space-y-6
+  text-muted-foreground` — 16px base, 24px rhythm; the clone had
+  `prose-legal mt-8 flex flex-col gap-4 text-sm leading-relaxed`
+  (14px, 16px gap).
+- **F40-16 — section headings**: `font-heading text-xl font-semibold
+  text-foreground` (20px/600, lh 28px); the clone's arbitrary-variant
+  rendered 700.
+- **F40-17 — p/li**: 16px/24px muted; the clone had 14px/22.75px.
+- **F40-18 — lists**: `ul.list-disc pl-6 space-y-2` with bare `li`
+  (disc marker, muted); the clone had ml-5 list-disc on the li, no
+  space-y-2.
+- **F40-19 — content completeness**: the reference ships full standard
+  policies (privacy 8 h2/9 p/2 ul · terms 7/9/1 · disclaimer 5/8/0 ·
+  cookie 5/7/1 · refund 5/7/0); the clone's demo-specific text is shorter
+  (privacy 4/4/1). Content is a parity surface — the reference text is
+  replicated verbatim (extracted to /tmp/legal during the sweep, committed
+  as JSX).
+- **F40-20 — the date is dynamic**: all 5 pages render "Last updated:
+  {today}" (M/D/YYYY) — the reference computes the current date; the
+  clone's static date is pinned to the build date.
+
+**Contact form fields (the D4 leftover):**
+
+- **F40-21 — form card border**: `border border-border/50` (0.5-alpha
+  hairline like the info cards); the clone had full-alpha `border-border`.
+- **F40-22 — inputs**: shadcn v3 spec — `h-9` 36px, `text-base` 16px,
+  radius 12px, border-input rgb(229,224,220), `bg-transparent`, `px-3
+  py-1`, placeholder muted; the clone had h-12 48px, 14px, `bg-card`,
+  `px-3.5`.
+- **F40-23 — labels**: `text-sm font-medium leading-none`; the clone had
+  default 20px leading (reference 14px).
+- **F40-24 — textarea**: `min-h-[60px] px-3 py-2 text-base`, rows=5
+  (renders 138px); the clone had py-3, 14px.
+- **F40-25 — submit button**: `w-full h-9 rounded-full bg-primary shadow
+  hover:bg-primary/90` (36px tall, full-width, 14px/500); the clone had
+  h-12 rounded-full (48px).
+
+### 29.2 ToDo (TDD — RED first, then GREEN)
+
+- [x] **R40-01 — RED specs**: gallery-tile hairline, about header/grid/
+  cards/CTA pins, legal wrapper/prose/content/date pins, contact form
+  field pins — appended to `tests/e2e/visual-parity.spec.ts`
+- [x] **R40-02 — shop.tsx**: gallery tile gains `border border-border-soft`
+  (F40-01)
+- [x] **R40-03 — content-pages.tsx about**: header space-y-4 + flat h1 +
+  text-lg subtitle; `md:grid-cols-2 gap-6`; cards `p-6 rounded-[16px]
+  bg-card border border-border-soft space-y-3` with `rounded-[12px]`
+  icon boxes, h3 text-lg font-semibold, p on the rhythm; CTA `p-10
+  rounded-[24px]` with flat text-2xl mb-3 + 16px/26px body
+- [x] **R40-04 — content-pages.tsx legal**: LegalLayout to the reference
+  template (py-12, lg:px-8, h1 mb-8, dynamic M/D/YYYY date inside the
+  prose, `space-y-6` 16px prose, h2 20px/600, ul list-disc pl-6
+  space-y-2); the 5 policies replaced with the reference-verbatim text
+- [x] **R40-05 — content-pages.tsx contact**: form card border-soft;
+  fields to the shadcn v3 spec (h-9 16px rounded-[12px] bg-transparent);
+  labels leading-none; textarea min-h-[60px] py-2; PrimaryButton
+  full-width h-9
+- [x] **R40-06 — full gate**: typecheck, lint, unit, build, E2E — zero
+  collateral on the 250 baseline
+- [x] **R40-07 — re-sweep + captures**: every remediated surface
+  re-measured live; after-screenshots to `docs/screenshots/`
+- [x] **R40-08 — docs**: remediation §29 checked-off + §29.4 gate,
+  session_40 record, AGENTS pins, CLAUDE counts, PAD §5.2/§5.6, README,
+  SKILL, both worklogs
+
+### 29.3 Decision records
+
+- **D1 — the legal content is replicated verbatim, not summarized.** The
+  reference's policy text is the resting visual of those pages; the
+  clone's demo-specific text is a content drift. The demo/localStorage
+  disclosure is retired from the legal pages — the same facts already
+  live in README/AGENTS/PAD and in the app's own zero-server behavior.
+- **D2 — the date renders dynamically** (`new Date()` formatted M/D/YYYY),
+  matching the reference's computed date. A static date is wrong the day
+  after any build.
+- **D3 — explicit radii on every remediated surface** (rounded-[12px]/
+  [16px]/[24px]) per trap #6 — the custom `--radius-xl: 1.25rem` scale
+  stays untouched (checkout/account surfaces depend on it; re-basing the
+  scale is a separate, higher-collateral decision).
+- **D4 — the about h2→h3 demotion** follows the reference DOM (h3 for
+  card titles) — an a11y-correct heading hierarchy that also matches the
+  measured 18px/600 spec.
+- **D5 — the PDP gallery thumbnail row is closed as a non-finding**
+  (measured across all 8 products, both viewports). No gallery array is
+  added to the data model — the reference renders single images.
+
+### 29.4 Verification gate (post session-40)
+
+Executed 2026-10-15, all stages green:
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | **527.15 KB** ✓ (the reference-verbatim legal text adds ~9 KB over the 517.87 KB session-39 ledger) |
+| E2E (Playwright, 2 projects) | **268/268 ✓ (134 specs, 4.8 min)** — 250 baseline + 9 new spec pairs; one collateral run on the superseded s39 gallery no-border pin (updated to the measured hairline — see the spec comment) |
+| RED observation | 18 failing runs (9 specs × 2 projects) on the pre-change build |
+| post-change re-sweep | PDP gallery tile 1px rgba(229,224,220,0.5) hairline + 24px radius + rgba(242,240,237,0.3) bg; about header 36px/16px rhythm + 18px/28px subtitle, md-grid gap-6, cards 16px/border-soft/no-shadow/24px-pad with 12px 48px icon discs + 18px/600 h3, CTA 40px/24px/cream with flat 24px h2 mb-3 + 16px/26px body; legal wrapper py-12 + h1 mb-8 + dynamic M/D/YYYY date row inside the 16px/24px space-y-6 prose with 20px/600 h2s and list-disc pl-6 space-y-2, privacy 8 h2/9 p/2 ul (exact reference structure); contact form border-soft card + 36px/16px/12px/transparent inputs + leading-none labels + 138px rows-5 textarea + 292px full-width 36px pill submit — all matching the live reference measurements ✓ |
+| mobile menu | opens with all 6 links (logged out) ✓ |
+| db contract | unchanged (24 products / 8 categories / 2 users — re-verified via suite) |
+
+Spec correction in GREEN: the contact-submit full-width pin compares the
+submit against the **textarea** (both w-full at every viewport) — the
+draft compared it to the name input, which is half-width at sm+ (the
+name/email pair is 2-up).

@@ -200,10 +200,12 @@ export function ProductPage({ slug }: { slug: string }) {
       {/* F39-02: side-by-side from md (768px), not lg — a whole tablet
           band stacked in the old layout. gap-10 = 40px column-gap. */}
       <div className="grid gap-10 md:grid-cols-2">
-        {/* F39-03: an aspect-square 24px-radius muted/30 tile with NO
-            border — the alpha is baked into --color-gallery because v4's
-            /30 modifier color-mixes in oklab (T-13). */}
-        <div className="aspect-square overflow-hidden rounded-[24px] bg-gallery">
+        {/* F39-03/F40-01: an aspect-square 24px-radius muted/30 tile with
+            the border-border/50 hairline (1px rgba(229,224,220,0.5) —
+            measured on all 8 reference PDPs; the s39 "no border" reading
+            is superseded). The bg alpha is baked into --color-gallery
+            because v4's /30 modifier color-mixes in oklab (T-13). */}
+        <div className="aspect-square overflow-hidden rounded-[24px] border border-border-soft bg-gallery">
           <img
             src={product.image}
             alt={product.name}

@@ -382,7 +382,7 @@ Scale: page titles `text-4xl/5xl`, card titles `text-lg`, labels `text-sm`, cate
 | `secondary` | `hsl(33 31% 93%)` | `rgb(243,238,232)` | CTA cream button (session-38 re-measurement) | — |
 | `secondary-hover` | `hsl(33 31% 93% / 0.8)` | `rgba(243,238,232,0.8)` | CTA button hover (session-38; alpha baked) | — |
 | `primary-film` | `hsl(24 70% 50% / 0.1)` | `rgba(217,110,38,0.1)` | FeatureBar icon disc (session-38; the reference's `bg-primary/10`, alpha baked) | — |
-| `gallery` | `hsl(30 15% 94% / 0.3)` | `rgba(242,240,237,0.3)` | PDP gallery tile (session-39; the reference's `bg-muted/30`, alpha baked — trap T-13) | — |
+| `gallery` | `hsl(30 15% 94% / 0.3)` | `rgba(242,240,237,0.3)` | PDP gallery tile bg (session-39; the reference's `bg-muted/30`, alpha baked — trap T-13). Session-40: the tile also carries the `border-border-soft` hairline (measured 1px `border-border/50` on all 8 reference PDPs — the s39 no-border reading is superseded) | — |
 | `accent-soft` | `hsl(160 40% 95%)` | — | Success icon wash | — |
 
 ### 5.3 Component Primitives
@@ -599,7 +599,8 @@ Single `main` branch; Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `
 | `src/pages/checkout-flow.tsx` | ~820 | Cart, checkout (COD + card), token-gated success |
 | `src/pages/account-pages.tsx` | ~863 | Auth card (async auth), account tabs, order detail, track order + stepper |
 | `src/data/catalog.ts` | ~700 | Seed catalog (24 products), categories, carousel, demo users (hashed credentials) |
-| `src/pages/shop.tsx` | ~380 | Products list (URL-driven filters), PDP, 404 |
+| `src/pages/shop.tsx` | ~404 | Products list (URL-driven filters), PDP (session-39/40 measured parity), 404 |
+| `src/pages/content-pages.tsx` | ~409 | About + Contact (session-39/40 measured parity) + 5 legal pages (session-40: reference template, verbatim policies, dynamic date) |
 | `src/lib/commerce.ts` | ~235 | Money/shipping/promo/validation/tracking seams |
 | `src/lib/seo.ts` | ~170 | Pure route-head seam (`buildRouteMeta`): reference title map, canonical/og:url, Product JSON-LD (R8-05) |
 | `src/components/head-manager.tsx` | ~100 | Applies the route-head contract to document.title/meta/canonical/JSON-LD inside RouterProvider |

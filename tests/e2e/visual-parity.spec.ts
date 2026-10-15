@@ -500,11 +500,13 @@ test("PDP wrapper rhythm and gallery surface match the reference", async ({ page
   const back = wrap.getByRole("link", { name: "Back to Products" });
   await expect(back).toHaveCSS("margin-bottom", "64px");
   await expect(wrap).toHaveCSS("padding-top", "32px");
-  // F39-03: the gallery is an aspect-square 24px-radius muted/30 tile with NO
-  // border (the reference's bg-muted/30 computes rgba(242,240,237,0.3)).
+  // F39-03/F40-01: the gallery is an aspect-square 24px-radius muted/30 tile
+  // (the reference's bg-muted/30 computes rgba(242,240,237,0.3)) WITH the
+  // border-border/50 hairline — measured on all 8 reference PDPs in
+  // session-40; the s39 "no border" reading is superseded.
   const gallery = page.locator("main [class*='grid-cols-2'] > div").first();
   await expect(gallery).toHaveCSS("border-radius", "24px");
-  await expect(gallery).toHaveCSS("border-width", "0px");
+  await expect(gallery).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
   await expect(gallery).toHaveCSS("background-color", "rgba(242, 240, 237, 0.3)");
   await expect(gallery).toHaveCSS("aspect-ratio", "1 / 1");
 });
@@ -702,4 +704,171 @@ test("about page wrapper matches the reference measure", async ({ page }) => {
   if (viewport && viewport.width >= 1024) {
     await expect(wrap).toHaveCSS("max-width", "896px");
   }
+});
+
+/* ── Session-40: the watch-list closure layer ─────────────────────────── */
+
+test("PDP gallery tile carries the reference hairline", async ({ page }) => {
+  await page.goto("/product/p-copper-pan");
+  // F40-01: measured on all 8 reference PDPs — the tile is an aspect-square
+  // 24px-radius bg-muted/30 tile WITH border border-border/50 (1px
+  // rgba(229,224,220,0.5)). The s39 "no border" pin is superseded.
+  const tile = page.locator("main img").first().locator("..");
+  await expect(tile).toHaveCSS("border-top-width", "1px");
+  await expect(tile).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(tile).toHaveCSS("border-radius", "24px");
+  await expect(tile).toHaveCSS("background-color", "rgba(242, 240, 237, 0.3)");
+});
+
+test("about header matches the reference measure", async ({ page }) => {
+  await page.goto("/about");
+  // F40-02..04: text-center space-y-4 rhythm; h1 FLAT text-4xl (36px, no
+  // responsive scale); subtitle text-lg 18px/28px muted.
+  const wrap = page.locator("main > div");
+  const header = wrap.locator("xpath=child::*[1]");
+  await expect(header).toHaveCSS("text-align", "center");
+  await expect(header.locator("h1")).toHaveCSS("font-size", "36px");
+  await expect(header.locator("h1")).toHaveCSS("margin-bottom", "16px");
+  await expect(header.locator("p")).toHaveCSS("font-size", "18px");
+  await expect(header.locator("p")).toHaveCSS("line-height", "28px");
+  await expect(header.locator("p")).toHaveCSS("color", "rgb(126, 111, 103)");
+});
+
+test("about story grid and card chrome match the reference", async ({ page }) => {
+  await page.goto("/about");
+  const viewport = page.viewportSize();
+  const isMobile = !!viewport && viewport.width < 768;
+  // F40-05: grid md:grid-cols-2 gap-6 — the tablet band stays 1-col.
+  const grid = page.locator("main > div > div.grid");
+  const cols = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length);
+  expect(cols).toBe(isMobile ? 1 : 2);
+  await expect(grid).toHaveCSS("gap", "24px");
+  // F40-06/07: p-6 rounded-2xl(16px) bg-card border/50 NO shadow, 12px
+  // internal rhythm; icon disc rounded-xl = 12px (trap #6: explicit radii).
+  const card = grid.locator("div").first();
+  await expect(card).toHaveCSS("border-radius", "16px");
+  await expect(card).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  await expect(card).toHaveCSS("box-shadow", "none");
+  await expect(card).toHaveCSS("padding", "24px");
+  const icon = card.locator("span");
+  const iconBox = await icon.boundingBox();
+  expect(Math.round(iconBox?.width ?? 0)).toBe(48);
+  await expect(icon).toHaveCSS("border-radius", "12px");
+  // F40-08/09: h3 18px/600 on the space-y-3 rhythm; body 14px muted.
+  await expect(card.locator("h3")).toHaveCSS("font-size", "18px");
+  await expect(card.locator("h3")).toHaveCSS("font-weight", "600");
+  await expect(card.locator("h3")).toHaveCSS("margin-bottom", "12px");
+  await expect(card.locator("h3")).toHaveCSS("margin-top", "0px");
+  await expect(card.locator("p")).toHaveCSS("font-size", "14px");
+});
+
+test("about promise CTA matches the reference measure", async ({ page }) => {
+  await page.goto("/about");
+  // F40-10..12: p-10 rounded-3xl bg-secondary; h2 flat 24px mb-3; body
+  // 16px/26px on the rhythm (no mt).
+  const cta = page.locator("main > div > div[class*='bg-secondary']");
+  await expect(cta).toHaveCSS("padding", "40px");
+  await expect(cta).toHaveCSS("border-radius", "24px");
+  await expect(cta).toHaveCSS("background-color", "rgb(243, 238, 232)");
+  await expect(cta.locator("h2")).toHaveCSS("font-size", "24px");
+  await expect(cta.locator("h2")).toHaveCSS("margin-bottom", "12px");
+  await expect(cta.locator("p")).toHaveCSS("font-size", "16px");
+  await expect(cta.locator("p")).toHaveCSS("line-height", "26px");
+  await expect(cta.locator("p")).toHaveCSS("margin-top", "0px");
+});
+
+test("legal wrapper matches the reference template", async ({ page }) => {
+  await page.goto("/privacy-policy");
+  // F40-13/14: max-w-3xl px-4 sm:px-6 lg:px-8 py-12; h1 mb-8.
+  const wrap = page.locator("main > div");
+  await expect(wrap).toHaveCSS("padding-top", "48px");
+  const h1 = wrap.locator("h1");
+  await expect(h1).toHaveCSS("font-size", "36px");
+  await expect(h1).toHaveCSS("margin-bottom", "32px");
+  // The date row is NOT a separate subtitle — it lives inside the prose.
+  await expect(wrap.locator("xpath=child::*[2]")).toHaveCSS("font-size", "16px");
+});
+
+test("legal prose matches the reference text scale", async ({ page }) => {
+  await page.goto("/privacy-policy");
+  // F40-15..18: prose base 16px, space-y-6 rhythm, h2 20px/600 foreground,
+  // p 16px/24px muted, ul list-disc pl-6 space-y-2.
+  const prose = page.locator("main > div > div");
+  const firstP = prose.locator("p").first();
+  await expect(firstP).toHaveCSS("font-size", "16px");
+  await expect(firstP).toHaveCSS("line-height", "24px");
+  await expect(firstP).toHaveCSS("color", "rgb(126, 111, 103)");
+  await expect(firstP).toHaveCSS("margin-bottom", "24px");
+  const h2 = prose.locator("h2").first();
+  await expect(h2).toHaveCSS("font-size", "20px");
+  await expect(h2).toHaveCSS("font-weight", "600");
+  await expect(h2).toHaveCSS("line-height", "28px");
+  await expect(h2).toHaveCSS("color", "rgb(29, 24, 22)");
+  const ul = prose.locator("ul").first();
+  await expect(ul).toHaveCSS("padding-left", "24px");
+  await expect(ul).toHaveCSS("list-style-type", "disc");
+  const li = ul.locator("li").first();
+  await expect(li).toHaveCSS("font-size", "16px");
+  await expect(li).toHaveCSS("margin-bottom", "8px");
+  await expect(li).toHaveCSS("margin-left", "0px");
+});
+
+test("legal pages carry the reference section set", async ({ page }) => {
+  // F40-19: the reference ships full standard policies — the section
+  // counts are the content contract.
+  const pages: [string, number, string][] = [
+    ["/privacy-policy", 8, "Advertising"],
+    ["/terms-of-service", 7, "Governing Law"],
+    ["/disclaimer", 5, "Testimonials Disclaimer"],
+    ["/cookie-policy", 5, "Managing Cookies"],
+    ["/refund-policy", 5, "Exchanges"],
+  ];
+  for (const [path, count, marker] of pages) {
+    await page.goto(path);
+    const prose = page.locator("main > div > div");
+    expect(await prose.locator("h2").count()).toBe(count);
+    await expect(prose.getByText(marker).first()).toBeVisible();
+  }
+});
+
+test("legal last-updated date renders dynamically", async ({ page }) => {
+  await page.goto("/privacy-policy");
+  // F40-20: the reference computes the current date (M/D/YYYY) — a static
+  // build date is wrong the day after any build.
+  const expected = new Intl.DateTimeFormat("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date());
+  const dateRow = page.locator("main > div > div p").first();
+  await expect(dateRow).toContainText(`Last updated: ${expected}`);
+});
+
+test("contact form fields match the reference spec", async ({ page }) => {
+  await page.goto("/contact");
+  // F40-21..25: the form card hairline; shadcn v3 fields — h-9 36px
+  // 16px radius-12 bg-transparent border-input; labels leading-none;
+  // textarea min-h-60 rows-5; full-width h-9 pill submit.
+  const form = page.locator("main form");
+  await expect(form).toHaveCSS("border-color", "rgba(229, 224, 220, 0.5)");
+  const nameInput = form.locator("#contact-name");
+  await expect(nameInput).toHaveCSS("height", "36px");
+  await expect(nameInput).toHaveCSS("font-size", "16px");
+  await expect(nameInput).toHaveCSS("border-radius", "12px");
+  await expect(nameInput).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(nameInput).toHaveCSS("border-color", "rgb(229, 224, 220)");
+  await expect(form.locator("label").first()).toHaveCSS("line-height", "14px");
+  const message = form.locator("#contact-message");
+  await expect(message).toHaveCSS("min-height", "60px");
+  await expect(message).toHaveCSS("font-size", "16px");
+  const submit = form.locator("button[type=submit]");
+  await expect(submit).toHaveCSS("height", "36px");
+  await expect(submit).toHaveCSS("border-radius", "9999px");
+  await expect(submit).toHaveCSS("background-color", "rgb(217, 110, 38)");
+  await expect(submit).toHaveCSS("font-weight", "500");
+  // Full-width: the submit spans the same inner width as the textarea
+  // (both w-full at every viewport — the name/email pair is 2-up at sm+).
+  const messageWidth = await message.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+  const submitWidth = await submit.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+  expect(Math.abs(submitWidth - messageWidth)).toBeLessThanOrEqual(2);
 });
