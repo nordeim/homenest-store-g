@@ -3612,3 +3612,227 @@ record of it.
 | E2E (Playwright, 2 projects) | **312/312 ✓ (156 specs, 5.6 min)** — first attempt, no cache quirk |
 | post-change re-sweep | N/A (no code change; the live clone verification in §35.1 IS the post-state) |
 | db contract | unchanged (24 products / 8 categories / 2 users; no seed or persistence change) |
+
+## 36. Session-47 audit — the fourth consecutive full-surface drift re-check (25th sweep, 2026-10-17)
+
+Context: after the session-46 validation round (§35) closed clean at
+`a127bdc`, the owner added `docs/session_54.md` (owner commit
+`6b5c7c4` — the raw session-46-round transcript, Chinese-English
+mixed; zero code drift). This round executed **Task 35 — the
+twenty-fifth bidirectional sweep**, the fourth consecutive
+full-surface drift re-check. The posture going in: 24 sweeps, 312
+pinned E2E runs, one open owner decision (ADR-001), and the
+unchanged watch list (accordion divergence #20, admin surfaces,
+entrance animations D8, reference drift). The round's question,
+again: has the reference drifted on any pinned surface?
+
+### 36.1 Findings — zero drift on every pinned surface, both sides
+
+**Reference side (agent-browser, logged in with the owner-supplied
+account, 390×844 mobile + 1440×900 desktop where noted):**
+
+- Standing chrome pins: mobile menu trigger BARE at rest —
+  **measurement 17, no seventeenth flip** (fifteen consecutive bare
+  measurements since s30); account and cart glyphs plain dark 16px
+  lucide `rgb(29,24,22)` 36×36 (the nav's "Search products…"
+  control is a desktop-only element — zero-rect at mobile,
+  consistent with every prior sweep); header glass
+  `rgba(255,255,255,0.8)` + `blur(24px)` + 1px bottom hairline
+  `rgba(229,224,220,0.5)` on a sticky NAV (h=65); brand "HomeNest"
+  wordmark SPAN Playfair Display 20px/700 (the first read caught the
+  wrapper `<a>` at Inter/16px/400 — re-measured on the text node's
+  parent); body `rgb(251,250,249)` with text elements computing
+  `Inter, sans-serif` and both webfonts live
+  (`document.fonts.check`); robots allow-all + sitemap link (22
+  `<loc>` URLs serving).
+- Mobile menu (standing emphasis): opens as the inline `md:hidden`
+  dropdown — all 5 links (Home/Products/Track Order/About/Contact)
+  at 14px/500, Home active white-on-orange `rgb(217,110,38)`, 44px
+  rows, first row y=121. Zero change.
+- Home: hero carousel rotates (three slides observed this round —
+  "Elevate Your Kitchen", "Sale Up to 40% Off", "New Arrivals" — all
+  render h1 36px/700 Playfair white; a mid-rotation read is not
+  drift); hero image 358×500 in a rounded-24px card; product card
+  chrome 16px radius / 1px hairline `rgba(229,224,220,0.5)` / white
+  / `shadow-sm` (the full computed string carries the
+  `rgba(0,0,0,0.05) 0px 1px 2px 0px` layer); Featured badge orange
+  pill 12px/600 73×22 (12 on the page).
+- /products: h1 "All Products" 30px/700 Playfair; "8 products found"
+  (settled on first read); search 36px pill 9999px 1px hairline;
+  category filter 36px pill 9999px hairline (a custom button, not a
+  native select); mobile 2-col grid (cards x=16/x=205, 169px wide,
+  row 1 at y=361) with card chrome 16px/hairline.
+- PDP (`/product/69d42b98…`): back link 14px; h1 30px/700 Playfair;
+  image 356×356 in a 24px-radius 1px-bordered card; "4.9 (412
+  reviews)" 14px/400; Add-to-Cart 40px/9999px orange.
+- /cart: h1 "Your Cart" 30px/700 no count; 16px radius / 1px
+  hairline cards p-16; 80×80 square r-0 images; h3 16px/600; OS
+  18px/700; compact amber COD `rgb(255,251,235)` / 12px radius /
+  1px `rgb(253,230,138)` border (located by background); Proceed
+  40px/9999px orange.
+- /checkout: h1 "Checkout" 30px/700; labels 14px/500; fields 36px /
+  12px radius / 1px hairline / transparent bg; Place Order
+  40px/9999px orange.
+- /account: h1 (user name) 20px/700; "Order History" h2 20px/700;
+  per-order cards 16px radius / 1px hairline / 358px wide rendering
+  the s42 shape. The account holds 5 orders (newest→oldest:
+  ORD-MVA85CBJ, ORD-MVA3M5YT, ORD-MV96YYQU, ORD-MV8ZOL1T,
+  ORD-MV530OZN) — the §35 set of 4 plus MVA85CBJ, which is the
+  fresh evidence order the s46 round itself placed; no new owner
+  orders beyond that. Account order growth is dynamic content (the
+  D2 precedent: evidence, not parity debt).
+- /track-order: h1 30px/700; 56px disc `rgba(217,110,38,0.1)`
+  rounded-16px with 28px icon; 36px pill input; 36px Track button;
+  result surface (ORD-MV8ZOL1T — submitted via Enter in the input
+  after a menu-link click interception; native type + Enter):
+  order number 18px Playfair/700; amber status badge
+  `rgb(254,243,199)` 14px/500 (text "pending" — the badge TEXT is
+  dynamic, never pinned; the style pins hold); stepper steps
+  14px/500 muted `rgb(126,111,103)`; amber COD 16px radius / 1px
+  `rgb(253,230,138)` border.
+- /order-success (a FRESH order **ORD-MVC1DNQK** placed this sweep):
+  h1 "Order Placed!" 30px; order pill `rgba(217,110,38,0.05)` /
+  9999px / 38px; LARGE amber COD `rgb(255,251,235)` / 16px radius /
+  h-128 / 1px `rgb(253,230,138)` border; CTAs 36px.
+- /about: h1 36px/700; value cards 16px radius p-24; "Our Promise"
+  beige `rgb(243,238,232)` 24px radius. /contact: h1 36px; Send
+  Message 36px/9999px orange.
+
+**Clone side (production preview :4173, the same 530.57 KB build
+that passed the 312/312 gate):**
+
+- Mobile menu (Tailwind v4 trap #5 watch, verified by hand): modal
+  dialog `aria-modal=true` / aria-label "Site menu", **portalized
+  directly to `document.body`** (parent chain `BODY>HTML` — not
+  confined to the header box; the backdrop-filter containing-block
+  fix holds), panel full-width 390px at y=64 below the h-16 header,
+  solid white NAV panel with the search control row and all 6 rows
+  (5 nav links + Account) at 44px; **focus trap verified by hand**
+  (13 Tab presses stay inside the dialog, cycling Close → Search →
+  Home → Products → Track Order → About → Contact → Account and
+  wrapping); **Escape closes and restores focus to the "Open menu"
+  trigger** via the real pointer-click path (an interaction note:
+  opening the menu with a synthetic JS `.click()` — which does not
+  focus the trigger first — leaves the captured restore target at
+  BODY, so Escape then "restores" to BODY; the real-click path a
+  user and the E2E spec take restores to the trigger exactly — an
+  instrumentation artifact, not a defect; the E2E spec passed in
+  the gate).
+- Cart drawer (the s43 layer): every pin exact live — h2 "Your Cart"
+  20px/700 Playfair, 80×80 square r-0 images, 16px/hairline cards
+  (p-4), h3 16px/600, price 16px/700 `rgb(217,110,38)`, muted-pill
+  steppers `rgb(242,240,237)` with 24×24 buttons, inline trash-2
+  present, "Order Summary" 18px/700 footer, CTA 40px/9999px, "View
+  full cart" 14px/500 muted; **desktop panel geometry
+  x=992/w=448/h=900 — byte-for-byte the s43 ledger**.
+- Header glass: sticky HEADER `rgba(255,255,255,0.8)` + `blur(24px)`
+  + 1px bottom hairline `rgba(229,224,220,0.5)`, h=65; brand
+  wordmark 20px/700 Playfair.
+- Served SEO superset: robots.txt (5 disallows + sitemap link),
+  sitemap.xml (36 `<loc>` URLs), manifest.webmanifest 200, per-route
+  titles live ("Products | HomeNest Kitchen", PDP "Damascus Steel
+  Chef Knife Set | HomeNest Kitchen").
+- Clone-session notes (no parity impact): the /products quick-add
+  button is icon-only with aria-label "Add {product} to cart" (a
+  text-regex locator misses it — the s47 drawer entry used the
+  aria-label); the drawer was first opened on an empty cart (the
+  add hadn't landed) — the empty state rendered correctly, the item
+  was then added and the drawer re-measured full.
+
+**Conclusion: ZERO drift on either side — no new findings (F47-xx:
+none).** The reference is stable at its 2026-10-12-through-17
+measured state (fresh order ORD-MVC1DNQK as live evidence); the
+clone's 312 pinned runs remain a faithful, verified parity+superset
+record of it.
+
+### 36.2 Environment notes (no code impact)
+
+- **The Playwright chromium cache regressed to revision 1200 only**
+  (the s46 round had both 1200 and 1248; this round the 1248
+  entries were absent again — the environment resets the cache
+  between rounds). Pre-installed `npx playwright install chromium`
+  BEFORE the E2E stage, so the gate ran green on the first attempt
+  (312/312, 5.8 min) instead of hitting the launch-failure quirk
+  class documented in §34.2/§35.2. The doctrine stands: check the
+  cache before E2E, install first.
+- **Build size reads 530.57 KB for the third consecutive round —
+  md5 `72be036…` identical to s45/s46.** The environmental baseline
+  is fully settled; two consecutive builds this round again produced
+  the identical hash.
+- The venv's paramiko was missing at round start (environment
+  reset); reinstalled before the push phase (`pip install paramiko`
+  → 5.0.0). The SSH shim at `/home/z/my-project/bin/ssh` already
+  pointed at the venv python.
+
+### 36.3 ToDo (validation session — no remediation items)
+
+- [x] **R47-01 — baseline gate reproduced.** typecheck ✓ lint ✓
+  104/104 unit ✓ build 530.57 KB deterministic (md5 identical to
+  s45/s46) ✓ — **312/312 E2E (156 specs, 5.8 min)** ✓ on the first
+  attempt (chromium-1248 pre-installed).
+- [x] **R47-02 — reference-side full-surface drift re-check.** Every
+  pinned surface re-measured live (chrome pins, home, /products,
+  PDP, /cart, /checkout, /account, /track-order entry + result,
+  /order-success via a fresh order, /about, /contact, mobile menu,
+  robots/sitemap) — zero drift, zero new findings.
+- [x] **R47-03 — clone-side live verification.** Mobile menu modal +
+  portal + 44px rows + focus trap (13 Tabs) + Escape with focus
+  restore (real-click path; synthetic-click artifact documented);
+  cart-drawer pins at both viewports (desktop geometry
+  byte-for-byte); header glass; served SEO artifacts. All exact.
+- [x] **R47-04 — session captures.** 9 images → `docs/screenshots/`
+  (`_ref-sweep47-menu-mobile`, `_ref-sweep47-success-mobile`,
+  `_sweep47-clone-mobile-menu`, `_sweep47-clone-cart-drawer-mobile`,
+  `_sweep47-clone-cart-drawer-desktop`, `_sweep47-clone-home-desktop`,
+  `_sweep47-clone-products-desktop`, `_sweep47-clone-pdp-desktop`,
+  `_sweep47-clone-cart-desktop`).
+- [x] **R47-05 — documentation alignment.** This §36 record; the
+  `session_47.md` round record (the prior owner-added
+  session-43-round transcript is preserved in git at `2c21b6f`);
+  README session rows (the 47 record row, the 54 transcript row, the
+  55 follow-up row); both worklogs. No count-bearing doc changes
+  (zero code delta — AGENTS/CLAUDE/PAD/SKILL/DEPLOYMENT stay at the
+  session-43/44 figures). `.env.example` verified in sync with
+  `.env`.
+
+### 36.4 Decision records
+
+- **D1 — validation track, no code change.** Zero drift on every
+  pinned surface means no TDD cycle applies this round (the
+  sessions 18/20/22/24/32/44/45/46 no-drift precedent). The 312/312
+  gate plus the live bidirectional measurements ARE the deliverable.
+- **D2 — the fresh reference order (ORD-MVC1DNQK) is evidence, not a
+  parity debt.** The reference account's order list is dynamic owner
+  activity (5 orders, all rendering the s42 per-card shape; the
+  only new entry vs §35 is the s46 round's own evidence order);
+  the clone's catalog/orders are seed-driven and unaffected; no
+  STORAGE_KEY or seed change.
+- **D3 — the trigger history stays bare at measurement 17.** The
+  oscillation era is long settled; the clone's trigger pin stays the
+  44px touch-target superset with the bare glyph.
+- **D4 — the chromium-cache pre-check is now standing doctrine.**
+  The cache regressed to revision-1200-only between rounds even
+  after the s46 both-revisions read; rounds must check
+  `~/.cache/ms-playwright/` and pre-install 1248 before the E2E
+  stage (this round did, and the gate was first-attempt green).
+- **D5 — the synthetic-click focus-restore artifact is documented,
+  not fixed.** The menu's Escape restore targets the element that
+  held focus at open; a JS `.click()` does not move focus, so
+  eval-opened menus "restore" to BODY. Real users and the E2E spec
+  click with a pointer (focus lands on the trigger, restore is
+  exact — verified live). Changing the capture logic to hard-target
+  the trigger would diverge from the reference's own behavior for
+  keyboard openers; the artifact lives in the instrumentation, not
+  the product.
+
+### 36.5 Verification gate (post session-47)
+
+| Gate | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build (single file) | **530.57 KB** ✓ (deterministic; md5 `72be036…` identical to s45/s46; zero code delta this round) |
+| E2E (Playwright, 2 projects) | **312/312 ✓ (156 specs, 5.8 min)** — first attempt (chromium-1248 pre-installed) |
+| post-change re-sweep | N/A (no code change; the live clone verification in §36.1 IS the post-state) |
+| db contract | unchanged (24 products / 8 categories / 2 users; no seed or persistence change) |

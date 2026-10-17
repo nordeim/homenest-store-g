@@ -1,120 +1,131 @@
-I'll start by refreshing the local workspace and reviewing the current state.
-Pulled `a62fc85` — a new file, `docs/session_46.md`, the prior round's raw
-transcript. Zero code drift; the tree is clean. Now let me review the core
-docs to internalize the doctrine.
+# Session 47 — Task 35 execution record
+## The twenty-fifth sweep: the fourth consecutive full-surface drift re-check
 
-AGENTS.md, CLAUDE.md, README.md, the PAD, and the SKILL ledger reviewed.
-The last round (Task 30, session-42, the 20th sweep) closed the
-order-success/account-orders layer. The watch list: the accordion stays a
-registered divergence, admin-only surfaces have no reference counterpart,
-entrance animations are transient (D8), and the drift watch continues. Let
-me read the remediation plan tail (§31) and the worklog to confirm the
-round numbering — this is Task 31, the session-43 record, the 21st sweep.
+Round context: the session-46 validation round (§35) closed clean at
+`a127bdc`; the owner then added `docs/session_54.md` (owner commit
+`6b5c7c4` — the raw session-46-round transcript; zero code drift).
+This round executed **Task 35 — the 25th bidirectional sweep**,
+holding the standing cadence: a full-surface drift re-check of every
+pinned surface on both sides. The file's prior content (the
+round-added session-43-round transcript) is preserved in git at
+`2c21b6f`.
 
-The convention is clear: `session_43.md` is currently the owner-added raw
-transcript of the Task 29 round (preserved in git at `a0d5ae0`) — it will
-become this round's record file. Now the environment check: deps,
-Playwright, agent-browser 0.39.0, the SSH wrapper, the `.env` contract, and
-the repo-root `db/`. All in place. The `.env` pins
-`DATABASE_URL="file:../db/custom.db"`, the db scripts live in
-`package.json`, and vitest + playwright configs match the ledger.
+### Baseline gate (reproduced exactly)
 
-Baseline gate: typecheck ✓ lint ✓ 104/104 unit ✓ build 529.56 KB ✓ — now
-the full E2E suite (~5.6 min).
+| Stage | Result |
+|---|---|
+| typecheck | ✓ |
+| lint | ✓ |
+| unit (Vitest) | 104/104 ✓ |
+| build | **530.57 KB** ✓ — deterministic (two consecutive builds → identical md5 `72be036…`, the same hash as s45/s46; third consecutive round at this figure) |
+| E2E | **312/312 ✓ (156 specs × 2 projects, 5.8 min)** — first attempt, after a pre-emptive `npx playwright install chromium` (the cache had regressed to revision-1200-only) |
 
-**Baseline gate fully reproduced: 304/304 E2E** — exact ledger match. Now
-the 21st bidirectional sweep. Setting the mobile viewport, opening the
-reference site, and logging in.
+Environment notes: the chromium cache regressed between rounds (the
+s46 both-revisions read did not persist), so the install ran BEFORE
+the E2E stage per the §34/§35 quirk doctrine — first-attempt green.
+The venv's paramiko was also missing at round start (environment
+reset) and was reinstalled (5.0.0) before the push phase.
 
-Logged in. Standing pins first — the pointer moved away per the recipe,
-then the trigger measurement.
+### Reference side — every pinned surface re-measured live (zero drift)
 
-Trigger bare at rest — measurement 13, no thirteenth flip ✓. Account and
-cart glyphs plain dark 16px ✓. Header glass `rgba(255,255,255,0.8)` +
-`blur(24px)` + hairline ✓. Brand Playfair 20px/700 ✓. Footer
-`rgb(29,24,22)` ✓, Inter + Playfair-700 live ✓, body `rgb(251,250,249)` ✓,
-robots + sitemap serve ✓.
+Logged in with the owner-supplied account; 390×844 mobile +
+1440×900 desktop where noted.
 
-Now the mobile menu check (the mandate's standing emphasis). The
-reference's menu opens as the inline `px-4 py-4 space-y-1` dropdown inside
-the sticky nav — all 5 links, 14px/500 muted. The clone's modal-dialog
-superset holds. Menu verified on both sides.
+- **Chrome pins**: mobile trigger BARE at rest (**measurement 17**,
+  no seventeenth flip; fifteen consecutive bare since s30); account
+  and cart glyphs plain dark 16px `rgb(29,24,22)` 36×36 (the nav's
+  "Search products…" control is desktop-only — zero-rect at mobile);
+  header glass `rgba(255,255,255,0.8)` + `blur(24px)` + 1px bottom
+  hairline `rgba(229,224,220,0.5)` on a sticky NAV (h=65); brand
+  "HomeNest" wordmark SPAN Playfair Display 20px/700; body
+  `rgb(251,250,249)`; text elements compute `Inter, sans-serif`
+  (both webfonts live); robots allow-all + sitemap link (22 URLs).
+- **Mobile menu**: inline `md:hidden` dropdown — 5 links 14px/500,
+  Home active white-on-orange `rgb(217,110,38)`, 44px rows, first
+  row y=121. Zero change.
+- **Home**: hero carousel rotates (three slides observed — all
+  render h1 36px/700 Playfair white; a mid-rotation read is not
+  drift); hero 358×500 r-24; card chrome 16px/hairline/white +
+  `shadow-sm` (full computed string carries the
+  `rgba(0,0,0,0.05) 0px 1px 2px 0px` layer); Featured badge orange
+  pill 12px/600 73×22 ×12.
+- **/products**: h1 30px/700; "8 products found" (first read);
+  36px pill search; 36px pill category filter (custom button);
+  mobile 2-col grid (x=16/x=205, 169px cards, y=361).
+- **PDP**: back 14px; h1 30px/700; 356×356 image in r-24 1px-bordered
+  card; "4.9 (412 reviews)"; CTA 40px/9999px orange.
+- **/cart**: h1 "Your Cart" 30px/700 no count; 16px/hairline cards;
+  80×80 square images; h3 16px/600; OS 18px/700; compact amber COD
+  `rgb(255,251,235)`/r-12/border `rgb(253,230,138)`; Proceed 40px
+  pill.
+- **/checkout**: h1 30px/700; labels 14px/500; fields
+  36px/r-12/hairline/transparent; Place Order 40px pill.
+- **/account**: h1 20px/700; OH h2 20px/700; per-order 16px/hairline
+  cards — 5 orders (ORD-MVA85CBJ, ORD-MVA3M5YT, ORD-MV96YYQU,
+  ORD-MV8ZOL1T, ORD-MV530OZN): the §35 set of 4 plus the s46
+  round's own evidence order; no new owner orders. Dynamic content,
+  per the D2 precedent.
+- **/track-order**: h1 30px/700; 56px disc r-16 + 28px icon; 36px
+  pills; result (ORD-MV8ZOL1T, native type + Enter after a
+  click-interception note): 18px Playfair/700 number; amber badge
+  `rgb(254,243,199)` 14px/500 (text "pending" — dynamic, the style
+  pins hold); steps 14px/500 muted; amber COD r-16.
+- **/order-success** (fresh order **ORD-MVC1DNQK** placed this
+  sweep): h1 "Order Placed!" 30px; pill
+  `rgba(217,110,38,0.05)`/9999px/38px; LARGE amber COD r-16/h-128;
+  CTAs 36px.
+- **/about**: h1 36px/700; value cards 16px p-24; promise beige
+  `rgb(243,238,232)` r-24. **/contact**: h1 36px; Send 36px pill.
 
-Now the main event. The s41/s42 transcripts both mentioned "opening the
-cart drawer" on the reference — let me verify that flow properly. Add a
-product first.
+### Clone side — production preview :4173 (the same 530.57 KB build)
 
-Product added, cart badge = 1 (primary orange). Now the cart icon click —
-and the result is decisive: it NAVIGATED to `/cart`. Zero dialogs, zero
-asides anywhere in the DOM. The h1 reads "Your Cart". **The reference has
-NO cart drawer** — the prior transcripts' phrasing was loose language for
-the icon→page flow. Let me confirm at desktop too: same anchor, same
-navigation.
+- **Mobile menu (trap #5, verified by hand)**: modal dialog
+  aria-label "Site menu", portalized to `document.body` (chain
+  `BODY>HTML`); panel 390px at y=64, solid white, 6 rows × 44px;
+  focus trap verified (13 Tabs cycle inside: Close → Search → Home
+  → Products → Track Order → About → Contact → Account → wrap);
+  Escape closes and **restores focus to the "Open menu" trigger**
+  via the real pointer-click path. Interaction note (documented in
+  §36.4-D5): a synthetic JS `.click()` open leaves the captured
+  restore target at BODY (JS clicks don't focus the trigger) — an
+  instrumentation artifact, not a product defect; the E2E spec's
+  real-click path restores exactly.
+- **Cart drawer (s43 layer)**: h2 "Your Cart" 20px/700 Playfair;
+  80×80 square r-0 images; 16px/hairline p-4 cards; h3 16px/600;
+  price 16px/700 `rgb(217,110,38)`; muted-pill steppers
+  `rgb(242,240,237)` 24×24 buttons; inline trash-2; "Order Summary"
+  18px/700; CTA 40px/9999px; "View full cart" 14px/500 muted;
+  **desktop geometry x=992/w=448/h=900 byte-for-byte**.
+- **Header glass**: sticky HEADER 65px, `rgba(255,255,255,0.8)` +
+  `blur(24px)` + bottom hairline; brand 20px/700 Playfair.
+- **Served SEO superset**: robots 5 disallows + sitemap link;
+  sitemap 36 `<loc>` URLs; manifest 200; per-route titles live
+  ("Products | HomeNest Kitchen", PDP
+  "Damascus Steel Chef Knife Set | HomeNest Kitchen").
+- Clone-session notes (no parity impact): the /products quick-add
+  is icon-only with aria-label "Add {product} to cart" (text-regex
+  locators miss it); the drawer was first opened empty (correct
+  empty state), then re-measured with the item added.
 
-This makes the clone's CartDrawer an UNREGISTERED superset — and its
-internals are v1-era: "Cart (N)" heading, 72px rounded images, 36px round
-steppers, a 48px CTA. Let me drift-check the reference /cart page against
-the s41 pins before planning the remediation: h1 30px/700 no count ✓,
-80×80 square image ✓, `bg-card rounded-2xl border border-border/50 p-4
-flex gap-4` ✓ — zero drift. Reference evidence captured.
+### Captures (9 images, all dimension-validated)
 
-Now the clone side: add the knife, open the drawer, capture the "before"
-state and measure the divergences. h2 "Cart (1)", 72px r:16px b:1px
-images, a 48px CTA — the map is confirmed. Writing remediation plan §32
-(F43-01…F43-08, D1–D5) under the validate-then-execute doctrine.
+Reference evidence (390×844): `_ref-sweep47-menu-mobile.png`,
+`_ref-sweep47-success-mobile.png`. Clone verification:
+`_sweep47-clone-mobile-menu.png` (390×844),
+`_sweep47-clone-cart-drawer-mobile.png` (390×844),
+`_sweep47-clone-cart-drawer-desktop.png` (1440×900),
+`_sweep47-clone-home-desktop.png` (1440×900),
+`_sweep47-clone-products-desktop.png` (1440×900),
+`_sweep47-clone-pdp-desktop.png` (1440×900),
+`_sweep47-clone-cart-desktop.png` (1440×900).
 
-TDD: 4 new spec blocks appended to `tests/e2e/cart-drawer.spec.ts` —
-measured-language pins on the superset surface, per the "supersets keep
-the measured row spec" doctrine.
+### Verification gate
 
-**RED confirmed: 8 failing runs (4 specs × 2 projects)** — the 3 existing
-modal-semantics specs stay green. Now GREEN: the CartDrawer rewrite.
-Imports first (Minus, Plus, Trash2), then the full panel restyle — cream
-canvas, measured cards, OS footer, the h-10 pill CTA. The unused
-`cartCount` pruned.
-
-Typecheck ✓ lint ✓ build 530.49 KB. Now the drawer spec: **14/14 runs
-green**. The full gate next — unit + complete E2E (~6 min).
-
-**FULL GATE GREEN: 312/312 E2E (156 specs, 6.3 min), 104/104 unit, 530.49
-KB — zero collateral on the 304 baseline.** Now the post-change re-sweep
-against the live clone.
-
-Order placed in the drawer flow — every value reference-exact: h2 "Your
-Cart" 20px/700 Playfair, close 36×36, panel cream, cards 16px/hairline,
-images 80×80 square, h3 16px/600, price 16px/700 orange, stepper
-muted-pill with 24px buttons, trash 16px, footer h2 18px/700, Total 18px,
-CTA 40px/9999px, View full cart 14px/500 muted. Desktop panel x=992/w=448.
-After screenshots captured; the mobile menu re-checked (modal dialog, all
-links + the auth row). Six captures total under `docs/screenshots/`.
-
-Now the documentation alignment track: remediation §32 check-off + gate,
-PAD §5.6 #22 registration + the test-distribution table refreshed to the
-real counts + file-table rows, AGENTS drawer bullet + session-43 pins,
-CLAUDE counts (156/312), README badge + session rows, SKILL ledger
-(v1.4.0), DEPLOYMENT ~530 KB, the session_43 record, both worklogs.
-`.env.example` unchanged in sync.
-
-The final pre-commit verification: the change set is exactly as expected —
-2 code files, 9 docs, 6 screenshots. Committing on main.
-
-Committed `2885c90`. Now the SSH wrapper push — key materialized outside
-the repo, fingerprint verified (`3ddaNlFhMz…NnU4PU`, matching the prior
-rounds), shim on PATH, dry-run green (fast-forward `a62fc85..2885c90`).
-
-**Push verified: remote main @ `2885c90` == local HEAD, tree clean,
-operator key shredded.** Per the odd-transcript convention, this file is
-the follow-up transcript commit.
-
-**Session-43（第 21 次双向扫描，Task 31）已全部完成并推送到 main** ✅
-
-本轮成果：
-
-- **基准门完整复现**：typecheck ✓ lint ✓ 104/104 unit ✓ 304/304 E2E ✓（5.56 KB 单文件构建与上一轮账目逐字节一致）
-- **第 21 次扫描**：standing pins 全部守住（trigger bare 第 13 次测量无翻转）；/cart 漂移监测零漂移；移动端菜单双向核验通过
-- **头条发现（F43-01）**：参考站**没有购物车抽屉**——其购物车图标是纯锚点，直接导航到 /cart（双视口实测 0 dialog/0 aside；此前 s41/s42 记录中的 "cart drawer" 措辞实为图标→页面流程的口语化表述）。克隆站的 CartDrawer 因此是**未注册的超集**，且内部样式停留在 v1（计数标题、72px 圆角图片、36px 松散步进器、48px CTA）
-- **TDD 闭环**：4 个新 spec 先行（RED 8 runs）→ GREEN（抽屉整体重写为 s41 实测购物车设计语言：16px 发丝卡片 + 80×80 方形图片 + 哑色药丸步进器 + 内联 trash-2 + Order Summary 页脚 + h-10 药丸 CTA + "Your Cart" 20px/700 无计数）→ **312/312 E2E（156 specs），304 基线零 collateral**
-- **注册补齐**：PAD §5.6 #22 —— 抽屉作为 function-exceeds 超集正式注册（chrome 层超集、内部走实测语言、View full cart 指向 parity 页面）
-- 复扫逐值精确（桌面 x=992/w=448）；6 张截图、全部文档对齐（含 PAD 测试分布表修正为真实计数）、提交 `2885c90` 已推送，密钥已销毁
-
-**下一轮 watch list**：accordion 保持注册分歧（详情页功能超集）；admin-only 表面无参考对应物；tile 入场动画（瞬态 D8）；参考站漂移监测；ADR-001（服务端认证）仍待您拍板。
+typecheck ✓ lint ✓ 104/104 unit ✓ 530.57 KB deterministic ✓
+312/312 E2E ✓ — validation round, zero code delta, zero new
+findings. Parity posture: trigger bare at measurement 17 (fifteen
+consecutive since s30); every content-layer pin holds on both
+sides; the watch list is unchanged (accordion registered
+divergence #20, admin-only surfaces, entrance animations D8,
+reference drift watch — this round clean); ADR-001 remains the only
+open owner decision.
